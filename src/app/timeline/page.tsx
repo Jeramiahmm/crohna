@@ -1,18 +1,108 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { demoEvents, getEventsByYear } from "@/data/demo";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { demoEvents, getEventsByYear, TimelineEvent } from "@/data/demo";
 import YearSection from "@/components/timeline/YearSection";
+import ChapterHeader from "@/components/timeline/ChapterHeader";
+import EventModal from "@/components/events/EventModal";
+import EmptyState from "@/components/ui/EmptyState";
+
+// Chapter definitions based on date ranges
+const chapters: Record<string, { title: string; subtitle: string; startDate: string; endDate: string }> = {
+  "college-start": {
+    title: "College Years",
+    subtitle: "Where it all began",
+    startDate: "2022-01-01",
+    endDate: "2022-12-31",
+  },
+  "growth": {
+    title: "Growth & Discovery",
+    subtitle: "Firsts and foundations",
+    startDate: "2023-01-01",
+    endDate: "2023-12-31",
+  },
+  "breakthrough": {
+    title: "Breakthrough Year",
+    subtitle: "Ambitions became achievements",
+    startDate: "2024-01-01",
+    endDate: "2024-12-31",
+  },
+};
+
+function getChapterForYear(year: string) {
+  switch (year) {
+    case "2022": return chapters["college-start"];
+    case "2023": return chapters["growth"];
+    case "2024": return chapters["breakthrough"];
+    default: return null;
+  }
+}
 
 export default function TimelinePage() {
-  const eventsByYear = getEventsByYear(demoEvents);
+  const [events, setEvents] = useState<TimelineEvent[]>(demoEvents);
+  const [activeYear, setActiveYear] = useState<string>("");
+  const [eventModalOpen, setEventModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<TimelineEvent | undefined>();
+  const [demoMode, setDemoMode] = useState(true);
+
+  const eventsByYear = getEventsByYear(events);
   const years = Object.keys(eventsByYear);
+
+  // Track active year on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const yearElements = document.querySelectorAll("[data-year]");
+      let current = "";
+      yearElements.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top <= 200) {
+          current = el.getAttribute("data-year") || "";
+        }
+      });
+      if (current) setActiveYear(current);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleCreateEvent = useCallback((eventData: Partial<TimelineEvent>) => {
+    const newEvent: TimelineEvent = {
+      id: eventData.id || `evt-${Date.now()}`,
+      title: eventData.title || "",
+      date: eventData.date || "",
+      location: eventData.location,
+      description: eventData.description,
+      category: eventData.category,
+      imageUrl: eventData.imageUrl,
+      source: "manual",
+    };
+    setEvents((prev) => [...prev, newEvent]);
+  }, []);
+
+  const handleEditEvent = useCallback((eventData: Partial<TimelineEvent>) => {
+    setEvents((prev) =>
+      prev.map((e) => (e.id === eventData.id ? { ...e, ...eventData } : e))
+    );
+    setEditingEvent(undefined);
+  }, []);
+
+  const handleDeleteEvent = useCallback((id: string) => {
+    setEvents((prev) => prev.filter((e) => e.id !== id));
+    setEditingEvent(undefined);
+    setEventModalOpen(false);
+  }, []);
+
+  const scrollToYear = (year: string) => {
+    const el = document.querySelector(`[data-year="${year}"]`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <div className="min-h-screen pt-24 pb-32">
       {/* Page header */}
       <section className="relative py-20 px-6 overflow-hidden">
-        {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-chrono-accent/[0.03] via-transparent to-transparent" />
 
         <motion.div
@@ -27,61 +117,150 @@ export default function TimelinePage() {
           <h1 className="text-5xl md:text-7xl font-display font-bold mb-6">
             <span className="gradient-text">Timeline</span>
           </h1>
-          <p className="text-lg text-chrono-text-secondary max-w-xl mx-auto">
+          <p className="text-lg text-chrono-text-secondary max-w-xl mx-auto mb-8">
             Every moment that shaped your story, beautifully organized
             and brought to life.
           </p>
-        </motion.div>
 
-        {/* Year navigation pills */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
-          className="flex justify-center gap-3 mt-12"
-        >
-          {years.map((year, i) => (
-            <motion.button
-              key={year}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4 + i * 0.1 }}
-              className="px-5 py-2 rounded-full text-sm font-medium glass hover:bg-chrono-accent/10 hover:border-chrono-accent/30 transition-all"
+          {/* Actions */}
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={() => { setEditingEvent(undefined); setEventModalOpen(true); }}
+              className="px-6 py-2.5 text-sm bg-gradient-to-r from-chrono-accent to-chrono-accent-warm text-white rounded-full font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
             >
-              {year}
-            </motion.button>
-          ))}
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Add Event
+            </button>
+            <button
+              onClick={() => setDemoMode(!demoMode)}
+              className={`px-5 py-2.5 text-sm rounded-full transition-all border ${
+                demoMode
+                  ? "border-chrono-accent/30 text-chrono-accent bg-chrono-accent/5"
+                  : "border-chrono-border/50 text-chrono-text-secondary hover:border-chrono-border"
+              }`}
+            >
+              Demo Mode {demoMode ? "On" : "Off"}
+            </button>
+          </div>
         </motion.div>
+
+        {/* Year navigation pills - sticky */}
+        {years.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="flex justify-center gap-3 mt-12"
+          >
+            {years.map((year, i) => (
+              <motion.button
+                key={year}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 + i * 0.1 }}
+                onClick={() => scrollToYear(year)}
+                className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                  activeYear === year
+                    ? "bg-chrono-accent/20 border border-chrono-accent/40 text-chrono-accent"
+                    : "glass hover:bg-chrono-accent/10 hover:border-chrono-accent/30"
+                }`}
+              >
+                {year}
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
       </section>
 
-      {/* Timeline */}
-      <section className="px-6">
-        <div className="space-y-32">
-          {years.map((year, i) => (
-            <YearSection
-              key={year}
-              year={year}
-              events={eventsByYear[year]}
-              yearIndex={i}
-            />
-          ))}
-        </div>
-      </section>
+      {/* Sticky year indicator */}
+      <AnimatePresence>
+        {activeYear && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-30"
+          >
+            <div className="px-4 py-1.5 rounded-full glass-strong text-xs font-display font-medium text-chrono-text flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-chrono-accent" />
+              {activeYear}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Timeline content */}
+      {events.length === 0 ? (
+        <EmptyState
+          icon="timeline"
+          title="Your story starts here"
+          description="Add your first life event to begin building your personal timeline. Every moment matters."
+          actionLabel="Create First Event"
+          onAction={() => setEventModalOpen(true)}
+        />
+      ) : (
+        <section className="px-6">
+          <div className="space-y-16">
+            {years.map((year, i) => {
+              const chapter = getChapterForYear(year);
+              return (
+                <div key={year} data-year={year}>
+                  {/* Chapter header */}
+                  {chapter && (
+                    <ChapterHeader
+                      title={chapter.title}
+                      subtitle={chapter.subtitle}
+                    />
+                  )}
+                  <YearSection
+                    year={year}
+                    events={eventsByYear[year]}
+                    yearIndex={i}
+                    onEditEvent={(event) => {
+                      setEditingEvent(event);
+                      setEventModalOpen(true);
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* End marker */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        className="text-center mt-32"
-      >
-        <div className="inline-flex flex-col items-center gap-4">
-          <div className="w-3 h-3 rounded-full bg-chrono-accent/50" />
-          <p className="text-sm text-chrono-muted font-display italic">
-            Your story continues...
-          </p>
-        </div>
-      </motion.div>
+      {events.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="text-center mt-32"
+        >
+          <div className="inline-flex flex-col items-center gap-4">
+            <div className="w-3 h-3 rounded-full bg-chrono-accent/50" />
+            <p className="text-sm text-chrono-muted font-display italic">
+              Your story continues...
+            </p>
+            <button
+              onClick={() => { setEditingEvent(undefined); setEventModalOpen(true); }}
+              className="mt-2 px-5 py-2 text-xs text-chrono-accent border border-chrono-accent/30 hover:bg-chrono-accent/10 rounded-full transition-all"
+            >
+              Add Next Moment
+            </button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Event modal */}
+      <EventModal
+        isOpen={eventModalOpen}
+        onClose={() => { setEventModalOpen(false); setEditingEvent(undefined); }}
+        onSave={editingEvent ? handleEditEvent : handleCreateEvent}
+        event={editingEvent}
+        onDelete={handleDeleteEvent}
+      />
     </div>
   );
 }

@@ -8,9 +8,10 @@ interface YearSectionProps {
   year: string;
   events: TimelineEvent[];
   yearIndex: number;
+  onEditEvent?: (event: TimelineEvent) => void;
 }
 
-export default function YearSection({ year, events }: YearSectionProps) {
+export default function YearSection({ year, events, onEditEvent }: YearSectionProps) {
   return (
     <div className="relative">
       {/* Year label */}
@@ -31,6 +32,18 @@ export default function YearSection({ year, events }: YearSectionProps) {
             </span>
           </div>
         </div>
+      </motion.div>
+
+      {/* Events count */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        className="flex justify-center mb-8"
+      >
+        <span className="text-xs text-chrono-muted uppercase tracking-widest">
+          {events.length} {events.length === 1 ? "moment" : "moments"}
+        </span>
       </motion.div>
 
       {/* Events grid */}
@@ -76,7 +89,12 @@ export default function YearSection({ year, events }: YearSectionProps) {
                 {isLeft ? (
                   <>
                     <div className="md:text-right">
-                      <TimelineCard event={event} index={index} isLeft />
+                      <TimelineCard
+                        event={event}
+                        index={index}
+                        isLeft
+                        onEdit={onEditEvent ? () => onEditEvent(event) : undefined}
+                      />
                     </div>
                     <div className="hidden md:block" />
                   </>
@@ -84,7 +102,11 @@ export default function YearSection({ year, events }: YearSectionProps) {
                   <>
                     <div className="hidden md:block" />
                     <div style={{ direction: "ltr" }}>
-                      <TimelineCard event={event} index={index} />
+                      <TimelineCard
+                        event={event}
+                        index={index}
+                        onEdit={onEditEvent ? () => onEditEvent(event) : undefined}
+                      />
                     </div>
                   </>
                 )}

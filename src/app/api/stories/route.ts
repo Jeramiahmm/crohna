@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { demoStories, demoEvents } from "@/data/demo";
+import { demoStories } from "@/data/demo";
 
-// GET /api/stories — returns AI-generated life stories
+// GET /api/stories — returns all AI-generated stories
 export async function GET() {
   return NextResponse.json({
     stories: demoStories,
@@ -9,44 +9,30 @@ export async function GET() {
   });
 }
 
-// POST /api/stories/generate — generate a new AI story for a given period
+// POST /api/stories — generate a new AI story
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const { year, period } = body;
 
-  // Filter events for the requested period
-  let relevantEvents = demoEvents;
-  if (year) {
-    relevantEvents = demoEvents.filter(
-      (e) => new Date(e.date).getFullYear() === year
-    );
-  }
-
-  if (relevantEvents.length === 0) {
-    return NextResponse.json(
-      { error: "No events found for the specified period" },
-      { status: 404 }
-    );
-  }
-
   // In production, this would call an AI model to generate the story
-  // For demo, return a template-based story
-  const cities = Array.from(new Set(relevantEvents.map((e) => e.location).filter(Boolean)));
-  const categories = Array.from(new Set(relevantEvents.map((e) => e.category).filter(Boolean)));
-
-  const story = {
+  const newStory = {
     id: `story-${Date.now()}`,
-    title: year ? `Your ${year}` : `Your ${period ?? "Life Story"}`,
-    period: year?.toString() ?? period ?? "All Time",
-    year: year ?? null,
-    summary: `This period contained ${relevantEvents.length} notable events across ${cities.length} locations. Your activities spanned ${categories.join(", ")} categories, creating a rich tapestry of experiences that defined this chapter of your life.`,
-    highlights: relevantEvents.slice(0, 5).map((e) => e.title),
+    title: year ? `Your ${year}` : `Your ${period || "Life Story"}`,
+    period: period || (year ? `January – December ${year}` : "All Time"),
+    year: year || null,
+    summary:
+      "This is a generated summary of your life events during this period. In production, this would be created by an AI model analyzing your actual events.",
+    highlights: [
+      "Key moment that defined this period",
+      "Growth and personal development",
+      "Meaningful connections made",
+    ],
     stats: {
-      Events: relevantEvents.length,
-      Locations: cities.length,
-      Categories: categories.length,
+      events: 0,
+      cities: 0,
+      photos: 0,
     },
   };
 
-  return NextResponse.json({ story }, { status: 201 });
+  return NextResponse.json({ story: newStory }, { status: 201 });
 }

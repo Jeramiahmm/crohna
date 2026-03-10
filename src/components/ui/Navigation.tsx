@@ -10,6 +10,7 @@ const navItems = [
   { href: "/timeline", label: "Timeline" },
   { href: "/insights", label: "Insights" },
   { href: "/map", label: "Map" },
+  { href: "/settings", label: "Settings" },
 ];
 
 export default function Navigation() {

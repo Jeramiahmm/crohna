@@ -1,14 +1,47 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { demoStories, insightStats } from "@/data/demo";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useCallback } from "react";
+import { demoStories, insightStats, AIStory } from "@/data/demo";
 import AIStorySummary from "@/components/timeline/AIStorySummary";
 import StatCard from "@/components/insights/StatCard";
 import CategoryChart from "@/components/insights/CategoryChart";
 import YearChart from "@/components/insights/YearChart";
 import CityChart from "@/components/insights/CityChart";
+import ShareCard from "@/components/share/ShareCard";
+import { AIStoryLoadingSkeleton } from "@/components/ui/Skeletons";
 
 export default function InsightsPage() {
+  const [stories, setStories] = useState<AIStory[]>(demoStories);
+  const [generating, setGenerating] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareStory, setShareStory] = useState<AIStory | null>(null);
+  const [storyFilter, setStoryFilter] = useState<"all" | "year" | "chapter">("all");
+
+  const handleRegenerate = useCallback(async (storyId: string) => {
+    setGenerating(true);
+    await new Promise((r) => setTimeout(r, 2500));
+    setStories((prev) =>
+      prev.map((s) =>
+        s.id === storyId
+          ? { ...s, summary: s.summary + " [Regenerated with new insights and deeper reflection.]" }
+          : s
+      )
+    );
+    setGenerating(false);
+  }, []);
+
+  const handleShare = useCallback((story: AIStory) => {
+    setShareStory(story);
+    setShareOpen(true);
+  }, []);
+
+  const filteredStories = stories.filter((s) => {
+    if (storyFilter === "year") return s.year !== undefined;
+    if (storyFilter === "chapter") return !s.year;
+    return true;
+  });
+
   return (
     <div className="min-h-screen pt-24 pb-32">
       {/* Page header */}
@@ -37,69 +70,96 @@ export default function InsightsPage() {
       {/* Stats overview */}
       <section className="px-6 mb-16">
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard
-            label="Total Events"
-            value={insightStats.totalEvents}
-            delay={0}
-          />
-          <StatCard
-            label="Photos Captured"
-            value={insightStats.totalPhotos}
-            color="#f9a8d4"
-            delay={0.1}
-          />
-          <StatCard
-            label="Cities Visited"
-            value={insightStats.citiesVisited}
-            color="#67e8f9"
-            delay={0.2}
-          />
-          <StatCard
-            label="Most Active Year"
-            value={insightStats.mostActiveYear.toString()}
-            color="#fbbf24"
-            delay={0.3}
-          />
+          <StatCard label="Total Events" value={insightStats.totalEvents} delay={0} />
+          <StatCard label="Photos Captured" value={insightStats.totalPhotos} color="#f9a8d4" delay={0.1} />
+          <StatCard label="Cities Visited" value={insightStats.citiesVisited} color="#67e8f9" delay={0.2} />
+          <StatCard label="Most Active Year" value={insightStats.mostActiveYear.toString()} color="#fbbf24" delay={0.3} />
         </div>
       </section>
 
-      {/* Highlight stats */}
+      {/* Year in Review cards */}
       <section className="px-6 mb-16">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            className="text-center mb-8"
           >
-            <div className="bg-chrono-card/60 rounded-2xl p-6 border border-chrono-border/40 text-center">
-              <div className="text-4xl mb-3">🏙</div>
-              <div className="text-xl font-display font-bold text-chrono-text mb-1">
-                {insightStats.mostVisitedCity}
-              </div>
-              <div className="text-xs text-chrono-muted uppercase tracking-widest">
-                Most Visited City
-              </div>
-            </div>
-            <div className="bg-chrono-card/60 rounded-2xl p-6 border border-chrono-border/40 text-center">
-              <div className="text-4xl mb-3">✈</div>
-              <div className="text-xl font-display font-bold text-chrono-text mb-1">
-                {insightStats.topCategory}
-              </div>
-              <div className="text-xs text-chrono-muted uppercase tracking-widest">
-                Top Category
-              </div>
-            </div>
-            <div className="bg-chrono-card/60 rounded-2xl p-6 border border-chrono-border/40 text-center">
-              <div className="text-4xl mb-3">🔥</div>
-              <div className="text-xl font-display font-bold text-chrono-text mb-1">
-                {insightStats.longestStreak}
-              </div>
-              <div className="text-xs text-chrono-muted uppercase tracking-widest">
-                Longest Active Streak
-              </div>
-            </div>
+            <span className="text-xs uppercase tracking-widest text-chrono-accent-warm mb-4 block">
+              Highlights
+            </span>
+            <h2 className="text-3xl md:text-4xl font-display font-bold">
+              Your Year in Review
+            </h2>
           </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { emoji: "🏙", value: insightStats.mostVisitedCity, label: "Most Visited City" },
+              { emoji: "✈", value: insightStats.topCategory, label: "Top Category" },
+              { emoji: "🔥", value: insightStats.longestStreak, label: "Longest Active Streak" },
+            ].map((item, i) => (
+              <motion.div
+                key={item.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="group bg-chrono-card/60 rounded-2xl p-6 border border-chrono-border/40 text-center card-hover"
+              >
+                <div className="text-4xl mb-3">{item.emoji}</div>
+                <div className="text-xl font-display font-bold text-chrono-text mb-1">
+                  {item.value}
+                </div>
+                <div className="text-xs text-chrono-muted uppercase tracking-widest">
+                  {item.label}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Life Chapters summary */}
+      <section className="px-6 mb-16">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-8"
+          >
+            <span className="text-xs uppercase tracking-widest text-chrono-accent mb-4 block">
+              Your Journey
+            </span>
+            <h2 className="text-3xl md:text-4xl font-display font-bold">
+              Life Chapters
+            </h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { year: "2022", title: "The Beginning", desc: "Started college, first hackathon, NYC adventure", events: 3, color: "#fbbf24" },
+              { year: "2023", title: "Growth", desc: "First internship, research paper, coast to coast", events: 6, color: "#f9a8d4" },
+              { year: "2024", title: "Breakthrough", desc: "Tech internship, product launch, full-time offer", events: 7, color: "#a78bfa" },
+            ].map((ch, i) => (
+              <motion.div
+                key={ch.year}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="group relative bg-chrono-card/40 rounded-2xl p-6 border border-chrono-border/30 card-hover overflow-hidden"
+              >
+                <div className="absolute top-0 left-0 right-0 h-0.5" style={{ backgroundColor: ch.color }} />
+                <div className="text-3xl font-display font-bold gradient-text mb-1">{ch.year}</div>
+                <div className="text-sm font-display font-semibold text-chrono-text mb-2">{ch.title}</div>
+                <p className="text-xs text-chrono-text-secondary leading-relaxed mb-3">{ch.desc}</p>
+                <div className="text-[10px] text-chrono-muted uppercase tracking-widest">{ch.events} events</div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -130,23 +190,105 @@ export default function InsightsPage() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-8"
           >
             <span className="text-xs uppercase tracking-widest text-chrono-accent mb-4 block">
               Generated for You
             </span>
-            <h2 className="text-3xl md:text-4xl font-display font-bold">
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               AI Life Stories
             </h2>
+            <p className="text-sm text-chrono-text-secondary max-w-md mx-auto">
+              Emotional, AI-crafted narratives about your life chapters and milestones.
+            </p>
           </motion.div>
 
+          {/* Story filter tabs */}
+          <div className="flex justify-center gap-2 mb-8">
+            {[
+              { id: "all" as const, label: "All Stories" },
+              { id: "year" as const, label: "By Year" },
+              { id: "chapter" as const, label: "By Chapter" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setStoryFilter(tab.id)}
+                className={`px-4 py-2 rounded-full text-xs font-medium transition-all ${
+                  storyFilter === tab.id
+                    ? "bg-chrono-accent/20 border border-chrono-accent/40 text-chrono-accent"
+                    : "text-chrono-text-secondary hover:text-chrono-text border border-chrono-border/30 hover:border-chrono-border/60"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
           <div className="space-y-8">
-            {demoStories.map((story, i) => (
-              <AIStorySummary key={story.id} story={story} index={i} />
+            <AnimatePresence mode="wait">
+              {generating && <AIStoryLoadingSkeleton />}
+            </AnimatePresence>
+
+            {filteredStories.map((story, i) => (
+              <div key={story.id} className="relative">
+                <AIStorySummary story={story} index={i} />
+
+                {/* Story action bar */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  className="flex items-center justify-end gap-2 mt-3 px-2"
+                >
+                  <button
+                    onClick={() => handleRegenerate(story.id)}
+                    disabled={generating}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-chrono-muted hover:text-chrono-text-secondary rounded-full border border-chrono-border/20 hover:border-chrono-border/40 transition-all disabled:opacity-40"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
+                    </svg>
+                    Regenerate
+                  </button>
+                  <button
+                    onClick={() => handleShare(story)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-chrono-muted hover:text-chrono-text-secondary rounded-full border border-chrono-border/20 hover:border-chrono-border/40 transition-all"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                    </svg>
+                    Share
+                  </button>
+                  <button
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(story.summary);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-chrono-muted hover:text-chrono-text-secondary rounded-full border border-chrono-border/20 hover:border-chrono-border/40 transition-all"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+                    </svg>
+                    Copy
+                  </button>
+                </motion.div>
+              </div>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Share modal */}
+      {shareStory && (
+        <ShareCard
+          isOpen={shareOpen}
+          onClose={() => { setShareOpen(false); setShareStory(null); }}
+          type={shareStory.year ? "year-review" : "story"}
+          title={shareStory.title}
+          content={shareStory.summary}
+          stats={shareStory.stats}
+          highlights={shareStory.highlights}
+        />
+      )}
     </div>
   );
 }
