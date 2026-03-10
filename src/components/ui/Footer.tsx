@@ -4,21 +4,21 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="relative border-t border-chrono-border/50 bg-chrono-bg">
-      <div className="max-w-7xl mx-auto px-6 py-16">
+    <footer className="relative border-t border-chrono-border/30 bg-chrono-bg">
+      <div className="max-w-7xl mx-auto px-6 py-20">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-3 mb-4">
               <div className="relative w-7 h-7">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-chrono-accent to-chrono-accent-warm opacity-80" />
+                <div className="absolute inset-0 rounded-full bg-chrono-accent/30" />
                 <div className="absolute inset-[2px] rounded-full bg-chrono-bg" />
-                <div className="absolute inset-[5px] rounded-full bg-gradient-to-br from-chrono-accent to-chrono-accent-warm opacity-60" />
+                <div className="absolute inset-[5px] rounded-full bg-chrono-accent/20" />
               </div>
               <span className="text-lg font-display font-semibold">Chrono</span>
             </Link>
             <p className="text-chrono-muted text-sm max-w-sm leading-relaxed">
-              Your life, beautifully mapped. Chrono transforms your memories into
-              a stunning visual timeline powered by AI.
+              Your life, beautifully mapped. Transform your memories into
+              a stunning visual timeline.
             </p>
           </div>
 
@@ -27,7 +27,7 @@ export default function Footer() {
               Product
             </h4>
             <div className="flex flex-col gap-2">
-              {["Timeline", "AI Stories", "Map", "Insights"].map((item) => (
+              {["Timeline", "Stories", "Map", "Insights"].map((item) => (
                 <span
                   key={item}
                   className="text-sm text-chrono-text-secondary hover:text-chrono-text cursor-pointer transition-colors"
@@ -55,7 +55,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-16 pt-8 border-t border-chrono-border/30 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="mt-20 pt-8 border-t border-chrono-border/20 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-chrono-muted">
             &copy; {new Date().getFullYear()} Chrono. All rights reserved.
           </p>

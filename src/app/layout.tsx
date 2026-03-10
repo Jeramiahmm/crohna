@@ -20,8 +20,8 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Chrono — Your Life, Beautifully Mapped",
   description:
-    "Chrono transforms your memories into a stunning visual timeline. AI-powered digital life story.",
-  keywords: ["timeline", "life events", "AI", "memories", "digital story"],
+    "Chrono transforms your memories into a stunning visual timeline. A premium digital life story.",
+  keywords: ["timeline", "life events", "memories", "digital story"],
 };
 
 export default function RootLayout({

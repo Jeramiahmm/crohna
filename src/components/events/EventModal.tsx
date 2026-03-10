@@ -5,11 +5,11 @@ import { useState, useCallback, useRef } from "react";
 import { TimelineEvent } from "@/data/demo";
 
 const categories = [
-  { value: "travel", label: "Travel", color: "#a78bfa", icon: "✈" },
-  { value: "career", label: "Career", color: "#f9a8d4", icon: "💼" },
-  { value: "achievement", label: "Achievement", color: "#67e8f9", icon: "🏆" },
-  { value: "education", label: "Education", color: "#fbbf24", icon: "🎓" },
-  { value: "life", label: "Life", color: "#34d399", icon: "🏠" },
+  { value: "travel", label: "Travel", color: "#7A8A96" },
+  { value: "career", label: "Career", color: "#D6CFC7" },
+  { value: "achievement", label: "Achievement", color: "#BFC3C7" },
+  { value: "education", label: "Education", color: "#9A9590" },
+  { value: "life", label: "Life", color: "#8A9A8A" },
 ];
 
 const chapters = [
@@ -64,7 +64,6 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
     setErrors({});
     setSaving(true);
 
-    // Simulate save
     await new Promise((r) => setTimeout(r, 600));
 
     onSave({
@@ -103,24 +102,21 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm"
           />
 
-          {/* Modal */}
           <motion.div
             initial={{ opacity: 0, y: 40, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.97 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-x-4 top-[5%] bottom-[5%] md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-xl md:max-h-[85vh] z-[70] bg-chrono-surface rounded-3xl border border-chrono-border/50 overflow-hidden flex flex-col"
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-x-4 top-[5%] bottom-[5%] md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-xl md:max-h-[85vh] z-[70] bg-chrono-surface rounded-3xl border border-chrono-border/30 overflow-hidden flex flex-col"
           >
-            {/* Success overlay */}
             <AnimatePresence>
               {showSuccess && (
                 <motion.div
@@ -133,7 +129,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    className="w-16 h-16 rounded-full bg-chrono-accent/20 flex items-center justify-center"
+                    className="w-16 h-16 rounded-full bg-chrono-accent/10 flex items-center justify-center"
                   >
                     <svg className="w-8 h-8 text-chrono-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -146,8 +142,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
               )}
             </AnimatePresence>
 
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-chrono-border/30">
+            <div className="flex items-center justify-between p-6 border-b border-chrono-border/20">
               <div>
                 <h2 className="text-xl font-display font-bold text-chrono-text">
                   {isEditing ? "Edit Event" : "New Event"}
@@ -158,7 +153,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
               </div>
               <button
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-chrono-card flex items-center justify-center text-chrono-muted hover:text-chrono-text hover:bg-chrono-border/50 transition-all"
+                className="w-8 h-8 rounded-full bg-chrono-card flex items-center justify-center text-chrono-muted hover:text-chrono-text hover:bg-chrono-border/40 transition-all"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -166,9 +161,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
               </button>
             </div>
 
-            {/* Form content */}
             <div className="flex-1 overflow-y-auto p-6 space-y-5">
-              {/* Image upload */}
               <div>
                 <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Photo</label>
                 <div
@@ -178,17 +171,17 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                   onClick={() => fileInputRef.current?.click()}
                   className={`relative h-40 rounded-2xl border-2 border-dashed transition-all cursor-pointer overflow-hidden ${
                     dragOver
-                      ? "border-chrono-accent bg-chrono-accent/5"
+                      ? "border-chrono-accent/40 bg-chrono-accent/5"
                       : form.imageUrl
-                      ? "border-chrono-border/30"
-                      : "border-chrono-border/50 hover:border-chrono-border bg-chrono-card/30"
+                      ? "border-chrono-border/20"
+                      : "border-chrono-border/30 hover:border-chrono-border/50 bg-chrono-card/20"
                   }`}
                 >
                   {form.imageUrl ? (
                     <div className="relative w-full h-full group">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={form.imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <span className="text-sm text-white">Change photo</span>
                       </div>
                     </div>
@@ -204,7 +197,6 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                 </div>
               </div>
 
-              {/* Title */}
               <div>
                 <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">
                   Title <span className="text-chrono-accent">*</span>
@@ -214,14 +206,13 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                   value={form.title}
                   onChange={(e) => { setForm((f) => ({ ...f, title: e.target.value })); setErrors((er) => ({ ...er, title: "" })); }}
                   placeholder="What happened?"
-                  className={`w-full bg-chrono-card/60 rounded-xl px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border transition-colors outline-none focus:border-chrono-accent/50 ${
-                    errors.title ? "border-red-500/50" : "border-chrono-border/30"
+                  className={`w-full bg-chrono-card/40 rounded-xl px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border transition-colors outline-none focus:border-chrono-accent/40 ${
+                    errors.title ? "border-red-500/40" : "border-chrono-border/20"
                   }`}
                 />
-                {errors.title && <p className="text-xs text-red-400 mt-1">{errors.title}</p>}
+                {errors.title && <p className="text-xs text-red-400/70 mt-1">{errors.title}</p>}
               </div>
 
-              {/* Date + Location row */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">
@@ -231,11 +222,11 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                     type="date"
                     value={form.date}
                     onChange={(e) => { setForm((f) => ({ ...f, date: e.target.value })); setErrors((er) => ({ ...er, date: "" })); }}
-                    className={`w-full bg-chrono-card/60 rounded-xl px-4 py-3 text-sm text-chrono-text border transition-colors outline-none focus:border-chrono-accent/50 [color-scheme:dark] ${
-                      errors.date ? "border-red-500/50" : "border-chrono-border/30"
+                    className={`w-full bg-chrono-card/40 rounded-xl px-4 py-3 text-sm text-chrono-text border transition-colors outline-none focus:border-chrono-accent/40 [color-scheme:dark] ${
+                      errors.date ? "border-red-500/40" : "border-chrono-border/20"
                     }`}
                   />
-                  {errors.date && <p className="text-xs text-red-400 mt-1">{errors.date}</p>}
+                  {errors.date && <p className="text-xs text-red-400/70 mt-1">{errors.date}</p>}
                 </div>
                 <div>
                   <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Location</label>
@@ -244,12 +235,11 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                     value={form.location}
                     onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
                     placeholder="City, State"
-                    className="w-full bg-chrono-card/60 rounded-xl px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border border-chrono-border/30 transition-colors outline-none focus:border-chrono-accent/50"
+                    className="w-full bg-chrono-card/40 rounded-xl px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border border-chrono-border/20 transition-colors outline-none focus:border-chrono-accent/40"
                   />
                 </div>
               </div>
 
-              {/* Description */}
               <div>
                 <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Description</label>
                 <textarea
@@ -257,11 +247,10 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                   placeholder="Tell the story behind this moment..."
                   rows={3}
-                  className="w-full bg-chrono-card/60 rounded-xl px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border border-chrono-border/30 transition-colors outline-none focus:border-chrono-accent/50 resize-none"
+                  className="w-full bg-chrono-card/40 rounded-xl px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border border-chrono-border/20 transition-colors outline-none focus:border-chrono-accent/40 resize-none"
                 />
               </div>
 
-              {/* Category */}
               <div>
                 <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Category</label>
                 <div className="flex flex-wrap gap-2">
@@ -272,22 +261,20 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                         form.category === cat.value
                           ? "border-2"
-                          : "border border-chrono-border/30 text-chrono-text-secondary hover:border-chrono-border/60"
+                          : "border border-chrono-border/20 text-chrono-text-secondary hover:border-chrono-border/40"
                       }`}
                       style={
                         form.category === cat.value
-                          ? { backgroundColor: `${cat.color}15`, borderColor: `${cat.color}50`, color: cat.color }
+                          ? { backgroundColor: `${cat.color}12`, borderColor: `${cat.color}40`, color: cat.color }
                           : {}
                       }
                     >
-                      <span>{cat.icon}</span>
                       {cat.label}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Chapter tag */}
               <div>
                 <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">
                   Life Chapter <span className="text-chrono-muted/50">(optional)</span>
@@ -299,8 +286,8 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                       onClick={() => setForm((f) => ({ ...f, chapter: f.chapter === ch ? "" : ch }))}
                       className={`px-3 py-1.5 rounded-full text-xs transition-all ${
                         form.chapter === ch
-                          ? "bg-chrono-accent/20 border border-chrono-accent/40 text-chrono-accent"
-                          : "bg-chrono-card/40 border border-chrono-border/30 text-chrono-text-secondary hover:border-chrono-border/60"
+                          ? "bg-chrono-accent/10 border border-chrono-accent/30 text-chrono-accent"
+                          : "bg-chrono-card/30 border border-chrono-border/20 text-chrono-text-secondary hover:border-chrono-border/40"
                       }`}
                     >
                       {ch}
@@ -310,12 +297,11 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="p-6 border-t border-chrono-border/30 flex items-center justify-between">
+            <div className="p-6 border-t border-chrono-border/20 flex items-center justify-between">
               {isEditing && onDelete ? (
                 <button
                   onClick={() => onDelete(event!.id)}
-                  className="text-sm text-red-400 hover:text-red-300 transition-colors"
+                  className="text-sm text-red-400/70 hover:text-red-400 transition-colors"
                 >
                   Delete event
                 </button>
@@ -332,10 +318,10 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="px-6 py-2.5 text-sm bg-gradient-to-r from-chrono-accent to-chrono-accent-warm text-white rounded-full font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+                  className="px-6 py-2.5 text-sm bg-chrono-text text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors duration-300 disabled:opacity-50 flex items-center gap-2"
                 >
                   {saving && (
-                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <div className="w-3.5 h-3.5 border-2 border-chrono-bg/30 border-t-chrono-bg rounded-full animate-spin" />
                   )}
                   {isEditing ? "Save Changes" : "Create Event"}
                 </button>

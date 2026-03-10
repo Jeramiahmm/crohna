@@ -44,61 +44,58 @@ export default function InsightsPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-32">
-      {/* Page header */}
-      <section className="relative py-20 px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-chrono-accent/[0.03] via-transparent to-transparent" />
-
+      <section className="relative py-24 px-6 overflow-hidden">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           className="relative max-w-4xl mx-auto text-center"
         >
-          <span className="text-xs uppercase tracking-widest text-chrono-accent mb-4 block">
-            AI-Powered
+          <span className="text-xs uppercase tracking-[0.2em] text-chrono-muted mb-4 block">
+            Discover
           </span>
-          <h1 className="text-5xl md:text-7xl font-display font-bold mb-6">
+          <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-tight">
             <span className="gradient-text">Insights</span>
           </h1>
           <p className="text-lg text-chrono-text-secondary max-w-xl mx-auto">
             Discover patterns, highlights, and stories hidden in your
-            life&apos;s timeline, revealed by AI.
+            life&apos;s timeline.
           </p>
         </motion.div>
       </section>
 
       {/* Stats overview */}
-      <section className="px-6 mb-16">
+      <section className="px-6 mb-20">
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard label="Total Events" value={insightStats.totalEvents} delay={0} />
-          <StatCard label="Photos Captured" value={insightStats.totalPhotos} color="#f9a8d4" delay={0.1} />
-          <StatCard label="Cities Visited" value={insightStats.citiesVisited} color="#67e8f9" delay={0.2} />
-          <StatCard label="Most Active Year" value={insightStats.mostActiveYear.toString()} color="#fbbf24" delay={0.3} />
+          <StatCard label="Photos Captured" value={insightStats.totalPhotos} color="#D6CFC7" delay={0.1} />
+          <StatCard label="Cities Visited" value={insightStats.citiesVisited} color="#7A8A96" delay={0.2} />
+          <StatCard label="Most Active Year" value={insightStats.mostActiveYear.toString()} color="#BFC3C7" delay={0.3} />
         </div>
       </section>
 
       {/* Year in Review cards */}
-      <section className="px-6 mb-16">
+      <section className="px-6 mb-20">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-8"
+            className="text-center mb-12"
           >
-            <span className="text-xs uppercase tracking-widest text-chrono-accent-warm mb-4 block">
+            <span className="text-xs uppercase tracking-[0.2em] text-chrono-muted mb-4 block">
               Highlights
             </span>
-            <h2 className="text-3xl md:text-4xl font-display font-bold">
+            <h2 className="text-3xl md:text-4xl font-display font-bold tracking-tight">
               Your Year in Review
             </h2>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { emoji: "🏙", value: insightStats.mostVisitedCity, label: "Most Visited City" },
-              { emoji: "✈", value: insightStats.topCategory, label: "Top Category" },
-              { emoji: "🔥", value: insightStats.longestStreak, label: "Longest Active Streak" },
+              { label: "Most Visited City", value: insightStats.mostVisitedCity },
+              { label: "Top Category", value: insightStats.topCategory },
+              { label: "Longest Active Streak", value: insightStats.longestStreak },
             ].map((item, i) => (
               <motion.div
                 key={item.label}
@@ -106,13 +103,12 @@ export default function InsightsPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="group bg-chrono-card/60 rounded-2xl p-6 border border-chrono-border/40 text-center card-hover"
+                className="group bg-chrono-card/40 rounded-2xl p-8 border border-chrono-border/20 text-center card-hover"
               >
-                <div className="text-4xl mb-3">{item.emoji}</div>
-                <div className="text-xl font-display font-bold text-chrono-text mb-1">
+                <div className="text-2xl font-display font-bold text-chrono-text mb-2">
                   {item.value}
                 </div>
-                <div className="text-xs text-chrono-muted uppercase tracking-widest">
+                <div className="text-xs text-chrono-muted uppercase tracking-[0.15em]">
                   {item.label}
                 </div>
               </motion.div>
@@ -122,27 +118,27 @@ export default function InsightsPage() {
       </section>
 
       {/* Life Chapters summary */}
-      <section className="px-6 mb-16">
+      <section className="px-6 mb-20">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-8"
+            className="text-center mb-12"
           >
-            <span className="text-xs uppercase tracking-widest text-chrono-accent mb-4 block">
+            <span className="text-xs uppercase tracking-[0.2em] text-chrono-muted mb-4 block">
               Your Journey
             </span>
-            <h2 className="text-3xl md:text-4xl font-display font-bold">
+            <h2 className="text-3xl md:text-4xl font-display font-bold tracking-tight">
               Life Chapters
             </h2>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { year: "2022", title: "The Beginning", desc: "Started college, first hackathon, NYC adventure", events: 3, color: "#fbbf24" },
-              { year: "2023", title: "Growth", desc: "First internship, research paper, coast to coast", events: 6, color: "#f9a8d4" },
-              { year: "2024", title: "Breakthrough", desc: "Tech internship, product launch, full-time offer", events: 7, color: "#a78bfa" },
+              { year: "2022", title: "The Beginning", desc: "Started college, first hackathon, NYC adventure", events: 3 },
+              { year: "2023", title: "Growth", desc: "First internship, research paper, coast to coast", events: 6 },
+              { year: "2024", title: "Breakthrough", desc: "Tech internship, product launch, full-time offer", events: 7 },
             ].map((ch, i) => (
               <motion.div
                 key={ch.year}
@@ -150,9 +146,9 @@ export default function InsightsPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="group relative bg-chrono-card/40 rounded-2xl p-6 border border-chrono-border/30 card-hover overflow-hidden"
+                className="group relative bg-chrono-card/40 rounded-2xl p-6 border border-chrono-border/20 card-hover overflow-hidden"
               >
-                <div className="absolute top-0 left-0 right-0 h-0.5" style={{ backgroundColor: ch.color }} />
+                <div className="absolute top-0 left-0 right-0 h-px bg-chrono-accent/20" />
                 <div className="text-3xl font-display font-bold gradient-text mb-1">{ch.year}</div>
                 <div className="text-sm font-display font-semibold text-chrono-text mb-2">{ch.title}</div>
                 <p className="text-xs text-chrono-text-secondary leading-relaxed mb-3">{ch.desc}</p>
@@ -164,13 +160,13 @@ export default function InsightsPage() {
       </section>
 
       {/* Charts */}
-      <section className="px-6 mb-16">
+      <section className="px-6 mb-20">
         <div className="max-w-6xl mx-auto">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-2xl md:text-3xl font-display font-bold mb-8 text-center"
+            className="text-2xl md:text-3xl font-display font-bold mb-10 text-center tracking-tight"
           >
             Data Visualizations
           </motion.h2>
@@ -183,28 +179,27 @@ export default function InsightsPage() {
         </div>
       </section>
 
-      {/* AI Stories */}
+      {/* Stories */}
       <section className="px-6">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-8"
+            className="text-center mb-10"
           >
-            <span className="text-xs uppercase tracking-widest text-chrono-accent mb-4 block">
-              Generated for You
+            <span className="text-xs uppercase tracking-[0.2em] text-chrono-muted mb-4 block">
+              Your Narratives
             </span>
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-              AI Life Stories
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4 tracking-tight">
+              Life Stories
             </h2>
             <p className="text-sm text-chrono-text-secondary max-w-md mx-auto">
-              Emotional, AI-crafted narratives about your life chapters and milestones.
+              Emotional, crafted narratives about your life chapters and milestones.
             </p>
           </motion.div>
 
-          {/* Story filter tabs */}
-          <div className="flex justify-center gap-2 mb-8">
+          <div className="flex justify-center gap-2 mb-10">
             {[
               { id: "all" as const, label: "All Stories" },
               { id: "year" as const, label: "By Year" },
@@ -213,9 +208,9 @@ export default function InsightsPage() {
               <button
                 key={tab.id}
                 onClick={() => setStoryFilter(tab.id)}
-                className={`px-4 py-2 rounded-full text-xs font-medium transition-all ${
+                className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-300 ${
                   storyFilter === tab.id
-                    ? "bg-chrono-accent/20 border border-chrono-accent/40 text-chrono-accent"
+                    ? "bg-chrono-accent/10 border border-chrono-accent/30 text-chrono-accent"
                     : "text-chrono-text-secondary hover:text-chrono-text border border-chrono-border/30 hover:border-chrono-border/60"
                 }`}
               >
@@ -224,7 +219,7 @@ export default function InsightsPage() {
             ))}
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-10">
             <AnimatePresence mode="wait">
               {generating && <AIStoryLoadingSkeleton />}
             </AnimatePresence>
@@ -233,7 +228,6 @@ export default function InsightsPage() {
               <div key={story.id} className="relative">
                 <AIStorySummary story={story} index={i} />
 
-                {/* Story action bar */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
@@ -277,7 +271,6 @@ export default function InsightsPage() {
         </div>
       </section>
 
-      {/* Share modal */}
       {shareStory && (
         <ShareCard
           isOpen={shareOpen}

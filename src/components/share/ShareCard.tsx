@@ -19,7 +19,7 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
   const [exporting, setExporting] = useState(false);
 
   const handleCopy = useCallback(async () => {
-    const text = `${title}\n\n${content}${highlights ? "\n\n" + highlights.map((h) => `• ${h}`).join("\n") : ""}`;
+    const text = `${title}\n\n${content}${highlights ? "\n\n" + highlights.map((h) => `- ${h}`).join("\n") : ""}`;
     await navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -27,7 +27,6 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
 
   const handleExport = useCallback(async () => {
     setExporting(true);
-    // Simulate export
     await new Promise((r) => setTimeout(r, 1000));
     setExporting(false);
   }, []);
@@ -41,18 +40,17 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm"
           />
 
           <motion.div
             initial={{ opacity: 0, y: 40, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.97 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-x-4 top-[10%] md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg z-[70] bg-chrono-surface rounded-3xl border border-chrono-border/50 overflow-hidden"
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-x-4 top-[10%] md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg z-[70] bg-chrono-surface rounded-3xl border border-chrono-border/30 overflow-hidden"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-chrono-border/30">
+            <div className="flex items-center justify-between p-6 border-b border-chrono-border/20">
               <h2 className="text-lg font-display font-bold text-chrono-text">Share & Export</h2>
               <button
                 onClick={onClose}
@@ -64,20 +62,18 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
               </button>
             </div>
 
-            {/* Preview card */}
             <div className="p-6">
               <div
                 ref={cardRef}
-                className="relative bg-gradient-to-br from-chrono-bg via-chrono-surface to-chrono-bg rounded-2xl p-6 border border-chrono-border/30 overflow-hidden"
+                className="relative bg-gradient-to-br from-chrono-bg via-chrono-surface to-chrono-bg rounded-2xl p-6 border border-chrono-border/20 overflow-hidden"
               >
-                {/* Decorative gradient */}
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-chrono-accent via-chrono-accent-warm to-chrono-accent" />
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-chrono-accent/30 to-transparent" />
 
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-chrono-accent to-chrono-accent-warm" />
-                  <span className="text-[10px] text-chrono-muted uppercase tracking-widest">Chrono</span>
+                  <div className="w-5 h-5 rounded-full bg-chrono-accent/20" />
+                  <span className="text-[10px] text-chrono-muted uppercase tracking-[0.15em]">Chrono</span>
                   <span className="text-[10px] text-chrono-muted">
-                    {type === "year-review" ? "Year in Review" : type === "story" ? "AI Story" : "Timeline"}
+                    {type === "year-review" ? "Year in Review" : type === "story" ? "Story" : "Timeline"}
                   </span>
                 </div>
 
@@ -88,7 +84,7 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
                   <div className="mt-4 space-y-1.5">
                     {highlights.slice(0, 3).map((h, i) => (
                       <div key={i} className="flex items-start gap-2">
-                        <div className="w-1 h-1 rounded-full bg-chrono-accent mt-1.5 flex-shrink-0" />
+                        <div className="w-1 h-1 rounded-full bg-chrono-accent/40 mt-1.5 flex-shrink-0" />
                         <span className="text-xs text-chrono-text-secondary">{h}</span>
                       </div>
                     ))}
@@ -96,7 +92,7 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
                 )}
 
                 {stats && (
-                  <div className="flex gap-4 mt-4 pt-4 border-t border-chrono-border/20">
+                  <div className="flex gap-4 mt-4 pt-4 border-t border-chrono-border/15">
                     {Object.entries(stats).slice(0, 3).map(([key, value]) => (
                       <div key={key}>
                         <div className="text-sm font-display font-bold text-chrono-text">{value}</div>
@@ -108,14 +104,13 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
               </div>
             </div>
 
-            {/* Actions */}
             <div className="px-6 pb-6 grid grid-cols-3 gap-3">
               <button
                 onClick={handleCopy}
-                className="flex flex-col items-center gap-2 py-3 rounded-xl bg-chrono-card/60 border border-chrono-border/30 hover:border-chrono-border/60 transition-all"
+                className="flex flex-col items-center gap-2 py-3 rounded-xl bg-chrono-card/40 border border-chrono-border/20 hover:border-chrono-border/40 transition-all"
               >
                 {copied ? (
-                  <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <svg className="w-5 h-5 text-chrono-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
                 ) : (
@@ -124,17 +119,17 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
                   </svg>
                 )}
                 <span className="text-[10px] text-chrono-muted uppercase tracking-wider">
-                  {copied ? "Copied!" : "Copy"}
+                  {copied ? "Copied" : "Copy"}
                 </span>
               </button>
 
               <button
                 onClick={handleExport}
                 disabled={exporting}
-                className="flex flex-col items-center gap-2 py-3 rounded-xl bg-chrono-card/60 border border-chrono-border/30 hover:border-chrono-border/60 transition-all disabled:opacity-50"
+                className="flex flex-col items-center gap-2 py-3 rounded-xl bg-chrono-card/40 border border-chrono-border/20 hover:border-chrono-border/40 transition-all disabled:opacity-50"
               >
                 {exporting ? (
-                  <div className="w-5 h-5 border-2 border-chrono-muted/30 border-t-chrono-accent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-chrono-muted/30 border-t-chrono-accent/50 rounded-full animate-spin" />
                 ) : (
                   <svg className="w-5 h-5 text-chrono-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -143,7 +138,7 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
                 <span className="text-[10px] text-chrono-muted uppercase tracking-wider">Download</span>
               </button>
 
-              <button className="flex flex-col items-center gap-2 py-3 rounded-xl bg-chrono-accent/10 border border-chrono-accent/20 hover:bg-chrono-accent/20 transition-all">
+              <button className="flex flex-col items-center gap-2 py-3 rounded-xl bg-chrono-accent/5 border border-chrono-accent/15 hover:bg-chrono-accent/10 transition-all">
                 <svg className="w-5 h-5 text-chrono-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
                 </svg>

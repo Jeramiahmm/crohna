@@ -7,20 +7,17 @@ import EventMap from "@/components/map/EventMap";
 export default function MapPage() {
   return (
     <div className="min-h-screen pt-24 pb-32">
-      {/* Page header */}
-      <section className="relative py-20 px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-chrono-accent/[0.03] via-transparent to-transparent" />
-
+      <section className="relative py-24 px-6 overflow-hidden">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           className="relative max-w-4xl mx-auto text-center"
         >
-          <span className="text-xs uppercase tracking-widest text-chrono-accent mb-4 block">
+          <span className="text-xs uppercase tracking-[0.2em] text-chrono-muted mb-4 block">
             Explore
           </span>
-          <h1 className="text-5xl md:text-7xl font-display font-bold mb-6">
+          <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-tight">
             <span className="gradient-text">Life Map</span>
           </h1>
           <p className="text-lg text-chrono-text-secondary max-w-xl mx-auto">
@@ -30,26 +27,24 @@ export default function MapPage() {
         </motion.div>
       </section>
 
-      {/* Map */}
       <section className="px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
+          transition={{ delay: 0.3, duration: 1 }}
           className="max-w-7xl mx-auto"
         >
           <EventMap events={demoEvents} />
         </motion.div>
       </section>
 
-      {/* Event list below map */}
-      <section className="px-6 mt-16">
+      <section className="px-6 mt-20">
         <div className="max-w-7xl mx-auto">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-2xl font-display font-semibold mb-8 text-center"
+            className="text-2xl font-display font-semibold mb-10 text-center tracking-tight"
           >
             All Locations
           </motion.h2>
@@ -64,7 +59,7 @@ export default function MapPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.05 }}
-                  className="bg-chrono-card/40 rounded-xl p-4 border border-chrono-border/30 card-hover"
+                  className="bg-chrono-card/40 rounded-xl p-4 border border-chrono-border/20 card-hover"
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <svg

@@ -56,15 +56,13 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[100] bg-chrono-bg flex items-center justify-center"
     >
-      {/* Background effects */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-chrono-accent/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-chrono-accent-warm/5 rounded-full blur-[120px]" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-chrono-accent/3 rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-chrono-accent-warm/3 rounded-full blur-[120px]" />
       </div>
 
       <div className="relative w-full max-w-2xl mx-auto px-6">
-        {/* Progress bar */}
-        <div className="flex items-center justify-center gap-3 mb-12">
+        <div className="flex items-center justify-center gap-3 mb-14">
           {steps.map((s, i) => (
             <div key={s.id} className="flex items-center gap-3">
               <button
@@ -77,7 +75,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-500 ${
                     i <= step
-                      ? "bg-chrono-accent text-white"
+                      ? "bg-chrono-text text-chrono-bg"
                       : "bg-chrono-card border border-chrono-border text-chrono-muted"
                   }`}
                 >
@@ -94,13 +92,12 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
                 </span>
               </button>
               {i < steps.length - 1 && (
-                <div className={`w-12 h-px transition-colors duration-500 ${i < step ? "bg-chrono-accent" : "bg-chrono-border"}`} />
+                <div className={`w-12 h-px transition-colors duration-500 ${i < step ? "bg-chrono-text" : "bg-chrono-border"}`} />
               )}
             </div>
           ))}
         </div>
 
-        {/* Step content */}
         <div className="relative min-h-[420px] flex items-center">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
@@ -110,7 +107,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               className="w-full"
             >
               {step === 0 && <WelcomeStep />}
@@ -120,14 +117,13 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
           </AnimatePresence>
         </div>
 
-        {/* Navigation */}
-        <div className="flex items-center justify-between mt-8">
+        <div className="flex items-center justify-between mt-10">
           <button
             onClick={prev}
             className={`px-6 py-2.5 text-sm rounded-full transition-all ${
               step === 0
                 ? "opacity-0 pointer-events-none"
-                : "text-chrono-text-secondary hover:text-chrono-text border border-chrono-border/50 hover:border-chrono-border"
+                : "text-chrono-text-secondary hover:text-chrono-text border border-chrono-border/40 hover:border-chrono-border"
             }`}
           >
             Back
@@ -136,7 +132,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
           {step < steps.length - 1 && (
             <button
               onClick={next}
-              className="px-8 py-2.5 text-sm bg-gradient-to-r from-chrono-accent to-chrono-accent-warm text-white rounded-full font-medium hover:opacity-90 transition-opacity"
+              className="px-8 py-2.5 text-sm bg-chrono-text text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors duration-300"
             >
               Continue
             </button>
@@ -150,24 +146,22 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
 function WelcomeStep() {
   return (
     <div className="text-center">
-      {/* Logo animation */}
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 20 }}
-        className="mx-auto mb-8 relative w-20 h-20"
+        className="mx-auto mb-10 relative w-20 h-20"
       >
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-chrono-accent to-chrono-accent-warm opacity-80" />
+        <div className="absolute inset-0 rounded-full bg-chrono-accent/20" />
         <div className="absolute inset-[4px] rounded-full bg-chrono-bg" />
-        <div className="absolute inset-[8px] rounded-full bg-gradient-to-br from-chrono-accent to-chrono-accent-warm opacity-60" />
-        <div className="absolute inset-0 rounded-full animate-pulse-glow" style={{ boxShadow: "0 0 40px rgba(167,139,250,0.3)" }} />
+        <div className="absolute inset-[8px] rounded-full bg-chrono-accent/10" />
       </motion.div>
 
       <motion.h1
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="text-4xl md:text-5xl font-display font-bold mb-4"
+        className="text-4xl md:text-5xl font-display font-bold mb-4 tracking-tight"
       >
         Welcome to <span className="gradient-text">Chrono</span>
       </motion.h1>
@@ -185,12 +179,12 @@ function WelcomeStep() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="flex items-center justify-center gap-6 mt-10"
+        className="flex items-center justify-center gap-6 mt-12"
       >
         {[
-          { label: "AI Stories", icon: "sparkles" },
-          { label: "Interactive Maps", icon: "map" },
-          { label: "Life Insights", icon: "chart" },
+          { label: "Stories" },
+          { label: "Interactive Maps" },
+          { label: "Life Insights" },
         ].map((item, i) => (
           <motion.div
             key={item.label}
@@ -199,7 +193,7 @@ function WelcomeStep() {
             transition={{ delay: 0.6 + i * 0.1 }}
             className="flex items-center gap-2 text-xs text-chrono-muted"
           >
-            <div className="w-1.5 h-1.5 rounded-full bg-chrono-accent" />
+            <div className="w-1.5 h-1.5 rounded-full bg-chrono-accent/40" />
             {item.label}
           </motion.div>
         ))}
@@ -209,34 +203,31 @@ function WelcomeStep() {
 }
 
 function ExplainStep() {
-  const steps = [
+  const explainSteps = [
     {
       number: "01",
       title: "Add your memories",
       description: "Create events manually, import photos, or connect your calendar. Every moment counts.",
-      color: "#a78bfa",
     },
     {
       number: "02",
       title: "Watch your timeline come alive",
       description: "See your life organized beautifully by year, with interactive maps and category breakdowns.",
-      color: "#f9a8d4",
     },
     {
       number: "03",
       title: "Discover your story",
-      description: "AI generates emotional, personalized narratives about your life chapters and milestones.",
-      color: "#67e8f9",
+      description: "Chrono generates emotional, personalized narratives about your life chapters and milestones.",
     },
   ];
 
   return (
     <div>
-      <div className="text-center mb-10">
+      <div className="text-center mb-12">
         <motion.h2
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-3xl md:text-4xl font-display font-bold mb-3"
+          className="text-3xl md:text-4xl font-display font-bold mb-3 tracking-tight"
         >
           How Chrono works
         </motion.h2>
@@ -251,18 +242,15 @@ function ExplainStep() {
       </div>
 
       <div className="space-y-4">
-        {steps.map((s, i) => (
+        {explainSteps.map((s, i) => (
           <motion.div
             key={s.number}
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.15 + i * 0.12 }}
-            className="flex items-start gap-5 bg-chrono-card/40 rounded-2xl p-5 border border-chrono-border/30"
+            className="flex items-start gap-5 bg-chrono-card/30 rounded-2xl p-5 border border-chrono-border/15"
           >
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-display font-bold flex-shrink-0"
-              style={{ backgroundColor: `${s.color}15`, color: s.color }}
-            >
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-display font-bold flex-shrink-0 bg-chrono-border/20 text-chrono-accent">
               {s.number}
             </div>
             <div>
@@ -287,7 +275,6 @@ function ChooseStep({ onComplete }: { onComplete: (choice: "demo" | "manual" | "
           <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
         </svg>
       ),
-      color: "#a78bfa",
       recommended: true,
     },
     {
@@ -299,7 +286,6 @@ function ChooseStep({ onComplete }: { onComplete: (choice: "demo" | "manual" | "
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
       ),
-      color: "#f9a8d4",
       recommended: false,
     },
     {
@@ -311,18 +297,17 @@ function ChooseStep({ onComplete }: { onComplete: (choice: "demo" | "manual" | "
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
         </svg>
       ),
-      color: "#67e8f9",
       recommended: false,
     },
   ];
 
   return (
     <div>
-      <div className="text-center mb-10">
+      <div className="text-center mb-12">
         <motion.h2
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-3xl md:text-4xl font-display font-bold mb-3"
+          className="text-3xl md:text-4xl font-display font-bold mb-3 tracking-tight"
         >
           How would you like to start?
         </motion.h2>
@@ -344,20 +329,16 @@ function ChooseStep({ onComplete }: { onComplete: (choice: "demo" | "manual" | "
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 + i * 0.1 }}
             onClick={() => onComplete(option.id)}
-            className="w-full group relative bg-chrono-card/40 rounded-2xl p-5 border border-chrono-border/30 hover:border-chrono-border/60 transition-all text-left flex items-start gap-5 card-hover"
+            className="w-full group relative bg-chrono-card/30 rounded-2xl p-5 border border-chrono-border/15 hover:border-chrono-border/40 transition-all text-left flex items-start gap-5 card-hover"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" style={{ background: `linear-gradient(135deg, ${option.color}05, transparent)` }} />
-            <div
-              className="relative w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: `${option.color}15`, color: option.color }}
-            >
+            <div className="relative w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-chrono-border/20 text-chrono-accent">
               {option.icon}
             </div>
             <div className="relative flex-1">
               <div className="flex items-center gap-2">
                 <h3 className="font-display font-semibold text-chrono-text">{option.title}</h3>
                 {option.recommended && (
-                  <span className="px-2 py-0.5 text-[10px] rounded-full bg-chrono-accent/20 text-chrono-accent font-medium uppercase tracking-wider">
+                  <span className="px-2 py-0.5 text-[10px] rounded-full bg-chrono-accent/10 text-chrono-accent font-medium uppercase tracking-wider">
                     Recommended
                   </span>
                 )}

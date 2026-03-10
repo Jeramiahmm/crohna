@@ -29,7 +29,7 @@ export default function Navigation() {
       <motion.nav
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
             ? "glass-strong py-3"
@@ -39,11 +39,11 @@ export default function Navigation() {
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-8 h-8">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-chrono-accent to-chrono-accent-warm opacity-80 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 rounded-full bg-chrono-accent/30 group-hover:bg-chrono-accent/40 transition-colors" />
               <div className="absolute inset-[3px] rounded-full bg-chrono-bg" />
-              <div className="absolute inset-[6px] rounded-full bg-gradient-to-br from-chrono-accent to-chrono-accent-warm opacity-60" />
+              <div className="absolute inset-[6px] rounded-full bg-chrono-accent/20" />
             </div>
-            <span className="text-lg font-display font-semibold tracking-tight">
+            <span className="text-lg font-display font-semibold tracking-tight text-chrono-text">
               Chrono
             </span>
           </Link>
@@ -68,7 +68,7 @@ export default function Navigation() {
                 {pathname === item.href && (
                   <motion.div
                     layoutId="nav-indicator"
-                    className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-chrono-accent to-chrono-accent-warm rounded-full"
+                    className="absolute bottom-0 left-2 right-2 h-[1px] bg-chrono-accent/60 rounded-full"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
@@ -80,7 +80,7 @@ export default function Navigation() {
             <button className="px-5 py-2 text-sm text-chrono-text-secondary hover:text-chrono-text transition-colors">
               Sign In
             </button>
-            <button className="px-5 py-2 text-sm bg-gradient-to-r from-chrono-accent to-chrono-accent-warm text-white rounded-full font-medium hover:opacity-90 transition-opacity">
+            <button className="px-5 py-2 text-sm bg-chrono-text text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors">
               Get Started
             </button>
           </div>

@@ -20,19 +20,17 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-32">
-      <section className="relative py-20 px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-chrono-accent/[0.03] via-transparent to-transparent" />
-
+      <section className="relative py-24 px-6 overflow-hidden">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           className="relative max-w-4xl mx-auto text-center"
         >
-          <span className="text-xs uppercase tracking-widest text-chrono-accent mb-4 block">
+          <span className="text-xs uppercase tracking-[0.2em] text-chrono-muted mb-4 block">
             Account
           </span>
-          <h1 className="text-5xl md:text-7xl font-display font-bold mb-6">
+          <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-tight">
             <span className="gradient-text">Settings</span>
           </h1>
         </motion.div>
@@ -45,11 +43,11 @@ export default function SettingsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-chrono-card/60 rounded-2xl p-6 border border-chrono-border/40"
+            className="bg-chrono-card/40 rounded-2xl p-6 border border-chrono-border/20"
           >
             <h3 className="text-sm font-display font-semibold text-chrono-text mb-4">Profile</h3>
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-chrono-accent to-chrono-accent-warm flex items-center justify-center text-white text-xl font-bold">
+              <div className="w-16 h-16 rounded-full bg-chrono-border/30 flex items-center justify-center text-chrono-text text-xl font-medium">
                 U
               </div>
               <div>
@@ -64,7 +62,7 @@ export default function SettingsPage() {
                 <input
                   type="text"
                   defaultValue="Demo User"
-                  className="w-full bg-chrono-bg/60 rounded-xl px-4 py-2.5 text-sm text-chrono-text border border-chrono-border/30 outline-none focus:border-chrono-accent/50 transition-colors"
+                  className="w-full bg-chrono-bg/60 rounded-xl px-4 py-2.5 text-sm text-chrono-text border border-chrono-border/20 outline-none focus:border-chrono-accent/40 transition-colors"
                 />
               </div>
               <div>
@@ -72,7 +70,7 @@ export default function SettingsPage() {
                 <input
                   type="email"
                   defaultValue="demo@chrono.app"
-                  className="w-full bg-chrono-bg/60 rounded-xl px-4 py-2.5 text-sm text-chrono-text border border-chrono-border/30 outline-none focus:border-chrono-accent/50 transition-colors"
+                  className="w-full bg-chrono-bg/60 rounded-xl px-4 py-2.5 text-sm text-chrono-text border border-chrono-border/20 outline-none focus:border-chrono-accent/40 transition-colors"
                 />
               </div>
             </div>
@@ -83,7 +81,7 @@ export default function SettingsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-chrono-card/60 rounded-2xl p-6 border border-chrono-border/40"
+            className="bg-chrono-card/40 rounded-2xl p-6 border border-chrono-border/20"
           >
             <h3 className="text-sm font-display font-semibold text-chrono-text mb-4">Preferences</h3>
             <div className="space-y-4">
@@ -95,7 +93,7 @@ export default function SettingsPage() {
                 <button
                   onClick={() => setDemoMode(!demoMode)}
                   className={`relative w-11 h-6 rounded-full transition-colors ${
-                    demoMode ? "bg-chrono-accent" : "bg-chrono-border"
+                    demoMode ? "bg-chrono-accent/60" : "bg-chrono-border"
                   }`}
                 >
                   <div
@@ -108,13 +106,13 @@ export default function SettingsPage() {
 
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm text-chrono-text">AI Story Notifications</div>
+                  <div className="text-sm text-chrono-text">Story Notifications</div>
                   <div className="text-xs text-chrono-muted">Get notified when new stories are ready</div>
                 </div>
                 <button
                   onClick={() => setNotifications(!notifications)}
                   className={`relative w-11 h-6 rounded-full transition-colors ${
-                    notifications ? "bg-chrono-accent" : "bg-chrono-border"
+                    notifications ? "bg-chrono-accent/60" : "bg-chrono-border"
                   }`}
                 >
                   <div
@@ -132,7 +130,7 @@ export default function SettingsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-chrono-card/60 rounded-2xl p-6 border border-chrono-border/40"
+            className="bg-chrono-card/40 rounded-2xl p-6 border border-chrono-border/20"
           >
             <h3 className="text-sm font-display font-semibold text-chrono-text mb-4">Connected Accounts</h3>
             <div className="space-y-3">
@@ -154,7 +152,7 @@ export default function SettingsPage() {
                       </div>
                     </div>
                   </div>
-                  <button className="px-4 py-1.5 text-xs rounded-full border border-chrono-border/40 text-chrono-text-secondary hover:text-chrono-text hover:border-chrono-border/60 transition-all">
+                  <button className="px-4 py-1.5 text-xs rounded-full border border-chrono-border/30 text-chrono-text-secondary hover:text-chrono-text hover:border-chrono-border/60 transition-all">
                     {account.connected ? "Disconnect" : "Connect"}
                   </button>
                 </div>
@@ -167,7 +165,7 @@ export default function SettingsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-chrono-card/60 rounded-2xl p-6 border border-chrono-border/40"
+            className="bg-chrono-card/40 rounded-2xl p-6 border border-chrono-border/20"
           >
             <h3 className="text-sm font-display font-semibold text-chrono-text mb-4">Data</h3>
             <div className="space-y-3">
@@ -182,7 +180,7 @@ export default function SettingsPage() {
                 Reset onboarding
               </button>
               <br />
-              <button className="text-sm text-red-400 hover:text-red-300 transition-colors">
+              <button className="text-sm text-red-400/70 hover:text-red-400 transition-colors">
                 Delete all events
               </button>
             </div>
@@ -197,9 +195,9 @@ export default function SettingsPage() {
           >
             <button
               onClick={handleSave}
-              className="px-6 py-2.5 text-sm bg-gradient-to-r from-chrono-accent to-chrono-accent-warm text-white rounded-full font-medium hover:opacity-90 transition-opacity"
+              className="px-6 py-2.5 text-sm bg-chrono-text text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors duration-300"
             >
-              {saved ? "Saved!" : "Save Changes"}
+              {saved ? "Saved" : "Save Changes"}
             </button>
           </motion.div>
         </div>

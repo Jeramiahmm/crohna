@@ -15,8 +15,8 @@ export default function CityChart({ data }: { data: CityData[] }) {
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="bg-chrono-card/60 rounded-2xl p-6 md:p-8 border border-chrono-border/40 backdrop-blur-sm"
+      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+      className="bg-chrono-card/40 rounded-2xl p-6 md:p-8 border border-chrono-border/20"
     >
       <h3 className="text-lg font-display font-semibold text-chrono-text mb-6">
         Most Visited Cities
@@ -35,17 +35,17 @@ export default function CityChart({ data }: { data: CityData[] }) {
             <div className="w-24 md:w-32 text-sm text-chrono-text-secondary truncate text-right flex-shrink-0">
               {item.city}
             </div>
-            <div className="flex-1 h-3 bg-chrono-bg rounded-full overflow-hidden">
+            <div className="flex-1 h-2 bg-chrono-bg rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 whileInView={{ width: `${(item.count / maxCount) * 100}%` }}
                 viewport={{ once: true }}
                 transition={{
-                  duration: 0.8,
+                  duration: 1,
                   delay: 0.3 + i * 0.1,
                   ease: [0.16, 1, 0.3, 1],
                 }}
-                className="h-full rounded-full bg-gradient-to-r from-chrono-accent-warm to-chrono-accent"
+                className="h-full rounded-full bg-gradient-to-r from-chrono-accent-warm/60 to-chrono-accent/60"
               />
             </div>
             <span className="text-sm font-medium text-chrono-text w-6 text-right">

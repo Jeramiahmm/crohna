@@ -18,7 +18,7 @@ const icons = {
   ),
   story: (
     <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={0.8}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
     </svg>
   ),
   map: (
@@ -38,9 +38,9 @@ export default function EmptyState({ title, description, actionLabel, onAction, 
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col items-center justify-center py-20 px-6 text-center"
+      className="flex flex-col items-center justify-center py-24 px-6 text-center"
     >
-      <div className="w-20 h-20 rounded-2xl bg-chrono-card/60 border border-chrono-border/30 flex items-center justify-center text-chrono-muted/40 mb-6">
+      <div className="w-20 h-20 rounded-2xl bg-chrono-card/40 border border-chrono-border/20 flex items-center justify-center text-chrono-muted/30 mb-6">
         {icons[icon]}
       </div>
       <h3 className="text-xl font-display font-semibold text-chrono-text mb-2">{title}</h3>
@@ -48,7 +48,7 @@ export default function EmptyState({ title, description, actionLabel, onAction, 
       {actionLabel && onAction && (
         <button
           onClick={onAction}
-          className="mt-6 px-6 py-2.5 text-sm bg-gradient-to-r from-chrono-accent to-chrono-accent-warm text-white rounded-full font-medium hover:opacity-90 transition-opacity"
+          className="mt-8 px-6 py-2.5 text-sm bg-chrono-text text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors duration-300"
         >
           {actionLabel}
         </button>

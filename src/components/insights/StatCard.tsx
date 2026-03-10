@@ -21,7 +21,7 @@ function AnimatedNumber({ value, suffix = "" }: { value: number; suffix?: string
       ([entry]) => {
         if (entry.isIntersecting && !hasAnimated) {
           setHasAnimated(true);
-          const duration = 1.5;
+          const duration = 1.8;
           const startTime = Date.now();
           const step = () => {
             const elapsed = (Date.now() - startTime) / 1000;
@@ -48,7 +48,7 @@ function AnimatedNumber({ value, suffix = "" }: { value: number; suffix?: string
   );
 }
 
-export default function StatCard({ label, value, suffix, color = "#a78bfa", delay = 0 }: StatCardProps) {
+export default function StatCard({ label, value, suffix, color = "#D6CFC7", delay = 0 }: StatCardProps) {
   const isNumeric = typeof value === "number";
 
   return (
@@ -56,22 +56,21 @@ export default function StatCard({ label, value, suffix, color = "#a78bfa", dela
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
       className="relative group"
     >
-      <div className="bg-chrono-card/60 rounded-2xl p-6 md:p-8 border border-chrono-border/40 backdrop-blur-sm card-hover overflow-hidden">
-        {/* Accent line */}
+      <div className="bg-chrono-card/40 rounded-2xl p-6 md:p-8 border border-chrono-border/20 card-hover overflow-hidden">
         <div
-          className="absolute top-0 left-0 right-0 h-[2px]"
+          className="absolute top-0 left-0 right-0 h-px"
           style={{
-            background: `linear-gradient(90deg, transparent, ${color}, transparent)`,
+            background: `linear-gradient(90deg, transparent, ${color}40, transparent)`,
           }}
         />
 
         <div className="text-3xl md:text-4xl font-display font-bold text-chrono-text mb-2">
           {isNumeric ? <AnimatedNumber value={value} suffix={suffix} /> : value}
         </div>
-        <div className="text-xs text-chrono-muted uppercase tracking-widest">
+        <div className="text-xs text-chrono-muted uppercase tracking-[0.15em]">
           {label}
         </div>
       </div>

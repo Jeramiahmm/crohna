@@ -10,14 +10,12 @@ interface EventMapProps {
   events: TimelineEvent[];
 }
 
-// SVG-based world map component (no external map library dependency for demo)
 export default function EventMap({ events }: EventMapProps) {
   const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null);
   const [hoveredEvent, setHoveredEvent] = useState<string | null>(null);
 
-  // Simple mercator projection for demo
   const project = (lat: number, lng: number): { x: number; y: number } => {
-    const x = ((lng + 130) / 70) * 100; // Adjusted for US-centric view
+    const x = ((lng + 130) / 70) * 100;
     const y = ((50 - lat) / 20) * 100;
     return {
       x: Math.max(2, Math.min(98, x)),
@@ -30,12 +28,10 @@ export default function EventMap({ events }: EventMapProps) {
   );
 
   return (
-    <div className="relative w-full h-full min-h-[500px] md:min-h-[700px] bg-chrono-surface rounded-3xl overflow-hidden border border-chrono-border/40">
-      {/* Map background gradient */}
+    <div className="relative w-full h-full min-h-[500px] md:min-h-[700px] bg-chrono-surface rounded-3xl overflow-hidden border border-chrono-border/20">
       <div className="absolute inset-0 bg-gradient-to-br from-chrono-bg via-chrono-surface to-chrono-card" />
 
-      {/* Grid overlay */}
-      <svg className="absolute inset-0 w-full h-full opacity-[0.04]">
+      <svg className="absolute inset-0 w-full h-full opacity-[0.03]">
         {Array.from({ length: 20 }, (_, i) => (
           <line
             key={`h${i}`}
@@ -60,7 +56,6 @@ export default function EventMap({ events }: EventMapProps) {
         ))}
       </svg>
 
-      {/* Connection lines between events */}
       <svg className="absolute inset-0 w-full h-full">
         {eventsWithCoords.slice(0, -1).map((event, i) => {
           const next = eventsWithCoords[i + 1];
@@ -70,13 +65,13 @@ export default function EventMap({ events }: EventMapProps) {
             <motion.line
               key={`line-${event.id}`}
               initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.15 }}
-              transition={{ duration: 1, delay: i * 0.1 }}
+              animate={{ pathLength: 1, opacity: 0.1 }}
+              transition={{ duration: 1.2, delay: i * 0.1 }}
               x1={`${from.x}%`}
               y1={`${from.y}%`}
               x2={`${to.x}%`}
               y2={`${to.y}%`}
-              stroke="#a78bfa"
+              stroke="#D6CFC7"
               strokeWidth="1"
               strokeDasharray="4 4"
             />
@@ -84,7 +79,6 @@ export default function EventMap({ events }: EventMapProps) {
         })}
       </svg>
 
-      {/* Event pins */}
       {eventsWithCoords.map((event, i) => {
         const pos = project(event.latitude!, event.longitude!);
         const color = getCategoryColor(event.category);
@@ -107,19 +101,17 @@ export default function EventMap({ events }: EventMapProps) {
             onMouseEnter={() => setHoveredEvent(event.id)}
             onMouseLeave={() => setHoveredEvent(null)}
           >
-            {/* Pulse ring */}
             <div
               className="absolute inset-0 rounded-full animate-ping"
               style={{
                 backgroundColor: color,
-                opacity: isSelected || isHovered ? 0.3 : 0.1,
+                opacity: isSelected || isHovered ? 0.2 : 0.06,
                 width: 24,
                 height: 24,
                 margin: -4,
               }}
             />
 
-            {/* Pin */}
             <motion.div
               animate={{ scale: isSelected || isHovered ? 1.3 : 1 }}
               className="relative w-4 h-4 rounded-full border-2 border-chrono-bg"
@@ -127,11 +119,10 @@ export default function EventMap({ events }: EventMapProps) {
             >
               <div
                 className="absolute inset-1 rounded-full"
-                style={{ backgroundColor: color, opacity: 0.6 }}
+                style={{ backgroundColor: color, opacity: 0.5 }}
               />
             </motion.div>
 
-            {/* Tooltip */}
             <AnimatePresence>
               {isHovered && !isSelected && (
                 <motion.div
@@ -149,7 +140,6 @@ export default function EventMap({ events }: EventMapProps) {
         );
       })}
 
-      {/* Selected event card */}
       <AnimatePresence>
         {selectedEvent && (
           <motion.div
@@ -173,7 +163,7 @@ export default function EventMap({ events }: EventMapProps) {
             <div className="p-5">
               <div className="flex items-center gap-2 mb-2">
                 <div
-                  className="w-2 h-2 rounded-full"
+                  className="w-1.5 h-1.5 rounded-full"
                   style={{ backgroundColor: getCategoryColor(selectedEvent.category) }}
                 />
                 <span className="text-xs text-chrono-muted">
@@ -208,18 +198,17 @@ export default function EventMap({ events }: EventMapProps) {
         )}
       </AnimatePresence>
 
-      {/* Legend */}
       <div className="absolute bottom-4 left-4 glass rounded-xl px-4 py-3 z-20">
-        <div className="text-[10px] text-chrono-muted uppercase tracking-widest mb-2">
+        <div className="text-[10px] text-chrono-muted uppercase tracking-[0.15em] mb-2">
           Legend
         </div>
         <div className="flex flex-wrap gap-3">
           {[
-            { label: "Travel", color: "#a78bfa" },
-            { label: "Career", color: "#f9a8d4" },
-            { label: "Achievement", color: "#67e8f9" },
-            { label: "Education", color: "#fbbf24" },
-            { label: "Life", color: "#34d399" },
+            { label: "Travel", color: "#7A8A96" },
+            { label: "Career", color: "#D6CFC7" },
+            { label: "Achievement", color: "#BFC3C7" },
+            { label: "Education", color: "#9A9590" },
+            { label: "Life", color: "#8A9A8A" },
           ].map((item) => (
             <div key={item.label} className="flex items-center gap-1.5">
               <div

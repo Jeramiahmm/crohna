@@ -24,33 +24,33 @@ export function formatDateShort(dateStr: string): string {
 export function getCategoryColor(category?: string): string {
   switch (category) {
     case "travel":
-      return "#a78bfa";
+      return "#7A8A96";
     case "career":
-      return "#f9a8d4";
+      return "#D6CFC7";
     case "achievement":
-      return "#67e8f9";
+      return "#BFC3C7";
     case "education":
-      return "#fbbf24";
+      return "#9A9590";
     case "life":
-      return "#34d399";
+      return "#8A9A8A";
     default:
-      return "#a78bfa";
+      return "#A1A1A1";
   }
 }
 
 export function getCategoryIcon(category?: string): string {
   switch (category) {
     case "travel":
-      return "✈";
+      return "—";
     case "career":
-      return "💼";
+      return "—";
     case "achievement":
-      return "🏆";
+      return "—";
     case "education":
-      return "🎓";
+      return "—";
     case "life":
-      return "🏠";
+      return "—";
     default:
-      return "📌";
+      return "—";
   }
 }

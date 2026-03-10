@@ -11,26 +11,23 @@ interface AIStorySummaryProps {
 export default function AIStorySummary({ story, index }: AIStorySummaryProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{
-        duration: 0.8,
+        duration: 0.9,
         delay: index * 0.15,
         ease: [0.16, 1, 0.3, 1],
       }}
       className="relative group"
     >
-      <div className="relative bg-chrono-card/60 rounded-3xl p-8 md:p-10 border border-chrono-border/40 backdrop-blur-sm overflow-hidden card-hover">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-chrono-accent/5 via-transparent to-chrono-accent-warm/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
-        {/* AI badge */}
+      <div className="relative bg-chrono-card/40 rounded-3xl p-8 md:p-10 border border-chrono-border/20 overflow-hidden card-hover">
+        {/* Badge */}
         <div className="relative flex items-center gap-2 mb-6">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-chrono-accent/10 border border-chrono-accent/20">
-            <div className="w-1.5 h-1.5 rounded-full bg-chrono-accent animate-pulse-glow" />
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-chrono-accent/5 border border-chrono-accent/15">
+            <div className="w-1.5 h-1.5 rounded-full bg-chrono-accent/50 animate-pulse-glow" />
             <span className="text-[11px] font-medium text-chrono-accent uppercase tracking-wider">
-              AI Generated
+              Story
             </span>
           </div>
           <span className="text-xs text-chrono-muted">{story.period}</span>
@@ -47,7 +44,7 @@ export default function AIStorySummary({ story, index }: AIStorySummaryProps) {
         </p>
 
         {/* Highlights */}
-        <div className="relative space-y-2 mb-8">
+        <div className="relative space-y-2.5 mb-8">
           {story.highlights.map((highlight, i) => (
             <motion.div
               key={i}
@@ -57,7 +54,7 @@ export default function AIStorySummary({ story, index }: AIStorySummaryProps) {
               transition={{ delay: 0.3 + i * 0.1 }}
               className="flex items-start gap-3"
             >
-              <div className="w-1 h-1 rounded-full bg-chrono-accent mt-2 flex-shrink-0" />
+              <div className="w-1 h-1 rounded-full bg-chrono-accent/50 mt-2 flex-shrink-0" />
               <span className="text-sm text-chrono-text-secondary">{highlight}</span>
             </motion.div>
           ))}
@@ -73,7 +70,7 @@ export default function AIStorySummary({ story, index }: AIStorySummaryProps) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.5 + i * 0.1 }}
-                className="bg-chrono-bg/50 rounded-xl p-4 border border-chrono-border/30"
+                className="bg-chrono-bg/40 rounded-xl p-4 border border-chrono-border/15"
               >
                 <div className="text-lg md:text-xl font-display font-bold text-chrono-text">
                   {value}

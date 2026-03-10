@@ -16,8 +16,8 @@ export default function CategoryChart({ categories }: { categories: Category[] }
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="bg-chrono-card/60 rounded-2xl p-6 md:p-8 border border-chrono-border/40 backdrop-blur-sm"
+      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+      className="bg-chrono-card/40 rounded-2xl p-6 md:p-8 border border-chrono-border/20"
     >
       <h3 className="text-lg font-display font-semibold text-chrono-text mb-6">
         Events by Category
@@ -34,13 +34,13 @@ export default function CategoryChart({ categories }: { categories: Category[] }
                 {category.count}
               </span>
             </div>
-            <div className="h-2 bg-chrono-bg rounded-full overflow-hidden">
+            <div className="h-1.5 bg-chrono-bg rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 whileInView={{ width: `${(category.count / maxCount) * 100}%` }}
                 viewport={{ once: true }}
                 transition={{
-                  duration: 1,
+                  duration: 1.2,
                   delay: 0.2 + i * 0.1,
                   ease: [0.16, 1, 0.3, 1],
                 }}

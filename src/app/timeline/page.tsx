@@ -8,7 +8,6 @@ import ChapterHeader from "@/components/timeline/ChapterHeader";
 import EventModal from "@/components/events/EventModal";
 import EmptyState from "@/components/ui/EmptyState";
 
-// Chapter definitions based on date ranges
 const chapters: Record<string, { title: string; subtitle: string; startDate: string; endDate: string }> = {
   "college-start": {
     title: "College Years",
@@ -49,7 +48,6 @@ export default function TimelinePage() {
   const eventsByYear = getEventsByYear(events);
   const years = Object.keys(eventsByYear);
 
-  // Track active year on scroll
   useEffect(() => {
     const handleScroll = () => {
       const yearElements = document.querySelectorAll("[data-year]");
@@ -101,32 +99,28 @@ export default function TimelinePage() {
 
   return (
     <div className="min-h-screen pt-24 pb-32">
-      {/* Page header */}
-      <section className="relative py-20 px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-chrono-accent/[0.03] via-transparent to-transparent" />
-
+      <section className="relative py-24 px-6 overflow-hidden">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           className="relative max-w-4xl mx-auto text-center"
         >
-          <span className="text-xs uppercase tracking-widest text-chrono-accent mb-4 block">
+          <span className="text-xs uppercase tracking-[0.2em] text-chrono-muted mb-4 block">
             Your Journey
           </span>
-          <h1 className="text-5xl md:text-7xl font-display font-bold mb-6">
+          <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-tight">
             <span className="gradient-text">Timeline</span>
           </h1>
-          <p className="text-lg text-chrono-text-secondary max-w-xl mx-auto mb-8">
+          <p className="text-lg text-chrono-text-secondary max-w-xl mx-auto mb-10">
             Every moment that shaped your story, beautifully organized
             and brought to life.
           </p>
 
-          {/* Actions */}
           <div className="flex items-center justify-center gap-3">
             <button
               onClick={() => { setEditingEvent(undefined); setEventModalOpen(true); }}
-              className="px-6 py-2.5 text-sm bg-gradient-to-r from-chrono-accent to-chrono-accent-warm text-white rounded-full font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+              className="px-6 py-2.5 text-sm bg-chrono-text text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors duration-300 flex items-center gap-2"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -146,13 +140,12 @@ export default function TimelinePage() {
           </div>
         </motion.div>
 
-        {/* Year navigation pills - sticky */}
         {years.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="flex justify-center gap-3 mt-12"
+            transition={{ delay: 0.3, duration: 0.8 }}
+            className="flex justify-center gap-3 mt-14"
           >
             {years.map((year, i) => (
               <motion.button
@@ -163,8 +156,8 @@ export default function TimelinePage() {
                 onClick={() => scrollToYear(year)}
                 className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
                   activeYear === year
-                    ? "bg-chrono-accent/20 border border-chrono-accent/40 text-chrono-accent"
-                    : "glass hover:bg-chrono-accent/10 hover:border-chrono-accent/30"
+                    ? "bg-chrono-accent/10 border border-chrono-accent/30 text-chrono-accent"
+                    : "glass hover:bg-chrono-card/60"
                 }`}
               >
                 {year}
@@ -174,7 +167,6 @@ export default function TimelinePage() {
         )}
       </section>
 
-      {/* Sticky year indicator */}
       <AnimatePresence>
         {activeYear && (
           <motion.div
@@ -184,14 +176,13 @@ export default function TimelinePage() {
             className="fixed top-20 left-1/2 -translate-x-1/2 z-30"
           >
             <div className="px-4 py-1.5 rounded-full glass-strong text-xs font-display font-medium text-chrono-text flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-chrono-accent" />
+              <div className="w-1.5 h-1.5 rounded-full bg-chrono-accent/60" />
               {activeYear}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Timeline content */}
       {events.length === 0 ? (
         <EmptyState
           icon="timeline"
@@ -202,12 +193,11 @@ export default function TimelinePage() {
         />
       ) : (
         <section className="px-6">
-          <div className="space-y-16">
+          <div className="space-y-20">
             {years.map((year, i) => {
               const chapter = getChapterForYear(year);
               return (
                 <div key={year} data-year={year}>
-                  {/* Chapter header */}
                   {chapter && (
                     <ChapterHeader
                       title={chapter.title}
@@ -230,22 +220,21 @@ export default function TimelinePage() {
         </section>
       )}
 
-      {/* End marker */}
       {events.length > 0 && (
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="text-center mt-32"
+          className="text-center mt-40"
         >
           <div className="inline-flex flex-col items-center gap-4">
-            <div className="w-3 h-3 rounded-full bg-chrono-accent/50" />
+            <div className="w-3 h-3 rounded-full bg-chrono-accent/30" />
             <p className="text-sm text-chrono-muted font-display italic">
               Your story continues...
             </p>
             <button
               onClick={() => { setEditingEvent(undefined); setEventModalOpen(true); }}
-              className="mt-2 px-5 py-2 text-xs text-chrono-accent border border-chrono-accent/30 hover:bg-chrono-accent/10 rounded-full transition-all"
+              className="mt-2 px-5 py-2 text-xs text-chrono-text-secondary border border-chrono-border/40 hover:border-chrono-border hover:text-chrono-text rounded-full transition-all duration-300"
             >
               Add Next Moment
             </button>
@@ -253,7 +242,6 @@ export default function TimelinePage() {
         </motion.div>
       )}
 
-      {/* Event modal */}
       <EventModal
         isOpen={eventModalOpen}
         onClose={() => { setEventModalOpen(false); setEditingEvent(undefined); }}
