@@ -21,15 +21,12 @@ export default function AIStorySummary({ story, index }: AIStorySummaryProps) {
       }}
       className="relative group"
     >
-      <div className="relative bg-chrono-card/40 rounded-3xl p-8 md:p-10 border border-chrono-border/20 overflow-hidden card-hover">
+      <div className="relative bg-chrono-card/30 rounded-3xl p-8 md:p-12 border border-chrono-border/10 overflow-hidden card-hover">
         {/* Badge */}
         <div className="relative flex items-center gap-2 mb-6">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-chrono-accent/5 border border-chrono-accent/15">
-            <div className="w-1.5 h-1.5 rounded-full bg-chrono-accent/50 animate-pulse-glow" />
-            <span className="text-[11px] font-medium text-chrono-accent uppercase tracking-wider">
-              Story
-            </span>
-          </div>
+          <span className="text-[10px] font-medium text-chrono-muted uppercase tracking-[0.25em]">
+            Story
+          </span>
           <span className="text-xs text-chrono-muted">{story.period}</span>
         </div>
 
@@ -70,7 +67,7 @@ export default function AIStorySummary({ story, index }: AIStorySummaryProps) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.5 + i * 0.1 }}
-                className="bg-chrono-bg/40 rounded-xl p-4 border border-chrono-border/15"
+                className="bg-chrono-bg/30 rounded-xl p-4 border border-chrono-border/10"
               >
                 <div className="text-lg md:text-xl font-display font-bold text-chrono-text">
                   {value}

@@ -18,11 +18,11 @@ export default function YearSection({ year, events, onEditEvent }: YearSectionPr
         initial={{ opacity: 0, scale: 0.8 }}
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="sticky top-24 z-10 flex justify-center mb-14"
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        className="sticky top-24 z-10 flex justify-center mb-16"
       >
         <div className="relative">
-          <span className="text-7xl md:text-9xl font-display font-bold gradient-text opacity-10 select-none">
+          <span className="text-7xl md:text-9xl font-display font-bold gradient-text opacity-[0.06] select-none">
             {year}
           </span>
           <div className="absolute inset-0 flex items-center justify-center">
@@ -54,12 +54,12 @@ export default function YearSection({ year, events, onEditEvent }: YearSectionPr
             className="w-full h-full origin-top"
             style={{
               background:
-                "linear-gradient(180deg, transparent 0%, rgba(214,207,199,0.15) 10%, rgba(214,207,199,0.15) 90%, transparent 100%)",
+                "linear-gradient(180deg, transparent 0%, rgba(199,194,186,0.08) 10%, rgba(199,194,186,0.08) 90%, transparent 100%)",
             }}
           />
         </div>
 
-        <div className="space-y-8 md:space-y-14">
+        <div className="space-y-10 md:space-y-16">
           {events.map((event, index) => {
             const isLeft = index % 2 === 0;
             return (
@@ -75,7 +75,7 @@ export default function YearSection({ year, events, onEditEvent }: YearSectionPr
                     whileInView={{ scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: 0.2 }}
-                    className="w-3 h-3 rounded-full bg-chrono-accent/40 ring-4 ring-chrono-bg"
+                    className="w-2.5 h-2.5 rounded-full bg-chrono-accent/30 ring-4 ring-chrono-bg"
                   />
                 </div>
 

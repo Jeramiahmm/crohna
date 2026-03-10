@@ -44,46 +44,47 @@ export default function InsightsPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-32">
-      <section className="relative py-24 px-6 overflow-hidden">
+      <section className="relative py-28 px-6 overflow-hidden">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
           className="relative max-w-4xl mx-auto text-center"
         >
-          <span className="text-xs uppercase tracking-[0.2em] text-chrono-muted mb-4 block">
+          <span className="text-[11px] uppercase tracking-[0.25em] text-chrono-muted mb-5 block">
             Discover
           </span>
           <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-tight">
             <span className="gradient-text">Insights</span>
           </h1>
-          <p className="text-lg text-chrono-text-secondary max-w-xl mx-auto">
-            Discover patterns, highlights, and stories hidden in your
+          <p className="text-base text-chrono-text-secondary max-w-md mx-auto leading-relaxed">
+            Patterns, highlights, and stories hidden in your
             life&apos;s timeline.
           </p>
         </motion.div>
       </section>
 
       {/* Stats overview */}
-      <section className="px-6 mb-20">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
+      <section className="px-6 mb-28">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
           <StatCard label="Total Events" value={insightStats.totalEvents} delay={0} />
-          <StatCard label="Photos Captured" value={insightStats.totalPhotos} color="#D6CFC7" delay={0.1} />
-          <StatCard label="Cities Visited" value={insightStats.citiesVisited} color="#7A8A96" delay={0.2} />
-          <StatCard label="Most Active Year" value={insightStats.mostActiveYear.toString()} color="#BFC3C7" delay={0.3} />
+          <StatCard label="Photos captured" value={insightStats.totalPhotos} color="#C7C2BA" delay={0.1} />
+          <StatCard label="Cities visited" value={insightStats.citiesVisited} color="#C7C2BA" delay={0.2} />
+          <StatCard label="Most active year" value={insightStats.mostActiveYear.toString()} color="#C7C2BA" delay={0.3} />
         </div>
       </section>
 
       {/* Year in Review cards */}
-      <section className="px-6 mb-20">
-        <div className="max-w-6xl mx-auto">
+      <section className="px-6 mb-28">
+        <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            transition={{ duration: 1 }}
+            className="text-center mb-16"
           >
-            <span className="text-xs uppercase tracking-[0.2em] text-chrono-muted mb-4 block">
+            <span className="text-[11px] uppercase tracking-[0.25em] text-chrono-muted mb-5 block">
               Highlights
             </span>
             <h2 className="text-3xl md:text-4xl font-display font-bold tracking-tight">
@@ -91,24 +92,24 @@ export default function InsightsPage() {
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { label: "Most Visited City", value: insightStats.mostVisitedCity },
-              { label: "Top Category", value: insightStats.topCategory },
-              { label: "Longest Active Streak", value: insightStats.longestStreak },
+              { label: "Most visited city", value: insightStats.mostVisitedCity },
+              { label: "Top category", value: insightStats.topCategory },
+              { label: "Longest active streak", value: insightStats.longestStreak },
             ].map((item, i) => (
               <motion.div
                 key={item.label}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group bg-chrono-card/40 rounded-2xl p-8 border border-chrono-border/20 text-center card-hover"
+                transition={{ delay: i * 0.12, duration: 0.9 }}
+                className="group bg-chrono-card/30 rounded-2xl p-10 border border-chrono-border/10 text-center card-hover"
               >
-                <div className="text-2xl font-display font-bold text-chrono-text mb-2">
+                <div className="text-2xl font-display font-bold text-chrono-text mb-3">
                   {item.value}
                 </div>
-                <div className="text-xs text-chrono-muted uppercase tracking-[0.15em]">
+                <div className="text-[11px] text-chrono-muted uppercase tracking-[0.2em]">
                   {item.label}
                 </div>
               </motion.div>
@@ -118,15 +119,16 @@ export default function InsightsPage() {
       </section>
 
       {/* Life Chapters summary */}
-      <section className="px-6 mb-20">
-        <div className="max-w-6xl mx-auto">
+      <section className="px-6 mb-28">
+        <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            transition={{ duration: 1 }}
+            className="text-center mb-16"
           >
-            <span className="text-xs uppercase tracking-[0.2em] text-chrono-muted mb-4 block">
+            <span className="text-[11px] uppercase tracking-[0.25em] text-chrono-muted mb-5 block">
               Your Journey
             </span>
             <h2 className="text-3xl md:text-4xl font-display font-bold tracking-tight">
@@ -134,7 +136,7 @@ export default function InsightsPage() {
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { year: "2022", title: "The Beginning", desc: "Started college, first hackathon, NYC adventure", events: 3 },
               { year: "2023", title: "Growth", desc: "First internship, research paper, coast to coast", events: 6 },
@@ -145,14 +147,13 @@ export default function InsightsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group relative bg-chrono-card/40 rounded-2xl p-6 border border-chrono-border/20 card-hover overflow-hidden"
+                transition={{ delay: i * 0.12, duration: 0.9 }}
+                className="group relative bg-chrono-card/30 rounded-2xl p-8 border border-chrono-border/10 card-hover overflow-hidden"
               >
-                <div className="absolute top-0 left-0 right-0 h-px bg-chrono-accent/20" />
-                <div className="text-3xl font-display font-bold gradient-text mb-1">{ch.year}</div>
-                <div className="text-sm font-display font-semibold text-chrono-text mb-2">{ch.title}</div>
-                <p className="text-xs text-chrono-text-secondary leading-relaxed mb-3">{ch.desc}</p>
-                <div className="text-[10px] text-chrono-muted uppercase tracking-widest">{ch.events} events</div>
+                <div className="text-3xl font-display font-bold gradient-text mb-2">{ch.year}</div>
+                <div className="text-sm font-display font-semibold text-chrono-text mb-3">{ch.title}</div>
+                <p className="text-xs text-chrono-text-secondary leading-relaxed mb-4">{ch.desc}</p>
+                <div className="text-[10px] text-chrono-muted uppercase tracking-[0.2em]">{ch.events} events</div>
               </motion.div>
             ))}
           </div>
@@ -160,7 +161,7 @@ export default function InsightsPage() {
       </section>
 
       {/* Charts */}
-      <section className="px-6 mb-20">
+      <section className="px-6 mb-28">
         <div className="max-w-6xl mx-auto">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}

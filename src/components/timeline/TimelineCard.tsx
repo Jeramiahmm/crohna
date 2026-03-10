@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { TimelineEvent } from "@/data/demo";
-import { formatDate, getCategoryColor } from "@/lib/utils";
+import { formatDate, getCategoryColor, getSeason } from "@/lib/utils";
 
 interface TimelineCardProps {
   event: TimelineEvent;
@@ -21,15 +21,15 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
       whileInView={{ opacity: 1, x: 0, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{
-        duration: 0.8,
+        duration: 1,
         delay: index * 0.05,
         ease: [0.16, 1, 0.3, 1],
       }}
       className={`relative group ${isLeft ? "md:pr-12" : "md:pl-12"}`}
     >
-      <div className="relative bg-chrono-card/60 rounded-2xl overflow-hidden border border-chrono-border/20 card-hover">
+      <div className="relative bg-chrono-card/40 rounded-2xl overflow-hidden border border-chrono-border/10 card-hover">
         {event.imageUrl && (
-          <div className="relative h-48 md:h-56 overflow-hidden">
+          <div className="relative h-52 md:h-60 overflow-hidden">
             <Image
               src={event.imageUrl}
               alt={event.title}
@@ -84,18 +84,26 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
           </button>
         )}
 
-        <div className="p-5 md:p-6">
-          <div className="flex items-center gap-2 mb-2">
-            <div
-              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-              style={{ backgroundColor: categoryColor }}
-            />
-            <span className="text-xs text-chrono-muted">
-              {formatDate(event.date)}
+        <div className="p-6 md:p-7">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[10px] text-chrono-muted uppercase tracking-[0.2em]">
+              {getSeason(event.date)}
             </span>
+            {event.location && (
+              <>
+                <span className="text-chrono-border text-[10px]">/</span>
+                <span className="text-[10px] text-chrono-text-secondary">
+                  {event.location}
+                </span>
+              </>
+            )}
           </div>
 
-          <h3 className="text-lg md:text-xl font-display font-semibold mb-2 text-chrono-text">
+          <div className="text-xs text-chrono-muted mb-3">
+            {formatDate(event.date)}
+          </div>
+
+          <h3 className="text-lg md:text-xl font-display font-semibold mb-3 text-chrono-text leading-tight">
             {event.title}
           </h3>
 
@@ -103,16 +111,6 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
             <p className="text-sm text-chrono-text-secondary leading-relaxed line-clamp-3">
               {event.description}
             </p>
-          )}
-
-          {event.location && (
-            <div className="flex items-center gap-1.5 mt-4 text-xs text-chrono-muted">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 0115 0z" />
-              </svg>
-              {event.location}
-            </div>
           )}
         </div>
       </div>

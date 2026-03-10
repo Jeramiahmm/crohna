@@ -37,13 +37,9 @@ export default function Navigation() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-8 h-8">
-              <div className="absolute inset-0 rounded-full bg-chrono-accent/30 group-hover:bg-chrono-accent/40 transition-colors" />
-              <div className="absolute inset-[3px] rounded-full bg-chrono-bg" />
-              <div className="absolute inset-[6px] rounded-full bg-chrono-accent/20" />
-            </div>
-            <span className="text-lg font-display font-semibold tracking-tight text-chrono-text">
+          <Link href="/" className="flex items-center gap-2 group">
+            <span className="text-chrono-accent/60 text-base leading-none select-none">&#x2022;</span>
+            <span className="text-[13px] font-display font-medium tracking-[0.25em] uppercase text-chrono-text">
               Chrono
             </span>
           </Link>
@@ -68,7 +64,7 @@ export default function Navigation() {
                 {pathname === item.href && (
                   <motion.div
                     layoutId="nav-indicator"
-                    className="absolute bottom-0 left-2 right-2 h-[1px] bg-chrono-accent/60 rounded-full"
+                    className="absolute bottom-0 left-2 right-2 h-[1px] bg-chrono-accent/40 rounded-full"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
@@ -80,7 +76,7 @@ export default function Navigation() {
             <button className="px-5 py-2 text-sm text-chrono-text-secondary hover:text-chrono-text transition-colors">
               Sign In
             </button>
-            <button className="px-5 py-2 text-sm bg-chrono-text text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors">
+            <button className="px-5 py-2 text-sm bg-white text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors duration-500">
               Get Started
             </button>
           </div>

@@ -24,11 +24,11 @@ export function formatDateShort(dateStr: string): string {
 export function getCategoryColor(category?: string): string {
   switch (category) {
     case "travel":
-      return "#7A8A96";
+      return "#8A9098";
     case "career":
-      return "#D6CFC7";
+      return "#C7C2BA";
     case "achievement":
-      return "#BFC3C7";
+      return "#B8B3AB";
     case "education":
       return "#9A9590";
     case "life":
@@ -38,19 +38,10 @@ export function getCategoryColor(category?: string): string {
   }
 }
 
-export function getCategoryIcon(category?: string): string {
-  switch (category) {
-    case "travel":
-      return "—";
-    case "career":
-      return "—";
-    case "achievement":
-      return "—";
-    case "education":
-      return "—";
-    case "life":
-      return "—";
-    default:
-      return "—";
-  }
+export function getSeason(dateStr: string): string {
+  const month = new Date(dateStr).getMonth();
+  if (month >= 2 && month <= 4) return "Spring";
+  if (month >= 5 && month <= 7) return "Summer";
+  if (month >= 8 && month <= 10) return "Fall";
+  return "Winter";
 }

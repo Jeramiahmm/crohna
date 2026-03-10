@@ -5,20 +5,18 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="relative border-t border-chrono-border/30 bg-chrono-bg">
-      <div className="max-w-7xl mx-auto px-6 py-20">
+      <div className="max-w-7xl mx-auto px-6 py-24">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="md:col-span-2">
-            <Link href="/" className="flex items-center gap-3 mb-4">
-              <div className="relative w-7 h-7">
-                <div className="absolute inset-0 rounded-full bg-chrono-accent/30" />
-                <div className="absolute inset-[2px] rounded-full bg-chrono-bg" />
-                <div className="absolute inset-[5px] rounded-full bg-chrono-accent/20" />
-              </div>
-              <span className="text-lg font-display font-semibold">Chrono</span>
+            <Link href="/" className="flex items-center gap-2 mb-5">
+              <span className="text-chrono-accent/60 text-base leading-none select-none">&#x2022;</span>
+              <span className="text-[13px] font-display font-medium tracking-[0.25em] uppercase text-chrono-text">
+                Chrono
+              </span>
             </Link>
             <p className="text-chrono-muted text-sm max-w-sm leading-relaxed">
-              Your life, beautifully mapped. Transform your memories into
-              a stunning visual timeline.
+              A visual timeline of your memories,
+              milestones, and places.
             </p>
           </div>
 

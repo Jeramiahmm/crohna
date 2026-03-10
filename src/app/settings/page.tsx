@@ -20,14 +20,14 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-32">
-      <section className="relative py-24 px-6 overflow-hidden">
+      <section className="relative py-28 px-6 overflow-hidden">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
           className="relative max-w-4xl mx-auto text-center"
         >
-          <span className="text-xs uppercase tracking-[0.2em] text-chrono-muted mb-4 block">
+          <span className="text-[11px] uppercase tracking-[0.25em] text-chrono-muted mb-5 block">
             Account
           </span>
           <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-tight">
@@ -43,7 +43,7 @@ export default function SettingsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-chrono-card/40 rounded-2xl p-6 border border-chrono-border/20"
+            className="bg-chrono-card/30 rounded-2xl p-7 border border-chrono-border/10"
           >
             <h3 className="text-sm font-display font-semibold text-chrono-text mb-4">Profile</h3>
             <div className="flex items-center gap-4 mb-6">
@@ -81,7 +81,7 @@ export default function SettingsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-chrono-card/40 rounded-2xl p-6 border border-chrono-border/20"
+            className="bg-chrono-card/30 rounded-2xl p-7 border border-chrono-border/10"
           >
             <h3 className="text-sm font-display font-semibold text-chrono-text mb-4">Preferences</h3>
             <div className="space-y-4">
@@ -130,7 +130,7 @@ export default function SettingsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-chrono-card/40 rounded-2xl p-6 border border-chrono-border/20"
+            className="bg-chrono-card/30 rounded-2xl p-7 border border-chrono-border/10"
           >
             <h3 className="text-sm font-display font-semibold text-chrono-text mb-4">Connected Accounts</h3>
             <div className="space-y-3">
@@ -165,7 +165,7 @@ export default function SettingsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-chrono-card/40 rounded-2xl p-6 border border-chrono-border/20"
+            className="bg-chrono-card/30 rounded-2xl p-7 border border-chrono-border/10"
           >
             <h3 className="text-sm font-display font-semibold text-chrono-text mb-4">Data</h3>
             <div className="space-y-3">
@@ -195,7 +195,7 @@ export default function SettingsPage() {
           >
             <button
               onClick={handleSave}
-              className="px-6 py-2.5 text-sm bg-chrono-text text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors duration-300"
+              className="px-6 py-2.5 text-sm bg-white text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors duration-500"
             >
               {saved ? "Saved" : "Save Changes"}
             </button>

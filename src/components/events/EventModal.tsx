@@ -5,9 +5,9 @@ import { useState, useCallback, useRef } from "react";
 import { TimelineEvent } from "@/data/demo";
 
 const categories = [
-  { value: "travel", label: "Travel", color: "#7A8A96" },
-  { value: "career", label: "Career", color: "#D6CFC7" },
-  { value: "achievement", label: "Achievement", color: "#BFC3C7" },
+  { value: "travel", label: "Travel", color: "#8A9098" },
+  { value: "career", label: "Career", color: "#C7C2BA" },
+  { value: "achievement", label: "Achievement", color: "#B8B3AB" },
   { value: "education", label: "Education", color: "#9A9590" },
   { value: "life", label: "Life", color: "#8A9A8A" },
 ];
@@ -318,7 +318,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="px-6 py-2.5 text-sm bg-chrono-text text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors duration-300 disabled:opacity-50 flex items-center gap-2"
+                  className="px-6 py-2.5 text-sm bg-white text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors duration-500 disabled:opacity-50 flex items-center gap-2"
                 >
                   {saving && (
                     <div className="w-3.5 h-3.5 border-2 border-chrono-bg/30 border-t-chrono-bg rounded-full animate-spin" />

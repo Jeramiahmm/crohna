@@ -298,9 +298,9 @@ export const insightStats = {
   yearWithMostEvents: 2024,
   longestStreak: "14 days",
   categories: [
-    { name: "Travel", count: 5, color: "#7A8A96" },
-    { name: "Career", count: 4, color: "#D6CFC7" },
-    { name: "Achievement", count: 3, color: "#BFC3C7" },
+    { name: "Travel", count: 5, color: "#8A9098" },
+    { name: "Career", count: 4, color: "#C7C2BA" },
+    { name: "Achievement", count: 3, color: "#B8B3AB" },
     { name: "Education", count: 2, color: "#9A9590" },
     { name: "Life", count: 2, color: "#8A9A8A" },
   ],

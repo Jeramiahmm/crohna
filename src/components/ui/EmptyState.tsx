@@ -48,7 +48,7 @@ export default function EmptyState({ title, description, actionLabel, onAction, 
       {actionLabel && onAction && (
         <button
           onClick={onAction}
-          className="mt-8 px-6 py-2.5 text-sm bg-chrono-text text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors duration-300"
+          className="mt-8 px-6 py-2.5 text-sm bg-white text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors duration-500"
         >
           {actionLabel}
         </button>

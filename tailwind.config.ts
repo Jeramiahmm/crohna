@@ -10,15 +10,15 @@ const config: Config = {
     extend: {
       colors: {
         chrono: {
-          bg: "#0E0E0E",
-          surface: "#141414",
-          card: "#1A1A1A",
-          border: "#2A2A2A",
-          accent: "#D6CFC7",
-          "accent-warm": "#BFC3C7",
-          "accent-glow": "#D6CFC7",
-          muted: "#666666",
-          text: "#F5F5F5",
+          bg: "#0F0F10",
+          surface: "#131314",
+          card: "#181819",
+          border: "#1C1C1C",
+          accent: "#C7C2BA",
+          "accent-warm": "#B8B3AB",
+          "accent-glow": "#C7C2BA",
+          muted: "#5A5A5A",
+          text: "#F2F2F2",
           "text-secondary": "#A1A1A1",
         },
       },
@@ -27,12 +27,14 @@ const config: Config = {
         body: ["var(--font-body)", "system-ui", "sans-serif"],
       },
       animation: {
-        "fade-in": "fadeIn 1s ease-out forwards",
-        "slide-up": "slideUp 1s ease-out forwards",
-        "scale-in": "scaleIn 0.8s ease-out forwards",
-        float: "float 8s ease-in-out infinite",
-        "pulse-glow": "pulseGlow 4s ease-in-out infinite",
-        shimmer: "shimmer 2.5s linear infinite",
+        "fade-in": "fadeIn 1.2s ease-out forwards",
+        "slide-up": "slideUp 1.2s ease-out forwards",
+        "scale-in": "scaleIn 1s ease-out forwards",
+        float: "float 10s ease-in-out infinite",
+        "pulse-glow": "pulseGlow 5s ease-in-out infinite",
+        shimmer: "shimmer 3s linear infinite",
+        "constellation-drift": "constellationDrift 20s ease-in-out infinite",
+        "node-pulse": "nodePulse 4s ease-in-out infinite",
       },
       keyframes: {
         fadeIn: {
@@ -49,11 +51,21 @@ const config: Config = {
         },
         float: {
           "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-15px)" },
+          "50%": { transform: "translateY(-12px)" },
         },
         pulseGlow: {
-          "0%, 100%": { opacity: "0.3" },
-          "50%": { opacity: "0.8" },
+          "0%, 100%": { opacity: "0.2" },
+          "50%": { opacity: "0.6" },
+        },
+        constellationDrift: {
+          "0%, 100%": { transform: "translate(0, 0)" },
+          "25%": { transform: "translate(3px, -5px)" },
+          "50%": { transform: "translate(-2px, 3px)" },
+          "75%": { transform: "translate(4px, 2px)" },
+        },
+        nodePulse: {
+          "0%, 100%": { opacity: "0.4", transform: "scale(1)" },
+          "50%": { opacity: "0.8", transform: "scale(1.2)" },
         },
         shimmer: {
           "0%": { backgroundPosition: "-200% 0" },

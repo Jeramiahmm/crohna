@@ -48,7 +48,7 @@ function AnimatedNumber({ value, suffix = "" }: { value: number; suffix?: string
   );
 }
 
-export default function StatCard({ label, value, suffix, color = "#D6CFC7", delay = 0 }: StatCardProps) {
+export default function StatCard({ label, value, suffix, delay = 0 }: StatCardProps) {
   const isNumeric = typeof value === "number";
 
   return (
@@ -56,21 +56,14 @@ export default function StatCard({ label, value, suffix, color = "#D6CFC7", dela
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
       className="relative group"
     >
-      <div className="bg-chrono-card/40 rounded-2xl p-6 md:p-8 border border-chrono-border/20 card-hover overflow-hidden">
-        <div
-          className="absolute top-0 left-0 right-0 h-px"
-          style={{
-            background: `linear-gradient(90deg, transparent, ${color}40, transparent)`,
-          }}
-        />
-
-        <div className="text-3xl md:text-4xl font-display font-bold text-chrono-text mb-2">
+      <div className="bg-chrono-card/30 rounded-2xl p-8 md:p-10 border border-chrono-border/10 card-hover overflow-hidden">
+        <div className="text-4xl md:text-5xl font-display font-bold text-chrono-text mb-3">
           {isNumeric ? <AnimatedNumber value={value} suffix={suffix} /> : value}
         </div>
-        <div className="text-xs text-chrono-muted uppercase tracking-[0.15em]">
+        <div className="text-[11px] text-chrono-muted uppercase tracking-[0.2em]">
           {label}
         </div>
       </div>

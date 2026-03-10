@@ -132,7 +132,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
           {step < steps.length - 1 && (
             <button
               onClick={next}
-              className="px-8 py-2.5 text-sm bg-chrono-text text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors duration-300"
+              className="px-8 py-2.5 text-sm bg-white text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors duration-500"
             >
               Continue
             </button>
@@ -147,14 +147,15 @@ function WelcomeStep() {
   return (
     <div className="text-center">
       <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 20 }}
-        className="mx-auto mb-10 relative w-20 h-20"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1, duration: 0.8 }}
+        className="mx-auto mb-10 flex items-center gap-2"
       >
-        <div className="absolute inset-0 rounded-full bg-chrono-accent/20" />
-        <div className="absolute inset-[4px] rounded-full bg-chrono-bg" />
-        <div className="absolute inset-[8px] rounded-full bg-chrono-accent/10" />
+        <span className="text-chrono-accent/60 text-2xl leading-none select-none">&#x2022;</span>
+        <span className="text-lg font-display font-medium tracking-[0.25em] uppercase text-chrono-text">
+          Chrono
+        </span>
       </motion.div>
 
       <motion.h1

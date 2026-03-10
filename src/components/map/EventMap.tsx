@@ -28,8 +28,8 @@ export default function EventMap({ events }: EventMapProps) {
   );
 
   return (
-    <div className="relative w-full h-full min-h-[500px] md:min-h-[700px] bg-chrono-surface rounded-3xl overflow-hidden border border-chrono-border/20">
-      <div className="absolute inset-0 bg-gradient-to-br from-chrono-bg via-chrono-surface to-chrono-card" />
+    <div className="relative w-full h-full min-h-[500px] md:min-h-[700px] bg-chrono-surface rounded-3xl overflow-hidden border border-chrono-border/10">
+      <div className="absolute inset-0 bg-gradient-to-br from-chrono-bg via-chrono-surface to-chrono-card/50" />
 
       <svg className="absolute inset-0 w-full h-full opacity-[0.03]">
         {Array.from({ length: 20 }, (_, i) => (
@@ -65,15 +65,15 @@ export default function EventMap({ events }: EventMapProps) {
             <motion.line
               key={`line-${event.id}`}
               initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.1 }}
-              transition={{ duration: 1.2, delay: i * 0.1 }}
+              animate={{ pathLength: 1, opacity: 0.07 }}
+              transition={{ duration: 1.8, delay: i * 0.12 }}
               x1={`${from.x}%`}
               y1={`${from.y}%`}
               x2={`${to.x}%`}
               y2={`${to.y}%`}
-              stroke="#D6CFC7"
-              strokeWidth="1"
-              strokeDasharray="4 4"
+              stroke="#C7C2BA"
+              strokeWidth="0.5"
+              strokeDasharray="4 6"
             />
           );
         })}
@@ -102,26 +102,22 @@ export default function EventMap({ events }: EventMapProps) {
             onMouseLeave={() => setHoveredEvent(null)}
           >
             <div
-              className="absolute inset-0 rounded-full animate-ping"
+              className="absolute rounded-full animate-node-pulse"
               style={{
                 backgroundColor: color,
-                opacity: isSelected || isHovered ? 0.2 : 0.06,
-                width: 24,
-                height: 24,
-                margin: -4,
+                opacity: isSelected || isHovered ? 0.15 : 0.04,
+                width: 20,
+                height: 20,
+                margin: -3,
               }}
             />
 
             <motion.div
-              animate={{ scale: isSelected || isHovered ? 1.3 : 1 }}
-              className="relative w-4 h-4 rounded-full border-2 border-chrono-bg"
+              animate={{ scale: isSelected || isHovered ? 1.4 : 1 }}
+              transition={{ duration: 0.4 }}
+              className="relative w-3 h-3 rounded-full border border-chrono-bg/50"
               style={{ backgroundColor: color }}
-            >
-              <div
-                className="absolute inset-1 rounded-full"
-                style={{ backgroundColor: color, opacity: 0.5 }}
-              />
-            </motion.div>
+            />
 
             <AnimatePresence>
               {isHovered && !isSelected && (
@@ -204,9 +200,9 @@ export default function EventMap({ events }: EventMapProps) {
         </div>
         <div className="flex flex-wrap gap-3">
           {[
-            { label: "Travel", color: "#7A8A96" },
-            { label: "Career", color: "#D6CFC7" },
-            { label: "Achievement", color: "#BFC3C7" },
+            { label: "Travel", color: "#8A9098" },
+            { label: "Career", color: "#C7C2BA" },
+            { label: "Achievement", color: "#B8B3AB" },
             { label: "Education", color: "#9A9590" },
             { label: "Life", color: "#8A9A8A" },
           ].map((item) => (

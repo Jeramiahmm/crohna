@@ -99,20 +99,20 @@ export default function TimelinePage() {
 
   return (
     <div className="min-h-screen pt-24 pb-32">
-      <section className="relative py-24 px-6 overflow-hidden">
+      <section className="relative py-28 px-6 overflow-hidden">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
           className="relative max-w-4xl mx-auto text-center"
         >
-          <span className="text-xs uppercase tracking-[0.2em] text-chrono-muted mb-4 block">
+          <span className="text-[11px] uppercase tracking-[0.25em] text-chrono-muted mb-5 block">
             Your Journey
           </span>
           <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-tight">
             <span className="gradient-text">Timeline</span>
           </h1>
-          <p className="text-lg text-chrono-text-secondary max-w-xl mx-auto mb-10">
+          <p className="text-base text-chrono-text-secondary max-w-md mx-auto mb-12 leading-relaxed">
             Every moment that shaped your story, beautifully organized
             and brought to life.
           </p>
@@ -120,7 +120,7 @@ export default function TimelinePage() {
           <div className="flex items-center justify-center gap-3">
             <button
               onClick={() => { setEditingEvent(undefined); setEventModalOpen(true); }}
-              className="px-6 py-2.5 text-sm bg-chrono-text text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors duration-300 flex items-center gap-2"
+              className="px-6 py-2.5 text-sm bg-white text-chrono-bg rounded-full font-medium hover:bg-chrono-accent transition-colors duration-500 flex items-center gap-2"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -129,10 +129,10 @@ export default function TimelinePage() {
             </button>
             <button
               onClick={() => setDemoMode(!demoMode)}
-              className={`px-5 py-2.5 text-sm rounded-full transition-all border ${
+              className={`px-5 py-2.5 text-sm rounded-full transition-all duration-500 border ${
                 demoMode
-                  ? "border-chrono-accent/30 text-chrono-accent bg-chrono-accent/5"
-                  : "border-chrono-border/50 text-chrono-text-secondary hover:border-chrono-border"
+                  ? "border-chrono-accent/20 text-chrono-accent bg-chrono-accent/5"
+                  : "border-chrono-border text-chrono-text-secondary hover:border-chrono-text-secondary/30"
               }`}
             >
               Demo Mode {demoMode ? "On" : "Off"}
@@ -193,7 +193,7 @@ export default function TimelinePage() {
         />
       ) : (
         <section className="px-6">
-          <div className="space-y-20">
+          <div className="space-y-28">
             {years.map((year, i) => {
               const chapter = getChapterForYear(year);
               return (
@@ -234,7 +234,7 @@ export default function TimelinePage() {
             </p>
             <button
               onClick={() => { setEditingEvent(undefined); setEventModalOpen(true); }}
-              className="mt-2 px-5 py-2 text-xs text-chrono-text-secondary border border-chrono-border/40 hover:border-chrono-border hover:text-chrono-text rounded-full transition-all duration-300"
+              className="mt-2 px-5 py-2 text-xs text-chrono-text-secondary border border-chrono-border hover:border-chrono-text-secondary/30 hover:text-chrono-text rounded-full transition-all duration-500"
             >
               Add Next Moment
             </button>
