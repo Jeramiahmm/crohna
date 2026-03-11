@@ -136,7 +136,7 @@ export default function EventMap({ events }: EventMapProps) {
   }, []);
 
   return (
-    <div className="relative w-full h-full min-h-[360px] md:min-h-[700px] bg-chrono-surface overflow-hidden border border-white/[0.12]">
+    <div className="relative w-full h-full min-h-[360px] md:min-h-[700px] bg-chrono-surface overflow-hidden border border-[var(--line-strong)]">
       <div ref={mapRef} className="absolute inset-0 z-0" />
 
       {!mapLoaded && (
@@ -169,9 +169,7 @@ export default function EventMap({ events }: EventMapProps) {
             )}
             <div className="p-5">
               <div className="flex items-center gap-2 mb-2">
-                <div
-                  className="w-1.5 h-1.5 rounded-full bg-white/60"
-                />
+                <div className="w-1.5 h-1.5 rounded-full bg-chrono-accent" />
                 <span className="text-xs font-body font-extralight text-chrono-muted">
                   {formatDate(selectedEvent.date)}
                 </span>
@@ -189,13 +187,13 @@ export default function EventMap({ events }: EventMapProps) {
                 </p>
               )}
               {selectedEvent.description && (
-                <p className="text-sm font-body font-extralight leading-relaxed" style={{ color: "rgba(240,235,225,0.65)" }}>
+                <p className="text-sm font-body font-extralight leading-relaxed text-chrono-muted">
                   {selectedEvent.description}
                 </p>
               )}
               <button
                 onClick={() => setSelectedEvent(null)}
-                className="mt-4 text-xs font-body font-extralight text-chrono-muted hover:text-white transition-colors"
+                className="mt-4 text-xs font-body font-extralight text-chrono-muted hover:text-chrono-text transition-colors"
               >
                 Close
               </button>
@@ -208,18 +206,15 @@ export default function EventMap({ events }: EventMapProps) {
         <div className="section-label mb-2">Legend</div>
         <div className="flex flex-wrap gap-3">
           {[
-            { label: "Travel", color: "rgba(255,255,255,0.8)" },
-            { label: "Career", color: "rgba(255,255,255,0.6)" },
-            { label: "Achievement", color: "rgba(255,255,255,0.9)" },
-            { label: "Education", color: "rgba(255,255,255,0.5)" },
-            { label: "Life", color: "rgba(255,255,255,0.7)" },
+            { label: "Travel" },
+            { label: "Career" },
+            { label: "Achievement" },
+            { label: "Education" },
+            { label: "Life" },
           ].map((item) => (
             <div key={item.label} className="flex items-center gap-1.5">
-              <div
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: item.color }}
-              />
-              <span className="text-[11px] font-body font-extralight" style={{ color: "rgba(240,235,225,0.65)" }}>
+              <div className="w-2 h-2 rounded-full bg-chrono-accent" />
+              <span className="text-[11px] font-body font-extralight text-chrono-muted">
                 {item.label}
               </span>
             </div>

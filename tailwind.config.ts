@@ -41,6 +41,8 @@ const config: Config = {
         "star-twinkle": "starTwinkle 3s ease-in-out infinite",
         "white-pulse": "whitePulse 2.5s ease-in-out infinite",
         "marker-ring": "markerRing 2s ease-out infinite",
+        "shimmer-slide": "shimmerSlide 8s ease-in-out infinite",
+        "spin-around": "spinAround 13s linear infinite",
       },
       keyframes: {
         fadeIn: {
@@ -78,6 +80,14 @@ const config: Config = {
         shimmer: {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
+        },
+        shimmerSlide: {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
+        spinAround: {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
         },
       },
       borderRadius: {

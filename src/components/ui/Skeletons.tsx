@@ -5,11 +5,11 @@ import { motion } from "framer-motion";
 function Shimmer({ className = "" }: { className?: string }) {
   return (
     <div className={`relative overflow-hidden ${className}`}>
-      <div className="absolute inset-0 bg-chrono-card/40" />
+      <div className="absolute inset-0 bg-[var(--card-bg)]" />
       <motion.div
         animate={{ x: ["-100%", "100%"] }}
         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent"
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-[var(--muted)] to-transparent"
       />
     </div>
   );
@@ -17,7 +17,7 @@ function Shimmer({ className = "" }: { className?: string }) {
 
 export function TimelineCardSkeleton() {
   return (
-    <div className="bg-chrono-card/30 overflow-hidden border border-white/[0.08]">
+    <div className="bg-[var(--card-bg)] overflow-hidden border border-[var(--line-strong)]">
       <Shimmer className="h-48" />
       <div className="p-6 space-y-3">
         <Shimmer className="h-3 w-24" />
@@ -32,7 +32,7 @@ export function TimelineCardSkeleton() {
 
 export function StoryCardSkeleton() {
   return (
-    <div className="bg-chrono-card/30 p-8 md:p-10 border border-white/[0.08]">
+    <div className="bg-[var(--card-bg)] p-8 md:p-10 border border-[var(--line-strong)]">
       <div className="flex items-center gap-3 mb-6">
         <Shimmer className="h-6 w-24" />
         <Shimmer className="h-4 w-16" />
@@ -46,12 +46,12 @@ export function StoryCardSkeleton() {
       <div className="space-y-2 mb-8">
         {[1, 2, 3].map((i) => (
           <div key={i} className="flex items-center gap-3">
-            <div className="w-1 h-1 rounded-full bg-white/[0.1]" />
+            <div className="w-1 h-1 rounded-full bg-[var(--line-strong)]" />
             <Shimmer className="h-3 w-3/4" />
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-3 gap-[1px] bg-white/[0.06]">
+      <div className="grid grid-cols-3 gap-[1px] bg-[var(--line)]">
         {[1, 2, 3].map((i) => (
           <div key={i} className="bg-chrono-bg p-4">
             <Shimmer className="h-5 w-12 mb-2" />
@@ -65,7 +65,7 @@ export function StoryCardSkeleton() {
 
 export function StatCardSkeleton() {
   return (
-    <div className="bg-chrono-card/30 p-6 border border-white/[0.08]">
+    <div className="bg-[var(--card-bg)] p-6 border border-[var(--line-strong)]">
       <Shimmer className="h-8 w-16 mb-2" />
       <Shimmer className="h-3 w-24" />
     </div>
@@ -74,21 +74,21 @@ export function StatCardSkeleton() {
 
 export function AIStoryLoadingSkeleton() {
   return (
-    <div className="relative bg-chrono-card/30 p-8 md:p-10 border border-white/[0.08] overflow-hidden">
+    <div className="relative bg-[var(--card-bg)] p-8 md:p-10 border border-[var(--line-strong)] overflow-hidden">
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
           className="relative w-16 h-16 mb-6"
         >
-          <div className="absolute inset-0 rounded-full border-2 border-white/[0.08]" />
-          <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-white/30" />
-          <div className="absolute inset-[6px] rounded-full border-2 border-transparent border-t-white/20" style={{ animationDelay: "0.5s" }} />
+          <div className="absolute inset-0 rounded-full border-2 border-[var(--line-strong)]" />
+          <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-chrono-glow" />
+          <div className="absolute inset-[6px] rounded-full border-2 border-transparent border-t-[var(--line-hover)]" style={{ animationDelay: "0.5s" }} />
         </motion.div>
         <motion.p
           animate={{ opacity: [0.4, 0.8, 0.4] }}
           transition={{ duration: 2.5, repeat: Infinity }}
-          className="text-sm font-display font-light text-chrono-text-secondary"
+          className="text-sm font-display font-light text-chrono-muted"
         >
           Crafting your story...
         </motion.p>

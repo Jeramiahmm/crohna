@@ -57,8 +57,8 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
       className="fixed inset-0 z-[100] bg-chrono-bg flex items-center justify-center"
     >
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/[0.02] rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/[0.02] rounded-full blur-[120px]" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--muted)] rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[var(--muted)] rounded-full blur-[120px]" />
       </div>
 
       <div className="relative w-full max-w-2xl mx-auto px-6">
@@ -75,8 +75,8 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-500 ${
                     i <= step
-                      ? "bg-white text-black"
-                      : "bg-chrono-card border border-white/[0.1] text-chrono-muted"
+                      ? "bg-foreground text-background"
+                      : "bg-chrono-card border border-[var(--line-strong)] text-chrono-muted"
                   }`}
                 >
                   {i < step ? (
@@ -92,7 +92,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
                 </span>
               </button>
               {i < steps.length - 1 && (
-                <div className={`w-12 h-px transition-colors duration-500 ${i < step ? "bg-white/60" : "bg-white/[0.08]"}`} />
+                <div className={`w-12 h-px transition-colors duration-500 ${i < step ? "bg-chrono-accent" : "bg-[var(--line-strong)]"}`} />
               )}
             </div>
           ))}
@@ -123,7 +123,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
             className={`px-6 py-2.5 text-sm rounded-full transition-all ${
               step === 0
                 ? "opacity-0 pointer-events-none"
-                : "text-white/60 hover:text-chrono-text border border-white/[0.1] hover:border-white/20"
+                : "text-chrono-muted hover:text-chrono-text border border-[var(--line-strong)] hover:border-[var(--line-hover)]"
             }`}
           >
             Back
@@ -132,7 +132,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
           {step < steps.length - 1 && (
             <button
               onClick={next}
-              className="px-8 py-2.5 text-sm font-body font-light bg-white text-black rounded-full hover:bg-white/90 transition-colors duration-500"
+              className="px-8 py-2.5 text-sm font-body font-light bg-foreground text-background rounded-full hover:opacity-90 transition-colors duration-500"
             >
               Continue
             </button>
@@ -152,7 +152,7 @@ function WelcomeStep() {
         transition={{ delay: 0.1, duration: 0.8 }}
         className="mx-auto mb-10 flex items-center gap-2"
       >
-        <span className="text-white/60 text-2xl leading-none select-none">&#x2022;</span>
+        <span className="text-chrono-muted text-2xl leading-none select-none">&#x2022;</span>
         <span className="text-lg font-display font-bold tracking-[0.25em] uppercase text-chrono-text">
           Chrono
         </span>
@@ -162,7 +162,7 @@ function WelcomeStep() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="text-4xl md:text-5xl font-display font-bold mb-4 tracking-tight text-white"
+        className="text-4xl md:text-5xl font-display font-bold mb-4 tracking-tight text-chrono-text"
       >
         Welcome to Chrono
       </motion.h1>
@@ -171,7 +171,7 @@ function WelcomeStep() {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.35 }}
-        className="text-lg max-w-md mx-auto leading-relaxed" style={{ color: "rgba(240,235,225,0.65)" }}
+        className="text-lg max-w-md mx-auto leading-relaxed text-chrono-muted"
       >
         Your life is a story worth telling. Chrono transforms your memories, milestones, and moments into a beautiful, interactive timeline.
       </motion.p>
@@ -194,7 +194,7 @@ function WelcomeStep() {
             transition={{ delay: 0.6 + i * 0.1 }}
             className="flex items-center gap-2 text-xs text-chrono-muted"
           >
-            <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
+            <div className="w-1.5 h-1.5 rounded-full bg-chrono-glow" />
             {item.label}
           </motion.div>
         ))}
@@ -228,7 +228,7 @@ function ExplainStep() {
         <motion.h2
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-3xl md:text-4xl font-display font-bold mb-3 tracking-tight text-white"
+          className="text-3xl md:text-4xl font-display font-bold mb-3 tracking-tight text-chrono-text"
         >
           How Chrono works
         </motion.h2>
@@ -236,7 +236,7 @@ function ExplainStep() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          style={{ color: "rgba(240,235,225,0.65)" }}
+          className="text-chrono-muted"
         >
           Three steps to your personal life story
         </motion.p>
@@ -249,14 +249,14 @@ function ExplainStep() {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.15 + i * 0.12 }}
-            className="flex items-start gap-5 bg-chrono-card/30 p-5 border border-white/[0.08]"
+            className="flex items-start gap-5 bg-[var(--card-bg)] p-5 border border-[var(--line-strong)]"
           >
-            <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-display font-bold flex-shrink-0 bg-white/[0.06] text-white/80">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-display font-bold flex-shrink-0 bg-[var(--muted)] text-chrono-accent">
               {s.number}
             </div>
             <div>
               <h3 className="font-display font-bold text-chrono-text mb-1">{s.title}</h3>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(240,235,225,0.65)" }}>{s.description}</p>
+              <p className="text-sm leading-relaxed text-chrono-muted">{s.description}</p>
             </div>
           </motion.div>
         ))}
@@ -308,7 +308,7 @@ function ChooseStep({ onComplete }: { onComplete: (choice: "demo" | "manual" | "
         <motion.h2
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-3xl md:text-4xl font-display font-bold mb-3 tracking-tight text-white"
+          className="text-3xl md:text-4xl font-display font-bold mb-3 tracking-tight text-chrono-text"
         >
           How would you like to start?
         </motion.h2>
@@ -316,7 +316,7 @@ function ChooseStep({ onComplete }: { onComplete: (choice: "demo" | "manual" | "
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          style={{ color: "rgba(240,235,225,0.65)" }}
+          className="text-chrono-muted"
         >
           You can always change this later
         </motion.p>
@@ -330,21 +330,21 @@ function ChooseStep({ onComplete }: { onComplete: (choice: "demo" | "manual" | "
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 + i * 0.1 }}
             onClick={() => onComplete(option.id)}
-            className="w-full group relative bg-chrono-card/30 p-5 border border-white/[0.08] hover:border-white/20 transition-all text-left flex items-start gap-5 card-hover"
+            className="w-full group relative bg-[var(--card-bg)] p-5 border border-[var(--line-strong)] hover:border-[var(--line-hover)] transition-all text-left flex items-start gap-5 card-hover"
           >
-            <div className="relative w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-white/[0.06] text-white/80">
+            <div className="relative w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-[var(--muted)] text-chrono-accent">
               {option.icon}
             </div>
             <div className="relative flex-1">
               <div className="flex items-center gap-2">
                 <h3 className="font-display font-bold text-chrono-text">{option.title}</h3>
                 {option.recommended && (
-                  <span className="px-2 py-0.5 text-[10px] bg-white/[0.08] text-white/80 font-medium uppercase tracking-wider rounded-full">
+                  <span className="px-2 py-0.5 text-[10px] bg-[var(--muted)] text-chrono-accent font-medium uppercase tracking-wider rounded-full">
                     Recommended
                   </span>
                 )}
               </div>
-              <p className="text-sm leading-relaxed mt-1" style={{ color: "rgba(240,235,225,0.65)" }}>{option.description}</p>
+              <p className="text-sm leading-relaxed mt-1 text-chrono-muted">{option.description}</p>
             </div>
             <svg className="relative w-5 h-5 text-chrono-muted group-hover:text-chrono-text transition-colors flex-shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />

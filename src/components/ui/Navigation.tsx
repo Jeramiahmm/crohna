@@ -30,7 +30,7 @@ function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="w-8 h-8 rounded-full flex items-center justify-center text-foreground/60 hover:text-foreground transition-colors"
+      className="w-8 h-8 rounded-full flex items-center justify-center text-chrono-muted hover:text-chrono-text transition-colors"
       aria-label="Toggle theme"
     >
       <AnimatePresence mode="wait" initial={false}>
@@ -69,23 +69,36 @@ function SearchButton() {
     const cards = document.querySelectorAll("[data-memory-card]");
     if (!q.trim()) {
       cards.forEach((card) => {
-        (card as HTMLElement).style.opacity = "1";
-        (card as HTMLElement).style.filter = "";
-        (card as HTMLElement).style.borderColor = "";
+        const el = card as HTMLElement;
+        el.style.opacity = "1";
+        el.style.transform = "";
+        el.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+        // Reset border on the inner card div
+        const inner = el.querySelector(".card-hover") as HTMLElement;
+        if (inner) inner.style.borderColor = "";
       });
       return;
     }
     const lower = q.toLowerCase();
     cards.forEach((card) => {
-      const text = (card as HTMLElement).textContent?.toLowerCase() || "";
-      if (text.includes(lower)) {
-        (card as HTMLElement).style.opacity = "1";
-        (card as HTMLElement).style.filter = "brightness(1.1)";
-        (card as HTMLElement).style.borderColor = "rgba(255,255,255,0.5)";
+      const el = card as HTMLElement;
+      const title = el.getAttribute("data-title") || "";
+      const desc = el.getAttribute("data-description") || "";
+      const loc = el.getAttribute("data-location") || "";
+      const cat = el.getAttribute("data-category") || "";
+      const searchable = `${title} ${desc} ${loc} ${cat}`.toLowerCase();
+      el.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+
+      if (searchable.includes(lower)) {
+        el.style.opacity = "1";
+        el.style.transform = "scale(1)";
+        const inner = el.querySelector(".card-hover") as HTMLElement;
+        if (inner) inner.style.borderColor = "var(--chrono-accent)";
       } else {
-        (card as HTMLElement).style.opacity = "0.3";
-        (card as HTMLElement).style.filter = "";
-        (card as HTMLElement).style.borderColor = "";
+        el.style.opacity = "0.2";
+        el.style.transform = "scale(0.97)";
+        const inner = el.querySelector(".card-hover") as HTMLElement;
+        if (inner) inner.style.borderColor = "";
       }
     });
   }, []);
@@ -95,23 +108,37 @@ function SearchButton() {
   }, [open]);
 
   useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest("[data-search-bar]")) {
+        setOpen(false);
+        setQuery("");
+        applySearch("");
+      }
+    };
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && open) {
+      if (e.key === "Escape") {
         setOpen(false);
         setQuery("");
         applySearch("");
       }
     };
     window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
+    window.addEventListener("click", handleClickOutside, { capture: true });
+    return () => {
+      window.removeEventListener("keydown", handleEsc);
+      window.removeEventListener("click", handleClickOutside, { capture: true });
+    };
   }, [open, applySearch]);
 
   return (
     <>
       <button
-        onClick={() => setOpen(!open)}
-        className="w-8 h-8 rounded-full flex items-center justify-center text-foreground/60 hover:text-foreground transition-colors"
+        onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
+        className="w-8 h-8 rounded-full flex items-center justify-center text-chrono-muted hover:text-chrono-text transition-colors"
         aria-label="Search"
+        data-search-bar
       >
         <Search size={16} strokeWidth={2} />
       </button>
@@ -119,6 +146,7 @@ function SearchButton() {
       <AnimatePresence>
         {open && (
           <motion.div
+            data-search-bar
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -127,7 +155,7 @@ function SearchButton() {
           >
             <div className="glass-strong px-6 py-4">
               <div className="max-w-xl mx-auto flex items-center gap-3">
-                <Search size={16} className="text-foreground/40 flex-shrink-0" />
+                <Search size={16} className="text-chrono-muted flex-shrink-0" />
                 <input
                   ref={inputRef}
                   type="text"
@@ -137,7 +165,7 @@ function SearchButton() {
                     applySearch(e.target.value);
                   }}
                   placeholder="Search memories..."
-                  className="flex-1 bg-transparent text-sm text-foreground placeholder:text-foreground/30 outline-none font-body font-light"
+                  className="flex-1 bg-transparent text-sm text-chrono-text placeholder:text-chrono-muted outline-none font-body font-light"
                 />
                 <button
                   onClick={() => {
@@ -145,7 +173,7 @@ function SearchButton() {
                     setQuery("");
                     applySearch("");
                   }}
-                  className="text-foreground/40 hover:text-foreground transition-colors"
+                  className="text-chrono-muted hover:text-chrono-text transition-colors"
                 >
                   <X size={16} />
                 </button>
@@ -190,13 +218,13 @@ export default function Navigation() {
         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
         className={`fixed top-0 left-0 right-0 z-50 md:hidden transition-all duration-500 ${
           scrolled
-            ? "backdrop-blur-xl bg-chrono-bg/90 border-b border-white/[0.12] py-3"
+            ? "backdrop-blur-xl bg-chrono-bg/90 border-b border-[var(--line-strong)] py-3"
             : "bg-transparent py-5"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-foreground/60 text-base leading-none select-none">&#x2022;</span>
+            <span className="text-chrono-muted text-base leading-none select-none">&#x2022;</span>
             <span className="text-[13px] font-display font-bold tracking-[0.25em] uppercase text-chrono-text">
               Chrono
             </span>
@@ -211,15 +239,15 @@ export default function Navigation() {
             >
               <motion.span
                 animate={{ rotate: mobileOpen ? 45 : 0, y: mobileOpen ? 6 : 0 }}
-                className="w-5 h-[1px] bg-foreground/80 block"
+                className="w-5 h-[1px] bg-chrono-text block"
               />
               <motion.span
                 animate={{ opacity: mobileOpen ? 0 : 1 }}
-                className="w-5 h-[1px] bg-foreground/80 block"
+                className="w-5 h-[1px] bg-chrono-text block"
               />
               <motion.span
                 animate={{ rotate: mobileOpen ? -45 : 0, y: mobileOpen ? -6 : 0 }}
-                className="w-5 h-[1px] bg-foreground/80 block"
+                className="w-5 h-[1px] bg-chrono-text block"
               />
             </button>
           </div>
@@ -233,7 +261,8 @@ export default function Navigation() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-chrono-bg/98 backdrop-blur-2xl pt-24 px-8 md:hidden"
+            className="fixed inset-0 z-40 backdrop-blur-2xl pt-24 px-8 md:hidden"
+            style={{ background: "color-mix(in srgb, var(--chrono-bg) 98%, transparent)" }}
           >
             <div className="flex flex-col gap-2">
               {navItems.map((item, i) => (
@@ -248,7 +277,7 @@ export default function Navigation() {
                     onClick={() => setMobileOpen(false)}
                     className={`block text-3xl font-display font-bold py-3 ${
                       pathname === item.href
-                        ? "text-foreground"
+                        ? "text-chrono-text"
                         : "text-chrono-muted"
                     }`}
                   >
@@ -258,7 +287,7 @@ export default function Navigation() {
               ))}
             </div>
             <div className="mt-12 flex flex-col gap-4">
-              <button className="w-full py-3 text-sm font-body font-light text-chrono-muted border border-chrono-border rounded-full">
+              <button className="w-full py-3 text-sm font-body font-light text-chrono-muted border border-[var(--line-strong)] rounded-full">
                 Sign In
               </button>
               <button className="w-full py-3 text-sm font-body font-light bg-foreground text-background rounded-full">

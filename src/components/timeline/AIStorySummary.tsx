@@ -21,7 +21,7 @@ export default function AIStorySummary({ story, index }: AIStorySummaryProps) {
       }}
       className="relative group"
     >
-      <div className="relative bg-chrono-card/30 p-8 md:p-12 border border-white/[0.12] overflow-hidden card-hover">
+      <div className="relative bg-[var(--card-bg)] p-8 md:p-12 border border-[var(--line-strong)] overflow-hidden card-hover">
         <div className="relative flex items-center gap-2 mb-6">
           <span className="section-label">
             Story
@@ -29,11 +29,11 @@ export default function AIStorySummary({ story, index }: AIStorySummaryProps) {
           <span className="text-xs font-body font-extralight text-chrono-muted">{story.period}</span>
         </div>
 
-        <h3 className="relative text-2xl md:text-3xl font-display font-bold mb-4 text-white">
+        <h3 className="relative text-2xl md:text-3xl font-display font-bold mb-4 text-chrono-text">
           {story.title}
         </h3>
 
-        <p className="relative font-body font-extralight leading-relaxed text-base mb-8" style={{ color: "rgba(240,235,225,0.65)" }}>
+        <p className="relative font-body font-extralight leading-relaxed text-base mb-8 text-chrono-muted">
           {story.summary}
         </p>
 
@@ -47,14 +47,14 @@ export default function AIStorySummary({ story, index }: AIStorySummaryProps) {
               transition={{ delay: 0.3 + i * 0.1 }}
               className="flex items-start gap-3"
             >
-              <div className="w-1 h-1 rounded-full bg-white/40 mt-2 flex-shrink-0" />
-              <span className="text-sm font-body font-extralight" style={{ color: "rgba(240,235,225,0.65)" }}>{highlight}</span>
+              <div className="w-1 h-1 rounded-full bg-chrono-glow mt-2 flex-shrink-0" />
+              <span className="text-sm font-body font-extralight text-chrono-muted">{highlight}</span>
             </motion.div>
           ))}
         </div>
 
         {story.stats && (
-          <div className="relative grid grid-cols-2 md:grid-cols-3 gap-[1px] bg-white/[0.06]">
+          <div className="relative grid grid-cols-2 md:grid-cols-3 gap-[1px] bg-[var(--line)]">
             {Object.entries(story.stats).map(([key, value], i) => (
               <motion.div
                 key={key}

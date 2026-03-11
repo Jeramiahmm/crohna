@@ -16,6 +16,14 @@
   --primary: rgba(255,255,255,0.8);
   --border: rgba(255,255,255,0.12);
   --muted: rgba(255,255,255,0.06);
+
+  /* Theme-aware accent for borders, dividers, subtle elements */
+  --line: rgba(255,255,255,0.08);
+  --line-strong: rgba(255,255,255,0.12);
+  --line-hover: rgba(255,255,255,0.25);
+  --subtle-text: rgba(240,235,225,0.65);
+  --card-bg: rgba(20,20,20,0.4);
+  --input-bg: rgba(20,20,20,0.4);
 }
 
 html.light {
@@ -32,6 +40,13 @@ html.light {
   --primary: rgba(0,0,0,0.8);
   --border: rgba(0,0,0,0.12);
   --muted: rgba(0,0,0,0.06);
+
+  --line: rgba(0,0,0,0.08);
+  --line-strong: rgba(0,0,0,0.12);
+  --line-hover: rgba(0,0,0,0.25);
+  --subtle-text: rgba(26,24,20,0.6);
+  --card-bg: rgba(228,221,208,0.4);
+  --input-bg: rgba(228,221,208,0.5);
 }
 
 * {
@@ -68,6 +83,10 @@ body::after {
   z-index: 9000;
 }
 
+html.light body::after {
+  opacity: 0.02;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -85,6 +104,14 @@ body::after {
   background: rgba(255,255,255,0.15);
 }
 
+html.light ::-webkit-scrollbar-thumb {
+  background: #C8C0B4;
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.25);
+}
+
 /* Custom utility classes */
 @layer utilities {
   .text-balance {
@@ -95,14 +122,14 @@ body::after {
     background: rgba(8, 8, 8, 0.7);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.12);
+    border: 1px solid var(--line-strong);
   }
 
   .glass-strong {
     background: rgba(8, 8, 8, 0.94);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid var(--line-strong);
   }
 
   .glow-accent {
@@ -115,18 +142,18 @@ body::after {
   }
 
   .gradient-text {
-    color: #F0EBE1;
+    color: var(--chrono-text);
   }
 
   .gradient-text-subtle {
-    color: rgba(240,235,225,0.65);
+    color: var(--subtle-text);
   }
 
   .section-label {
     font-size: 10px;
     letter-spacing: 0.5em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.8);
+    color: var(--chrono-accent);
     font-family: var(--font-body), system-ui, sans-serif;
     font-weight: 200;
   }
@@ -152,8 +179,8 @@ body::after {
     background: linear-gradient(
       180deg,
       transparent 0%,
-      rgba(255,255,255,0.08) 10%,
-      rgba(255,255,255,0.08) 90%,
+      var(--line) 10%,
+      var(--line) 90%,
       transparent 100%
     );
   }
@@ -166,9 +193,9 @@ body::after {
 
   .card-hover:hover {
     transform: translateY(-6px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4),
-                0 0 40px rgba(255,255,255,0.02);
-    border-color: rgba(255,255,255,0.25);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15),
+                0 0 40px var(--chrono-glow);
+    border-color: var(--line-hover);
   }
 
   .mask-gradient-b {
@@ -195,7 +222,7 @@ body::after {
     font-family: var(--font-display), Georgia, serif;
     font-weight: 700;
     font-size: clamp(120px, 15vw, 240px);
-    color: rgba(255,255,255,0.03);
+    color: var(--line);
     pointer-events: none;
     user-select: none;
     line-height: 1;
@@ -211,10 +238,15 @@ html.lenis {
   scroll-behavior: auto;
 }
 
-/* Selection color — white */
+/* Selection color */
 ::selection {
   background: rgba(255,255,255,0.15);
   color: #F0EBE1;
+}
+
+html.light ::selection {
+  background: rgba(0,0,0,0.12);
+  color: #1A1814;
 }
 
 /* CSS variables for shadcn/tubelight compatibility */
@@ -247,23 +279,11 @@ html.light .glass-strong {
   border-color: rgba(0,0,0,0.12);
 }
 
-html.light .section-label {
-  color: rgba(0,0,0,0.6);
+html.light .glow-accent {
+  box-shadow: 0 0 40px rgba(0,0,0,0.04),
+              0 0 80px rgba(0,0,0,0.02);
 }
 
-html.light body::after {
-  opacity: 0.02;
-}
-
-html.light ::-webkit-scrollbar-thumb {
-  background: #C8C0B4;
-}
-
-html.light ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0,0,0,0.25);
-}
-
-html.light ::selection {
-  background: rgba(0,0,0,0.12);
-  color: #1A1814;
+html.light .glow-text {
+  text-shadow: 0 0 40px rgba(0,0,0,0.1);
 }

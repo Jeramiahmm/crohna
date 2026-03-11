@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import ShimmerButton from "./shimmer-button";
 
 const categories = [
   { value: "travel", label: "Travel" },
@@ -35,7 +36,6 @@ export default function AddMemoryButton() {
 
   const handleSave = () => {
     if (!form.title.trim() || !form.date) return;
-    // In a real app, this would save to a database
     setOpen(false);
     resetForm();
   };
@@ -61,16 +61,20 @@ export default function AddMemoryButton() {
   return (
     <>
       {/* Floating Button */}
-      <motion.button
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1, duration: 0.6 }}
-        onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 z-40 px-5 py-3 bg-white text-black text-sm font-body font-medium rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2"
+        className="fixed bottom-6 right-6 z-40"
       >
-        <span className="text-lg leading-none">+</span>
-        Add Memory
-      </motion.button>
+        <ShimmerButton
+          onClick={() => setOpen(true)}
+          className="px-5 py-3 text-sm font-body font-medium shadow-lg"
+        >
+          <span className="text-lg leading-none">+</span>
+          Add Memory
+        </ShimmerButton>
+      </motion.div>
 
       {/* Modal */}
       <AnimatePresence>
@@ -85,16 +89,16 @@ export default function AddMemoryButton() {
               className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm"
             />
 
-            {/* Slide-up Modal */}
+            {/* Centered Modal */}
             <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 z-[70] max-h-[90vh] bg-chrono-surface border-t border-white/[0.12] rounded-t-2xl overflow-hidden flex flex-col"
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] w-[calc(100%-2rem)] max-w-xl max-h-[90vh] bg-chrono-surface border border-[var(--border)] rounded-lg overflow-hidden flex flex-col"
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-white/[0.08]">
+              <div className="flex items-center justify-between p-6 border-b border-[var(--line)]">
                 <div>
                   <h2 className="text-xl font-display font-bold text-chrono-text">Add Memory</h2>
                   <p className="text-xs font-body font-extralight text-chrono-muted mt-1">
@@ -103,7 +107,7 @@ export default function AddMemoryButton() {
                 </div>
                 <button
                   onClick={handleClose}
-                  className="w-8 h-8 rounded-full bg-chrono-card flex items-center justify-center text-chrono-muted hover:text-chrono-text hover:bg-white/[0.06] transition-all"
+                  className="w-8 h-8 rounded-full bg-chrono-card flex items-center justify-center text-chrono-muted hover:text-chrono-text transition-all"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -111,9 +115,8 @@ export default function AddMemoryButton() {
                 </button>
               </div>
 
-              {/* Form */}
+              {/* Scrollable Form */}
               <div className="flex-1 overflow-y-auto p-6 space-y-5">
-                {/* Title */}
                 <div>
                   <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Title</label>
                   <input
@@ -121,11 +124,10 @@ export default function AddMemoryButton() {
                     value={form.title}
                     onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                     placeholder="What happened?"
-                    className="w-full bg-chrono-card/40 px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border border-white/[0.08] transition-colors outline-none focus:border-white/30"
+                    className="w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted border border-[var(--line-strong)] transition-colors outline-none focus:border-[var(--line-hover)]"
                   />
                 </div>
 
-                {/* Date & Location */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Date</label>
@@ -133,7 +135,7 @@ export default function AddMemoryButton() {
                       type="date"
                       value={form.date}
                       onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-                      className="w-full bg-chrono-card/40 px-4 py-3 text-sm text-chrono-text border border-white/[0.08] transition-colors outline-none focus:border-white/30 [color-scheme:dark]"
+                      className="w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text border border-[var(--line-strong)] transition-colors outline-none focus:border-[var(--line-hover)]"
                     />
                   </div>
                   <div>
@@ -143,19 +145,18 @@ export default function AddMemoryButton() {
                       value={form.location}
                       onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
                       placeholder="City, State"
-                      className="w-full bg-chrono-card/40 px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border border-white/[0.08] transition-colors outline-none focus:border-white/30"
+                      className="w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted border border-[var(--line-strong)] transition-colors outline-none focus:border-[var(--line-hover)]"
                     />
                   </div>
                 </div>
 
-                {/* Category */}
                 <div>
                   <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Category</label>
                   <div className="relative">
                     <select
                       value={form.category}
                       onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                      className="w-full bg-chrono-card/40 px-4 py-3 text-sm text-chrono-text border border-white/[0.08] transition-colors outline-none focus:border-white/30 appearance-none [color-scheme:dark]"
+                      className="w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text border border-[var(--line-strong)] transition-colors outline-none focus:border-[var(--line-hover)] appearance-none"
                     >
                       <option value="">Select category</option>
                       {categories.map((cat) => (
@@ -168,7 +169,6 @@ export default function AddMemoryButton() {
                   </div>
                 </div>
 
-                {/* Description */}
                 <div>
                   <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Description</label>
                   <textarea
@@ -176,11 +176,10 @@ export default function AddMemoryButton() {
                     onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                     placeholder="Tell the story behind this moment..."
                     rows={3}
-                    className="w-full bg-chrono-card/40 px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border border-white/[0.08] transition-colors outline-none focus:border-white/30 resize-none"
+                    className="w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted border border-[var(--line-strong)] transition-colors outline-none focus:border-[var(--line-hover)] resize-none"
                   />
                 </div>
 
-                {/* Photo Upload */}
                 <div>
                   <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Photo Upload</label>
                   <div
@@ -190,10 +189,10 @@ export default function AddMemoryButton() {
                     onClick={() => fileInputRef.current?.click()}
                     className={`relative h-32 border-2 border-dashed transition-all cursor-pointer overflow-hidden rounded-lg ${
                       dragOver
-                        ? "border-white/30 bg-white/[0.03]"
+                        ? "border-[var(--line-hover)] bg-[var(--muted)]"
                         : form.imageUrl
-                        ? "border-white/[0.08]"
-                        : "border-white/[0.12] hover:border-white/20 bg-chrono-card/20"
+                        ? "border-[var(--line)]"
+                        : "border-[var(--line-strong)] hover:border-[var(--line-hover)] bg-[var(--card-bg)]"
                     }`}
                   >
                     {form.imageUrl ? (
@@ -218,14 +217,14 @@ export default function AddMemoryButton() {
               </div>
 
               {/* Footer */}
-              <div className="p-6 border-t border-white/[0.08]">
-                <button
+              <div className="p-6 border-t border-[var(--line)]">
+                <ShimmerButton
                   onClick={handleSave}
                   disabled={!form.title.trim() || !form.date}
-                  className="w-full py-3 text-sm font-body font-medium bg-white text-black rounded-full hover:bg-white/90 transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full py-3 text-sm font-body font-medium disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Save Memory
-                </button>
+                </ShimmerButton>
               </div>
             </motion.div>
           </>

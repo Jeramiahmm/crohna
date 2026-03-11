@@ -40,17 +40,17 @@ export default function EmptyState({ title, description, actionLabel, onAction, 
       animate={{ opacity: 1, y: 0 }}
       className="flex flex-col items-center justify-center py-24 px-6 text-center"
     >
-      <div className="w-20 h-20 bg-chrono-card/40 border border-white/[0.08] rounded-full flex items-center justify-center text-white/30 mb-6">
+      <div className="w-20 h-20 bg-[var(--card-bg)] border border-[var(--line-strong)] rounded-full flex items-center justify-center text-chrono-muted mb-6">
         {icons[icon]}
       </div>
       <h3 className="text-xl font-display font-bold text-chrono-text mb-2">{title}</h3>
-      <p className="text-sm font-body font-extralight italic max-w-sm leading-relaxed" style={{ color: "rgba(240,235,225,0.45)" }}>
+      <p className="text-sm font-body font-extralight italic max-w-sm leading-relaxed text-chrono-muted">
         {description || "Your story begins the moment you add your first memory."}
       </p>
       {actionLabel && onAction && (
         <button
           onClick={onAction}
-          className="mt-8 px-8 py-3 text-sm font-body font-light bg-white text-black rounded-full hover:bg-white/90 transition-colors duration-500"
+          className="mt-8 px-8 py-3 text-sm font-body font-light bg-foreground text-background rounded-full hover:opacity-90 transition-colors duration-500"
         >
           {actionLabel}
         </button>
