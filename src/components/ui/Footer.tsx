@@ -2,6 +2,13 @@
 
 import Link from "next/link";
 
+const productLinks: Record<string, string> = {
+  Timeline: "/timeline",
+  Stories: "/insights",
+  Map: "/map",
+  Insights: "/insights",
+};
+
 export default function Footer() {
   return (
     <footer className="relative border-t border-white/[0.08] bg-chrono-bg">
@@ -25,14 +32,15 @@ export default function Footer() {
               Product
             </h4>
             <div className="flex flex-col gap-3">
-              {["Timeline", "Stories", "Map", "Insights"].map((item) => (
-                <span
-                  key={item}
+              {Object.entries(productLinks).map(([label, href]) => (
+                <Link
+                  key={label}
+                  href={href}
                   className="text-sm font-body font-extralight hover:text-white cursor-pointer transition-colors duration-300"
                   style={{ color: "rgba(240,235,225,0.65)" }}
                 >
-                  {item}
-                </span>
+                  {label}
+                </Link>
               ))}
             </div>
           </div>
@@ -43,13 +51,14 @@ export default function Footer() {
             </h4>
             <div className="flex flex-col gap-3">
               {["Twitter", "GitHub", "Discord", "Blog"].map((item) => (
-                <span
+                <button
                   key={item}
-                  className="text-sm font-body font-extralight hover:text-white cursor-pointer transition-colors duration-300"
+                  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                  className="text-sm font-body font-extralight hover:text-white cursor-pointer transition-colors duration-300 text-left"
                   style={{ color: "rgba(240,235,225,0.65)" }}
                 >
                   {item}
-                </span>
+                </button>
               ))}
             </div>
           </div>
@@ -61,12 +70,13 @@ export default function Footer() {
           </p>
           <div className="flex gap-6">
             {["Privacy", "Terms", "Cookies"].map((item) => (
-              <span
+              <button
                 key={item}
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 className="text-xs font-body font-extralight text-chrono-muted hover:text-white cursor-pointer transition-colors duration-300"
               >
                 {item}
-              </span>
+              </button>
             ))}
           </div>
         </div>

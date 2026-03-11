@@ -138,7 +138,16 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
                 <span className="text-[10px] text-chrono-muted uppercase tracking-wider">Download</span>
               </button>
 
-              <button className="flex flex-col items-center gap-2 py-3 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-all">
+              <button
+                onClick={async () => {
+                  if (navigator.share) {
+                    try { await navigator.share({ title, text: content }); } catch {}
+                  } else {
+                    await handleCopy();
+                  }
+                }}
+                className="flex flex-col items-center gap-2 py-3 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-all"
+              >
                 <svg className="w-5 h-5 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
                 </svg>

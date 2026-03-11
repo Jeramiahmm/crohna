@@ -398,18 +398,22 @@ function FeaturesSection() {
     {
       title: "Timeline",
       description: "Every moment organized chronologically. A living record of the events that shaped your story.",
+      href: "/timeline",
     },
     {
       title: "Stories",
       description: "Beautiful, emotional summaries of your life chapters. Narratives crafted from your real experiences.",
+      href: "/insights",
     },
     {
       title: "Places",
       description: "See where your life happened on an animated map with pins for every memory.",
+      href: "/map",
     },
     {
       title: "Insights",
       description: "Discover patterns in your life — most active years, favorite cities, biggest milestones.",
+      href: "/insights",
     },
   ];
 
@@ -428,14 +432,16 @@ function FeaturesSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-white/[0.08]">
           {features.map((feature, i) => (
             <FadeUp key={feature.title} delay={i * 0.1}>
-              <div className="group bg-chrono-bg p-10 card-hover h-full">
-                <h3 className="text-lg font-display font-bold mb-3 text-chrono-text tracking-tight">
-                  {feature.title}
-                </h3>
-                <p className="text-sm font-body font-extralight leading-relaxed" style={{ color: "rgba(240,235,225,0.65)" }}>
-                  {feature.description}
-                </p>
-              </div>
+              <Link href={feature.href}>
+                <div className="group bg-chrono-bg p-10 card-hover h-full cursor-pointer">
+                  <h3 className="text-lg font-display font-bold mb-3 text-chrono-text tracking-tight">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm font-body font-extralight leading-relaxed" style={{ color: "rgba(240,235,225,0.65)" }}>
+                    {feature.description}
+                  </p>
+                </div>
+              </Link>
             </FadeUp>
           ))}
         </div>
