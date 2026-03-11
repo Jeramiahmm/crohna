@@ -28,8 +28,8 @@ html.light {
   --chrono-accent: 26 24 20;
   --chrono-glow: rgba(26,24,20,0.1);
   --chrono-text: 26 24 20;
-  --chrono-text-secondary: rgba(26,24,20,0.6);
-  --chrono-muted: rgba(26,24,20,0.5);
+  --chrono-text-secondary: rgba(26,24,20,0.7);
+  --chrono-muted: rgba(26,24,20,0.55);
 
   --background: #F5F0E8;
   --foreground: #1A1814;
@@ -226,6 +226,131 @@ html.light .card-hover:hover {
 html.light .archival-img {
   filter: brightness(0.95) saturate(0.7);
 }
+
+/* ============================================
+   Light mode: override all hardcoded white-based
+   Tailwind utilities so text is dark & readable
+   ============================================ */
+
+/* --- Text color overrides --- */
+html.light .text-white { color: #0D0B09 !important; }
+html.light .text-white\/90 { color: rgba(26,24,20,0.9) !important; }
+html.light .text-white\/80 { color: rgba(26,24,20,0.8) !important; }
+html.light .text-white\/70 { color: rgba(26,24,20,0.7) !important; }
+html.light .text-white\/60 { color: rgba(26,24,20,0.6) !important; }
+html.light .text-white\/50 { color: rgba(26,24,20,0.55) !important; }
+html.light .text-white\/40 { color: rgba(26,24,20,0.4) !important; }
+html.light .text-white\/30 { color: rgba(26,24,20,0.3) !important; }
+html.light .text-white\/20 { color: rgba(26,24,20,0.2) !important; }
+
+/* --- Hover text overrides --- */
+html.light .hover\:text-white:hover { color: #0D0B09 !important; }
+html.light .hover\:text-white\/60:hover { color: rgba(26,24,20,0.6) !important; }
+html.light .group:hover .group-hover\:text-white { color: #0D0B09 !important; }
+
+/* --- Border color overrides --- */
+html.light .border-white { border-color: #1A1814 !important; }
+html.light .border-white\/\[0\.06\] { border-color: rgba(26,24,20,0.06) !important; }
+html.light .border-white\/\[0\.08\] { border-color: rgba(26,24,20,0.08) !important; }
+html.light .border-white\/\[0\.1\] { border-color: rgba(26,24,20,0.1) !important; }
+html.light .border-white\/\[0\.12\] { border-color: rgba(26,24,20,0.12) !important; }
+html.light .border-white\/\[0\.15\] { border-color: rgba(26,24,20,0.15) !important; }
+html.light .border-white\/20 { border-color: rgba(26,24,20,0.2) !important; }
+html.light .border-white\/30 { border-color: rgba(26,24,20,0.3) !important; }
+
+/* --- Hover / focus border overrides --- */
+html.light .hover\:border-white\/15:hover { border-color: rgba(26,24,20,0.15) !important; }
+html.light .hover\:border-white\/20:hover { border-color: rgba(26,24,20,0.2) !important; }
+html.light .hover\:border-white\/30:hover { border-color: rgba(26,24,20,0.3) !important; }
+html.light .focus\:border-white\/30:focus { border-color: rgba(26,24,20,0.3) !important; }
+html.light .focus-within\:border-white\/30:focus-within { border-color: rgba(26,24,20,0.3) !important; }
+
+/* --- Background white-alpha overrides (decorative bgs) --- */
+html.light .bg-white\/\[0\.02\] { background-color: rgba(26,24,20,0.02) !important; }
+html.light .bg-white\/\[0\.04\] { background-color: rgba(26,24,20,0.04) !important; }
+html.light .bg-white\/\[0\.06\] { background-color: rgba(26,24,20,0.06) !important; }
+html.light .bg-white\/\[0\.08\] { background-color: rgba(26,24,20,0.08) !important; }
+html.light .bg-white\/\[0\.1\] { background-color: rgba(26,24,20,0.1) !important; }
+html.light .bg-white\/10 { background-color: rgba(26,24,20,0.1) !important; }
+html.light .bg-white\/20 { background-color: rgba(26,24,20,0.2) !important; }
+html.light .bg-white\/30 { background-color: rgba(26,24,20,0.3) !important; }
+html.light .bg-white\/60 { background-color: rgba(26,24,20,0.6) !important; }
+html.light .hover\:bg-white\/\[0\.1\]:hover { background-color: rgba(26,24,20,0.1) !important; }
+html.light .group:hover .group-hover\:bg-white\/\[0\.1\] { background-color: rgba(26,24,20,0.1) !important; }
+
+/* --- Solid white buttons: invert to dark in light mode --- */
+html.light .bg-white.text-black {
+  background-color: #1A1814 !important;
+  color: #F5F0E8 !important;
+}
+html.light .bg-white.text-black:hover {
+  background-color: rgba(26,24,20,0.85) !important;
+}
+html.light .hover\:bg-white\/90:hover {
+  background-color: rgba(26,24,20,0.85) !important;
+}
+
+/* Category active state (bg-white text-black border-2 border-white) */
+html.light .border-2.border-white {
+  border-color: #1A1814 !important;
+}
+
+/* --- Section label --- */
+html.light .section-label {
+  color: rgba(26,24,20,0.5) !important;
+}
+
+/* --- Placeholder text --- */
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: rgba(26,24,20,0.35) !important;
+}
+
+/* --- Date input color scheme --- */
+html.light input[type="date"] {
+  color-scheme: light !important;
+}
+
+/* --- Timeline line gradient --- */
+html.light .timeline-line {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(26,24,20,0.08) 10%,
+    rgba(26,24,20,0.08) 90%,
+    transparent 100%
+  );
+}
+
+/* --- Glow effects toned down in light mode --- */
+html.light .glow-text {
+  text-shadow: none;
+}
+html.light .glow-accent {
+  box-shadow: 0 0 40px rgba(26,24,20,0.04),
+              0 0 80px rgba(26,24,20,0.02);
+}
+
+/* --- Card hover border in light mode --- */
+html.light .card-hover:hover {
+  border-color: rgba(26,24,20,0.25);
+}
+
+/* --- Scrollbar light mode --- */
+html.light {
+  scrollbar-color: rgba(26,24,20,0.15) transparent;
+}
+html.light ::-webkit-scrollbar-thumb {
+  background: rgba(26,24,20,0.15);
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(26,24,20,0.25);
+}
+
+/* --- Black overlay bg overrides --- */
+html.light .bg-black\/30 { background-color: rgba(26,24,20,0.15) !important; }
+html.light .bg-black\/50 { background-color: rgba(26,24,20,0.2) !important; }
+html.light .hover\:bg-black\/50:hover { background-color: rgba(26,24,20,0.2) !important; }
 
 /* CSS variables for shadcn/tubelight compatibility */
 @layer base {
