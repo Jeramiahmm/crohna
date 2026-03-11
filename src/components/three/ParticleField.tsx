@@ -57,13 +57,13 @@ export default function ParticleField() {
         // Soft glow
         ctx.beginPath();
         ctx.arc(star.x, star.y, radius * 3, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(201, 169, 110, ${opacity * 0.06})`;
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.04})`;
         ctx.fill();
 
-        // Core dot
+        // Core dot — white
         ctx.beginPath();
         ctx.arc(star.x, star.y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(240, 235, 225, ${opacity})`;
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
         ctx.fill();
       }
 

@@ -17,8 +17,8 @@ export default function MapPage() {
           <span className="section-label mb-5 block">
             Explore
           </span>
-          <h1 className="text-5xl md:text-7xl font-display font-light mb-6 tracking-tight">
-            <em className="gradient-text">Life Map</em>
+          <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-tight">
+            <em className="text-white">Life Map</em>
           </h1>
           <p className="text-base font-body font-light text-chrono-text-secondary max-w-md mx-auto leading-relaxed">
             See where your life happened. Every memory pinned to
@@ -53,7 +53,7 @@ export default function MapPage() {
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[1px] bg-chrono-accent/8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[1px] bg-white/[0.06]">
             {demoEvents
               .filter((e) => e.location)
               .map((event, i) => (
@@ -67,7 +67,7 @@ export default function MapPage() {
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <svg
-                      className="w-3 h-3 text-chrono-accent/60"
+                      className="w-3 h-3 text-white/60"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"

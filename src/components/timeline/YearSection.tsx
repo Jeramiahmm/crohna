@@ -16,7 +16,7 @@ export default function YearSection({ year, events, onEditEvent }: YearSectionPr
     <div className="relative">
       {/* Ghost watermark year */}
       <div className="absolute -top-10 left-1/2 -translate-x-1/2 pointer-events-none select-none z-0">
-        <span className="text-[clamp(120px,15vw,240px)] font-display font-light leading-none" style={{ color: "rgba(201,169,110,0.03)" }}>
+        <span className="text-[clamp(120px,15vw,240px)] font-display font-bold leading-none" style={{ color: "rgba(255,255,255,0.03)" }}>
           {year}
         </span>
       </div>
@@ -29,7 +29,7 @@ export default function YearSection({ year, events, onEditEvent }: YearSectionPr
         className="sticky top-24 z-10 flex justify-center mb-16"
       >
         <div className="relative text-center">
-          <span className="text-2xl md:text-3xl font-display font-light text-chrono-text">
+          <span className="text-2xl md:text-3xl font-display font-bold text-chrono-text">
             {year}
           </span>
         </div>
@@ -56,7 +56,7 @@ export default function YearSection({ year, events, onEditEvent }: YearSectionPr
             className="w-full h-full origin-top"
             style={{
               background:
-                "linear-gradient(180deg, transparent 0%, rgba(201,169,110,0.08) 10%, rgba(201,169,110,0.08) 90%, transparent 100%)",
+                "linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.06) 10%, rgba(255,255,255,0.06) 90%, transparent 100%)",
             }}
           />
         </div>
@@ -78,7 +78,7 @@ export default function YearSection({ year, events, onEditEvent }: YearSectionPr
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: 0.2 }}
                     className="w-2.5 h-2.5 rounded-full ring-4 ring-chrono-bg"
-                    style={{ backgroundColor: "rgba(201,169,110,0.4)" }}
+                    style={{ backgroundColor: "rgba(255,255,255,0.3)" }}
                   />
                 </div>
 

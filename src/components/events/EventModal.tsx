@@ -5,11 +5,11 @@ import { useState, useCallback, useRef } from "react";
 import { TimelineEvent } from "@/data/demo";
 
 const categories = [
-  { value: "travel", label: "Travel", color: "#C9A96E" },
-  { value: "career", label: "Career", color: "#D4B87A" },
-  { value: "achievement", label: "Achievement", color: "#C9A96E" },
-  { value: "education", label: "Education", color: "#A89060" },
-  { value: "life", label: "Life", color: "#B8A070" },
+  { value: "travel", label: "Travel" },
+  { value: "career", label: "Career" },
+  { value: "achievement", label: "Achievement" },
+  { value: "education", label: "Education" },
+  { value: "life", label: "Life" },
 ];
 
 const chapters = [
@@ -115,7 +115,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.97 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-x-4 top-[5%] bottom-[5%] md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-xl md:max-h-[85vh] z-[70] bg-chrono-surface border border-chrono-accent/15 overflow-hidden flex flex-col"
+            className="fixed inset-x-4 top-[5%] bottom-[5%] md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-xl md:max-h-[85vh] z-[70] bg-chrono-surface border border-white/[0.12] overflow-hidden flex flex-col"
           >
             <AnimatePresence>
               {showSuccess && (
@@ -129,31 +129,31 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    className="w-16 h-16 rounded-full bg-chrono-accent/10 flex items-center justify-center"
+                    className="w-16 h-16 rounded-full bg-white/[0.08] flex items-center justify-center"
                   >
-                    <svg className="w-8 h-8 text-chrono-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-8 h-8 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   </motion.div>
-                  <p className="text-chrono-text font-display font-semibold">
+                  <p className="text-chrono-text font-display font-bold">
                     {isEditing ? "Event updated" : "Event created"}
                   </p>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <div className="flex items-center justify-between p-6 border-b border-chrono-accent/10">
+            <div className="flex items-center justify-between p-6 border-b border-white/[0.08]">
               <div>
-                <h2 className="text-xl font-display font-light text-chrono-text">
+                <h2 className="text-xl font-display font-bold text-chrono-text">
                   {isEditing ? "Edit Event" : "New Event"}
                 </h2>
-                <p className="text-xs font-body font-light text-chrono-muted mt-1">
+                <p className="text-xs font-body font-extralight text-chrono-muted mt-1">
                   {isEditing ? "Update your memory" : "Add a moment to your timeline"}
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="w-8 h-8 bg-chrono-card flex items-center justify-center text-chrono-muted hover:text-chrono-text hover:bg-chrono-border/40 transition-all"
+                className="w-8 h-8 rounded-full bg-chrono-card flex items-center justify-center text-chrono-muted hover:text-chrono-text hover:bg-white/[0.06] transition-all"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -171,10 +171,10 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                   onClick={() => fileInputRef.current?.click()}
                   className={`relative h-40 border-2 border-dashed transition-all cursor-pointer overflow-hidden ${
                     dragOver
-                      ? "border-chrono-accent/40 bg-chrono-accent/5"
+                      ? "border-white/30 bg-white/[0.03]"
                       : form.imageUrl
-                      ? "border-chrono-border/20"
-                      : "border-chrono-border/30 hover:border-chrono-border/50 bg-chrono-card/20"
+                      ? "border-white/[0.08]"
+                      : "border-white/[0.12] hover:border-white/20 bg-chrono-card/20"
                   }`}
                 >
                   {form.imageUrl ? (
@@ -199,15 +199,15 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
 
               <div>
                 <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">
-                  Title <span className="text-chrono-accent">*</span>
+                  Title <span className="text-white/60">*</span>
                 </label>
                 <input
                   type="text"
                   value={form.title}
                   onChange={(e) => { setForm((f) => ({ ...f, title: e.target.value })); setErrors((er) => ({ ...er, title: "" })); }}
                   placeholder="What happened?"
-                  className={`w-full bg-chrono-card/40 px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border transition-colors outline-none focus:border-chrono-accent/40 ${
-                    errors.title ? "border-red-500/40" : "border-chrono-border/20"
+                  className={`w-full bg-chrono-card/40 px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border transition-colors outline-none focus:border-white/30 ${
+                    errors.title ? "border-red-500/40" : "border-white/[0.08]"
                   }`}
                 />
                 {errors.title && <p className="text-xs text-red-400/70 mt-1">{errors.title}</p>}
@@ -216,14 +216,14 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">
-                    Date <span className="text-chrono-accent">*</span>
+                    Date <span className="text-white/60">*</span>
                   </label>
                   <input
                     type="date"
                     value={form.date}
                     onChange={(e) => { setForm((f) => ({ ...f, date: e.target.value })); setErrors((er) => ({ ...er, date: "" })); }}
-                    className={`w-full bg-chrono-card/40 px-4 py-3 text-sm text-chrono-text border transition-colors outline-none focus:border-chrono-accent/40 [color-scheme:dark] ${
-                      errors.date ? "border-red-500/40" : "border-chrono-border/20"
+                    className={`w-full bg-chrono-card/40 px-4 py-3 text-sm text-chrono-text border transition-colors outline-none focus:border-white/30 [color-scheme:dark] ${
+                      errors.date ? "border-red-500/40" : "border-white/[0.08]"
                     }`}
                   />
                   {errors.date && <p className="text-xs text-red-400/70 mt-1">{errors.date}</p>}
@@ -235,7 +235,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                     value={form.location}
                     onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
                     placeholder="City, State"
-                    className="w-full bg-chrono-card/40 px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border border-chrono-border/20 transition-colors outline-none focus:border-chrono-accent/40"
+                    className="w-full bg-chrono-card/40 px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border border-white/[0.08] transition-colors outline-none focus:border-white/30"
                   />
                 </div>
               </div>
@@ -247,7 +247,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                   placeholder="Tell the story behind this moment..."
                   rows={3}
-                  className="w-full bg-chrono-card/40 px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border border-chrono-border/20 transition-colors outline-none focus:border-chrono-accent/40 resize-none"
+                  className="w-full bg-chrono-card/40 px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border border-white/[0.08] transition-colors outline-none focus:border-white/30 resize-none"
                 />
               </div>
 
@@ -258,16 +258,11 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                     <button
                       key={cat.value}
                       onClick={() => setForm((f) => ({ ...f, category: f.category === cat.value ? "" : cat.value }))}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-all ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
                         form.category === cat.value
-                          ? "border-2"
-                          : "border border-chrono-border/20 text-chrono-text-secondary hover:border-chrono-border/40"
+                          ? "bg-white text-black border-2 border-white"
+                          : "border border-white/[0.08] text-white/60 hover:border-white/20"
                       }`}
-                      style={
-                        form.category === cat.value
-                          ? { backgroundColor: `${cat.color}12`, borderColor: `${cat.color}40`, color: cat.color }
-                          : {}
-                      }
                     >
                       {cat.label}
                     </button>
@@ -284,10 +279,10 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                     <button
                       key={ch}
                       onClick={() => setForm((f) => ({ ...f, chapter: f.chapter === ch ? "" : ch }))}
-                      className={`px-3 py-1.5 text-xs transition-all ${
+                      className={`px-3 py-1.5 text-xs rounded-full transition-all ${
                         form.chapter === ch
-                          ? "bg-chrono-accent/10 border border-chrono-accent/30 text-chrono-accent"
-                          : "bg-chrono-card/30 border border-chrono-border/20 text-chrono-text-secondary hover:border-chrono-border/40"
+                          ? "bg-white/[0.1] border border-white/30 text-white"
+                          : "bg-chrono-card/30 border border-white/[0.08] text-white/60 hover:border-white/20"
                       }`}
                     >
                       {ch}
@@ -297,7 +292,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
               </div>
             </div>
 
-            <div className="p-6 border-t border-chrono-accent/10 flex items-center justify-between">
+            <div className="p-6 border-t border-white/[0.08] flex items-center justify-between">
               {isEditing && onDelete ? (
                 <button
                   onClick={() => onDelete(event!.id)}
@@ -311,17 +306,17 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
               <div className="flex items-center gap-3">
                 <button
                   onClick={onClose}
-                  className="px-5 py-2.5 text-sm text-chrono-text-secondary hover:text-chrono-text transition-colors"
+                  className="px-5 py-2.5 text-sm text-white/60 hover:text-chrono-text transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="px-6 py-2.5 text-sm font-body font-light bg-chrono-accent text-chrono-bg rounded-none hover:bg-chrono-accent-warm transition-colors duration-500 disabled:opacity-50 flex items-center gap-2"
+                  className="px-6 py-2.5 text-sm font-body font-light bg-white text-black rounded-full hover:bg-white/90 transition-colors duration-500 disabled:opacity-50 flex items-center gap-2"
                 >
                   {saving && (
-                    <div className="w-3.5 h-3.5 border-2 border-chrono-bg/30 border-t-chrono-bg rounded-full animate-spin" />
+                    <div className="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                   )}
                   {isEditing ? "Save Changes" : "Create Event"}
                 </button>

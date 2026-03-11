@@ -21,19 +21,19 @@ export default function AIStorySummary({ story, index }: AIStorySummaryProps) {
       }}
       className="relative group"
     >
-      <div className="relative bg-chrono-card/30 p-8 md:p-12 border border-chrono-accent/10 overflow-hidden card-hover">
+      <div className="relative bg-chrono-card/30 p-8 md:p-12 border border-white/[0.12] overflow-hidden card-hover">
         <div className="relative flex items-center gap-2 mb-6">
           <span className="section-label">
             Story
           </span>
-          <span className="text-xs font-body font-light text-chrono-muted">{story.period}</span>
+          <span className="text-xs font-body font-extralight text-chrono-muted">{story.period}</span>
         </div>
 
-        <h3 className="relative text-2xl md:text-3xl font-display font-light mb-4 gradient-text">
+        <h3 className="relative text-2xl md:text-3xl font-display font-bold mb-4 text-white">
           {story.title}
         </h3>
 
-        <p className="relative text-chrono-text-secondary font-body font-light leading-relaxed text-base mb-8">
+        <p className="relative font-body font-extralight leading-relaxed text-base mb-8" style={{ color: "rgba(240,235,225,0.65)" }}>
           {story.summary}
         </p>
 
@@ -47,14 +47,14 @@ export default function AIStorySummary({ story, index }: AIStorySummaryProps) {
               transition={{ delay: 0.3 + i * 0.1 }}
               className="flex items-start gap-3"
             >
-              <div className="w-1 h-1 rounded-full bg-chrono-accent/50 mt-2 flex-shrink-0" />
-              <span className="text-sm font-body font-light text-chrono-text-secondary">{highlight}</span>
+              <div className="w-1 h-1 rounded-full bg-white/40 mt-2 flex-shrink-0" />
+              <span className="text-sm font-body font-extralight" style={{ color: "rgba(240,235,225,0.65)" }}>{highlight}</span>
             </motion.div>
           ))}
         </div>
 
         {story.stats && (
-          <div className="relative grid grid-cols-2 md:grid-cols-3 gap-[1px] bg-chrono-accent/8">
+          <div className="relative grid grid-cols-2 md:grid-cols-3 gap-[1px] bg-white/[0.06]">
             {Object.entries(story.stats).map(([key, value], i) => (
               <motion.div
                 key={key}
@@ -64,10 +64,10 @@ export default function AIStorySummary({ story, index }: AIStorySummaryProps) {
                 transition={{ delay: 0.5 + i * 0.1 }}
                 className="bg-chrono-bg p-4"
               >
-                <div className="text-lg md:text-xl font-display font-light text-chrono-text">
+                <div className="text-lg md:text-xl font-display font-bold text-chrono-text">
                   {value}
                 </div>
-                <div className="text-[11px] font-body font-light text-chrono-muted uppercase tracking-wider mt-1">
+                <div className="text-[11px] font-body font-extralight text-chrono-muted uppercase tracking-wider mt-1">
                   {key}
                 </div>
               </motion.div>

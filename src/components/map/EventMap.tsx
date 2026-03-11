@@ -58,18 +58,18 @@ export default function EventMap({ events }: EventMapProps) {
           <div style="position:relative;width:12px;height:12px;">
             <div style="
               width:12px;height:12px;border-radius:50%;
-              background:rgba(201,169,110,0.3);
-              border:1.5px solid rgba(201,169,110,0.8);
-              box-shadow:0 0 20px rgba(201,169,110,0.5);
+              background:rgba(255,255,255,0.12);
+              border:1.5px solid rgba(255,255,255,0.8);
+              box-shadow:0 0 20px rgba(255,255,255,0.4);
             "></div>
             <div style="
               position:absolute;inset:-4px;border-radius:50%;
-              border:1px solid rgba(201,169,110,0.3);
+              border:1px solid rgba(255,255,255,0.3);
               animation:markerPulse 2s ease-out infinite;
             "></div>
             <div style="
               position:absolute;inset:-8px;border-radius:50%;
-              border:1px solid rgba(201,169,110,0.15);
+              border:1px solid rgba(255,255,255,0.15);
               animation:markerPulse 2s ease-out infinite 0.5s;
             "></div>
           </div>
@@ -86,13 +86,13 @@ export default function EventMap({ events }: EventMapProps) {
 
         const popupContent = `
           <div style="
-            background:rgba(8,8,8,0.95);
-            border:1px solid rgba(201,169,110,0.2);
+            background:rgba(5,5,5,0.95);
+            border:1px solid rgba(255,255,255,0.12);
             padding:12px 16px;
-            font-family:Jost,system-ui,sans-serif;
+            font-family:var(--font-body),system-ui,sans-serif;
             min-width:160px;
           ">
-            <div style="font-size:13px;color:#F0EBE1;font-weight:300;margin-bottom:4px;">
+            <div style="font-size:13px;color:#F0EBE1;font-weight:200;margin-bottom:4px;">
               ${event.title}
             </div>
             <div style="font-size:11px;color:rgba(240,235,225,0.45);">
@@ -115,7 +115,7 @@ export default function EventMap({ events }: EventMapProps) {
       if (eventsWithCoords.length > 1) {
         const latlngs = eventsWithCoords.map((e) => [e.latitude!, e.longitude!]);
         L.polyline(latlngs, {
-          color: "rgba(201,169,110,0.15)",
+          color: "rgba(255,255,255,0.1)",
           weight: 1,
           dashArray: "4 8",
         }).addTo(map);
@@ -136,12 +136,12 @@ export default function EventMap({ events }: EventMapProps) {
   }, []);
 
   return (
-    <div className="relative w-full h-full min-h-[360px] md:min-h-[700px] bg-chrono-surface overflow-hidden border border-chrono-accent/10">
+    <div className="relative w-full h-full min-h-[360px] md:min-h-[700px] bg-chrono-surface overflow-hidden border border-white/[0.12]">
       <div ref={mapRef} className="absolute inset-0 z-0" />
 
       {!mapLoaded && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-chrono-surface">
-          <div className="text-sm font-body font-light text-chrono-muted animate-pulse">
+          <div className="text-sm font-body font-extralight text-chrono-muted animate-pulse">
             Loading map...
           </div>
         </div>
@@ -164,24 +164,23 @@ export default function EventMap({ events }: EventMapProps) {
                   fill
                   className="object-cover archival-img"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-chrono-card via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(5,5,5,0.45)] via-transparent to-transparent" />
               </div>
             )}
             <div className="p-5">
               <div className="flex items-center gap-2 mb-2">
                 <div
-                  className="w-1.5 h-1.5 rounded-full"
-                  style={{ backgroundColor: getCategoryColor(selectedEvent.category) }}
+                  className="w-1.5 h-1.5 rounded-full bg-white/60"
                 />
-                <span className="text-xs font-body font-light text-chrono-muted">
+                <span className="text-xs font-body font-extralight text-chrono-muted">
                   {formatDate(selectedEvent.date)}
                 </span>
               </div>
-              <h3 className="text-lg font-display font-light text-chrono-text mb-1">
+              <h3 className="text-lg font-display font-bold text-chrono-text mb-1">
                 {selectedEvent.title}
               </h3>
               {selectedEvent.location && (
-                <p className="text-xs font-body font-light text-chrono-muted mb-3 flex items-center gap-1">
+                <p className="text-xs font-body font-extralight text-chrono-muted mb-3 flex items-center gap-1">
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 0115 0z" />
@@ -190,13 +189,13 @@ export default function EventMap({ events }: EventMapProps) {
                 </p>
               )}
               {selectedEvent.description && (
-                <p className="text-sm font-body font-light text-chrono-text-secondary leading-relaxed">
+                <p className="text-sm font-body font-extralight leading-relaxed" style={{ color: "rgba(240,235,225,0.65)" }}>
                   {selectedEvent.description}
                 </p>
               )}
               <button
                 onClick={() => setSelectedEvent(null)}
-                className="mt-4 text-xs font-body font-light text-chrono-muted hover:text-chrono-accent transition-colors"
+                className="mt-4 text-xs font-body font-extralight text-chrono-muted hover:text-white transition-colors"
               >
                 Close
               </button>
@@ -209,18 +208,18 @@ export default function EventMap({ events }: EventMapProps) {
         <div className="section-label mb-2">Legend</div>
         <div className="flex flex-wrap gap-3">
           {[
-            { label: "Travel", color: "#C9A96E" },
-            { label: "Career", color: "#D4B87A" },
-            { label: "Achievement", color: "#C9A96E" },
-            { label: "Education", color: "#A89060" },
-            { label: "Life", color: "#B8A070" },
+            { label: "Travel", color: "rgba(255,255,255,0.8)" },
+            { label: "Career", color: "rgba(255,255,255,0.6)" },
+            { label: "Achievement", color: "rgba(255,255,255,0.9)" },
+            { label: "Education", color: "rgba(255,255,255,0.5)" },
+            { label: "Life", color: "rgba(255,255,255,0.7)" },
           ].map((item) => (
             <div key={item.label} className="flex items-center gap-1.5">
               <div
                 className="w-2 h-2 rounded-full"
                 style={{ backgroundColor: item.color }}
               />
-              <span className="text-[11px] font-body font-light text-chrono-text-secondary">
+              <span className="text-[11px] font-body font-extralight" style={{ color: "rgba(240,235,225,0.65)" }}>
                 {item.label}
               </span>
             </div>

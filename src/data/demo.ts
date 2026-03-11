@@ -298,11 +298,11 @@ export const insightStats = {
   yearWithMostEvents: 2024,
   longestStreak: "14 days",
   categories: [
-    { name: "Travel", count: 5, color: "#C9A96E" },
-    { name: "Career", count: 4, color: "#D4B87A" },
-    { name: "Achievement", count: 3, color: "#C9A96E" },
-    { name: "Education", count: 2, color: "#A89060" },
-    { name: "Life", count: 2, color: "#B8A070" },
+    { name: "Travel", count: 5, color: "rgba(255,255,255,0.8)" },
+    { name: "Career", count: 4, color: "rgba(255,255,255,0.6)" },
+    { name: "Achievement", count: 3, color: "rgba(255,255,255,0.9)" },
+    { name: "Education", count: 2, color: "rgba(255,255,255,0.5)" },
+    { name: "Life", count: 2, color: "rgba(255,255,255,0.7)" },
   ],
   yearlyEvents: [
     { year: 2022, count: 3 },

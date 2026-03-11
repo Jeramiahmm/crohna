@@ -6,10 +6,16 @@
   --chrono-bg: #080808;
   --chrono-surface: #0F0F0F;
   --chrono-card: #141414;
-  --chrono-accent: #C9A96E;
-  --chrono-glow: rgba(201,169,110,0.5);
+  --chrono-accent: rgba(255,255,255,0.8);
+  --chrono-glow: rgba(255,255,255,0.3);
   --chrono-text: #F0EBE1;
   --chrono-muted: rgba(240,235,225,0.45);
+
+  --background: #080808;
+  --foreground: #F0EBE1;
+  --primary: rgba(255,255,255,0.8);
+  --border: rgba(255,255,255,0.12);
+  --muted: rgba(255,255,255,0.06);
 }
 
 * {
@@ -27,12 +33,12 @@ html {
 body {
   background: var(--chrono-bg);
   color: var(--chrono-text);
-  font-family: "Jost", var(--font-body), system-ui, sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
   overflow-x: hidden;
 }
 
 /* Grain texture overlay */
-body > *:first-child::before {
+body::after {
   content: "";
   position: fixed;
   inset: 0;
@@ -55,7 +61,7 @@ body > *:first-child::before {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(201,169,110,0.3);
+  background: rgba(255,255,255,0.15);
 }
 
 /* Custom utility classes */
@@ -68,58 +74,44 @@ body > *:first-child::before {
     background: rgba(8, 8, 8, 0.7);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(201,169,110,0.12);
+    border: 1px solid rgba(255,255,255,0.12);
   }
 
   .glass-strong {
     background: rgba(8, 8, 8, 0.94);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
-    border: 1px solid rgba(201,169,110,0.18);
+    border: 1px solid rgba(255,255,255,0.15);
   }
 
   .glow-accent {
-    box-shadow: 0 0 40px rgba(201,169,110,0.06),
-                0 0 80px rgba(201,169,110,0.02);
+    box-shadow: 0 0 40px rgba(255,255,255,0.04),
+                0 0 80px rgba(255,255,255,0.02);
   }
 
   .glow-text {
-    text-shadow: 0 0 40px rgba(201,169,110,0.15);
+    text-shadow: 0 0 40px rgba(255,255,255,0.1);
   }
 
   .gradient-text {
-    background: linear-gradient(135deg, #F0EBE1 0%, #C9A96E 60%, #A89060 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #F0EBE1;
   }
 
   .gradient-text-subtle {
-    background: linear-gradient(135deg, #F0EBE1 0%, rgba(240,235,225,0.65) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .gold-border {
-    border: 1px solid rgba(201,169,110,0.18);
-  }
-
-  .gold-border-hover:hover {
-    border-color: rgba(201,169,110,0.4);
+    color: rgba(240,235,225,0.65);
   }
 
   .section-label {
     font-size: 10px;
     letter-spacing: 0.5em;
     text-transform: uppercase;
-    color: #C9A96E;
-    font-family: "Jost", var(--font-body), system-ui, sans-serif;
-    font-weight: 300;
+    color: rgba(255,255,255,0.8);
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-weight: 200;
   }
 
   .archival-img {
-    filter: brightness(0.88) saturate(0.6) sepia(0.25);
+    filter: brightness(0.85) saturate(0.5);
   }
 
   .noise-bg {
@@ -139,8 +131,8 @@ body > *:first-child::before {
     background: linear-gradient(
       180deg,
       transparent 0%,
-      rgba(201,169,110,0.12) 10%,
-      rgba(201,169,110,0.12) 90%,
+      rgba(255,255,255,0.08) 10%,
+      rgba(255,255,255,0.08) 90%,
       transparent 100%
     );
   }
@@ -154,8 +146,8 @@ body > *:first-child::before {
   .card-hover:hover {
     transform: translateY(-6px);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4),
-                0 0 40px rgba(201,169,110,0.04);
-    border-color: rgba(201,169,110,0.4);
+                0 0 40px rgba(255,255,255,0.02);
+    border-color: rgba(255,255,255,0.25);
   }
 
   .mask-gradient-b {
@@ -170,10 +162,10 @@ body > *:first-child::before {
 
   .watermark {
     position: absolute;
-    font-family: "Cormorant Garamond", var(--font-display), Georgia, serif;
-    font-weight: 300;
+    font-family: var(--font-display), Georgia, serif;
+    font-weight: 700;
     font-size: clamp(120px, 15vw, 240px);
-    color: rgba(201,169,110,0.03);
+    color: rgba(255,255,255,0.03);
     pointer-events: none;
     user-select: none;
     line-height: 1;
@@ -189,9 +181,19 @@ html.lenis {
   scroll-behavior: auto;
 }
 
-/* Selection color — gold */
+/* Selection color — white */
 ::selection {
-  background: rgba(201,169,110,0.2);
+  background: rgba(255,255,255,0.15);
   color: #F0EBE1;
 }
 
+/* CSS variables for shadcn/tubelight compatibility */
+@layer base {
+  :root {
+    --background: 0 0% 3.1%;
+    --foreground: 40 28% 91%;
+    --primary: 0 0% 100%;
+    --muted: 0 0% 8%;
+    --border: 0 0% 100%;
+  }
+}

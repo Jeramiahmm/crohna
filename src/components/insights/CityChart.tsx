@@ -16,9 +16,9 @@ export default function CityChart({ data }: { data: CityData[] }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-      className="bg-chrono-card/40 p-6 md:p-8 border border-chrono-accent/10"
+      className="bg-chrono-card/40 p-6 md:p-8 border border-white/[0.12]"
     >
-      <h3 className="text-lg font-display font-light text-chrono-text mb-6">
+      <h3 className="text-lg font-display font-bold text-chrono-text mb-6">
         Most Visited Cities
       </h3>
 
@@ -45,7 +45,7 @@ export default function CityChart({ data }: { data: CityData[] }) {
                   delay: 0.3 + i * 0.1,
                   ease: [0.16, 1, 0.3, 1],
                 }}
-                className="h-full bg-gradient-to-r from-chrono-accent/40 to-chrono-accent/70"
+                className="h-full bg-gradient-to-r from-white/30 to-white/60"
               />
             </div>
             <span className="text-sm font-body font-light text-chrono-text w-6 text-right">

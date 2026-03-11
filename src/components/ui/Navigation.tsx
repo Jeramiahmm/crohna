@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { Home, Clock, BarChart3, Map, Settings } from "lucide-react";
+import { NavBar } from "./tubelight-navbar";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -11,6 +13,14 @@ const navItems = [
   { href: "/insights", label: "Insights" },
   { href: "/map", label: "Map" },
   { href: "/settings", label: "Settings" },
+];
+
+const tubelightItems = [
+  { name: "Home", url: "/", icon: Home },
+  { name: "Timeline", url: "/timeline", icon: Clock },
+  { name: "Insights", url: "/insights", icon: BarChart3 },
+  { name: "Map", url: "/map", icon: Map },
+  { name: "Settings", url: "/settings", icon: Settings },
 ];
 
 export default function Navigation() {
@@ -26,77 +36,45 @@ export default function Navigation() {
 
   return (
     <>
+      {/* Desktop: Tubelight Navbar */}
+      <div className="hidden md:block">
+        <NavBar items={tubelightItems} />
+      </div>
+
+      {/* Mobile: hamburger nav with fullscreen overlay */}
       <motion.nav
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        className={`fixed top-0 left-0 right-0 z-50 md:hidden transition-all duration-500 ${
           scrolled
-            ? "backdrop-blur-xl bg-chrono-bg/90 border-b border-chrono-accent/10 py-3"
+            ? "backdrop-blur-xl bg-chrono-bg/90 border-b border-white/[0.12] py-3"
             : "bg-transparent py-5"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-chrono-accent/60 text-base leading-none select-none">&#x2022;</span>
-            <span className="text-[13px] font-body font-light tracking-[0.25em] uppercase text-chrono-text">
+            <span className="text-white/60 text-base leading-none select-none">&#x2022;</span>
+            <span className="text-[13px] font-display font-bold tracking-[0.25em] uppercase text-chrono-text">
               Chrono
             </span>
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="relative px-4 py-2 text-sm font-body font-light transition-colors"
-              >
-                <span
-                  className={
-                    pathname === item.href
-                      ? "text-chrono-accent"
-                      : "text-chrono-muted hover:text-chrono-text"
-                  }
-                >
-                  {item.label}
-                </span>
-                {pathname === item.href && (
-                  <motion.div
-                    layoutId="nav-indicator"
-                    className="absolute bottom-0 left-2 right-2 h-[1px] bg-chrono-accent/40"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-              </Link>
-            ))}
-          </div>
-
-          <div className="hidden md:flex items-center gap-3">
-            <button className="px-5 py-2 text-sm font-body font-light text-chrono-muted hover:text-chrono-text transition-colors">
-              Sign In
-            </button>
-            <button className="px-5 py-2 text-sm font-body font-light bg-chrono-accent text-chrono-bg rounded-none hover:bg-chrono-accent-warm transition-colors duration-500">
-              Get Started
-            </button>
-          </div>
-
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden flex flex-col gap-1.5 p-2"
+            className="flex flex-col gap-1.5 p-2"
           >
             <motion.span
               animate={{ rotate: mobileOpen ? 45 : 0, y: mobileOpen ? 6 : 0 }}
-              className="w-5 h-[1px] bg-chrono-accent block"
+              className="w-5 h-[1px] bg-white/80 block"
             />
             <motion.span
               animate={{ opacity: mobileOpen ? 0 : 1 }}
-              className="w-5 h-[1px] bg-chrono-accent block"
+              className="w-5 h-[1px] bg-white/80 block"
             />
             <motion.span
               animate={{ rotate: mobileOpen ? -45 : 0, y: mobileOpen ? -6 : 0 }}
-              className="w-5 h-[1px] bg-chrono-accent block"
+              className="w-5 h-[1px] bg-white/80 block"
             />
           </button>
         </div>
@@ -122,9 +100,9 @@ export default function Navigation() {
                   <Link
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
-                    className={`block text-3xl font-display font-light py-3 ${
+                    className={`block text-3xl font-display font-bold py-3 ${
                       pathname === item.href
-                        ? "text-chrono-accent"
+                        ? "text-white"
                         : "text-chrono-muted"
                     }`}
                   >
@@ -134,10 +112,10 @@ export default function Navigation() {
               ))}
             </div>
             <div className="mt-12 flex flex-col gap-4">
-              <button className="w-full py-3 text-sm font-body font-light text-chrono-muted border border-chrono-accent/20 rounded-none">
+              <button className="w-full py-3 text-sm font-body font-light text-chrono-muted border border-white/[0.12] rounded-full">
                 Sign In
               </button>
-              <button className="w-full py-3 text-sm font-body font-light bg-chrono-accent text-chrono-bg rounded-none">
+              <button className="w-full py-3 text-sm font-body font-light bg-white text-black rounded-full">
                 Get Started
               </button>
             </div>

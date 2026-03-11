@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { TimelineEvent } from "@/data/demo";
-import { formatDate, getCategoryColor, getSeason } from "@/lib/utils";
+import { formatDate, getSeason } from "@/lib/utils";
 
 interface TimelineCardProps {
   event: TimelineEvent;
@@ -13,8 +13,6 @@ interface TimelineCardProps {
 }
 
 export default function TimelineCard({ event, index, isLeft = false, onEdit }: TimelineCardProps) {
-  const categoryColor = getCategoryColor(event.category);
-
   return (
     <motion.div
       initial={{ opacity: 0, x: isLeft ? -40 : 40, y: 20 }}
@@ -27,7 +25,7 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
       }}
       className={`relative group ${isLeft ? "md:pr-12" : "md:pl-12"}`}
     >
-      <div className="relative bg-chrono-card/40 overflow-hidden border border-chrono-accent/10 card-hover">
+      <div className="relative bg-chrono-card/40 overflow-hidden border border-white/[0.12] card-hover">
         {event.imageUrl && (
           <div className="relative h-52 md:h-60 overflow-hidden">
             <Image
@@ -37,15 +35,14 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
               className="object-cover archival-img transition-transform duration-700 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-chrono-card via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[rgba(5,5,5,0.45)] via-transparent to-transparent" />
 
             <div className="absolute top-4 left-4">
               <span
-                className="px-3 py-1 text-xs font-body font-light backdrop-blur-md border"
+                className="px-3 py-1 text-xs font-body font-extralight backdrop-blur-md border border-white/[0.12] rounded-full"
                 style={{
-                  backgroundColor: `${categoryColor}12`,
-                  borderColor: `${categoryColor}25`,
-                  color: categoryColor,
+                  backgroundColor: "rgba(255,255,255,0.06)",
+                  color: "rgba(255,255,255,0.8)",
                 }}
               >
                 {event.category}
@@ -55,7 +52,7 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
             {onEdit && (
               <button
                 onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                className="absolute top-4 right-4 w-8 h-8 bg-black/30 backdrop-blur-md flex items-center justify-center text-white/50 hover:text-white hover:bg-black/50 opacity-0 group-hover:opacity-100 transition-all"
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white/50 hover:text-white hover:bg-black/50 opacity-0 group-hover:opacity-100 transition-all"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -65,7 +62,7 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
 
             {event.source && event.source !== "manual" && (
               <div className="absolute bottom-4 right-4">
-                <span className="px-2 py-1 text-[10px] font-body font-light bg-white/8 text-white/50 backdrop-blur-md">
+                <span className="px-2 py-1 text-[10px] font-body font-extralight bg-white/[0.06] text-white/50 backdrop-blur-md rounded-full">
                   {event.source}
                 </span>
               </div>
@@ -76,7 +73,7 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
         {!event.imageUrl && onEdit && (
           <button
             onClick={(e) => { e.stopPropagation(); onEdit(); }}
-            className="absolute top-4 right-4 w-8 h-8 bg-chrono-card/80 flex items-center justify-center text-chrono-muted hover:text-chrono-text opacity-0 group-hover:opacity-100 transition-all z-10"
+            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-chrono-card/80 flex items-center justify-center text-chrono-muted hover:text-chrono-text opacity-0 group-hover:opacity-100 transition-all z-10"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -86,29 +83,29 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
 
         <div className="p-6 md:p-7">
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-[10px] font-body font-light text-chrono-accent uppercase tracking-[0.2em]">
+            <span className="text-[10px] font-body font-extralight text-white/80 uppercase tracking-[0.2em]">
               {getSeason(event.date)}
             </span>
             {event.location && (
               <>
-                <span className="text-chrono-accent/20 text-[10px]">/</span>
-                <span className="text-[10px] font-body font-light text-chrono-text-secondary">
+                <span className="text-white/20 text-[10px]">/</span>
+                <span className="text-[10px] font-body font-extralight" style={{ color: "rgba(240,235,225,0.65)" }}>
                   {event.location}
                 </span>
               </>
             )}
           </div>
 
-          <div className="text-xs font-body font-light text-chrono-muted mb-3">
+          <div className="text-xs font-body font-extralight text-chrono-muted mb-3">
             {formatDate(event.date)}
           </div>
 
-          <h3 className="text-lg md:text-xl font-display font-light mb-3 text-chrono-text leading-tight">
+          <h3 className="text-lg md:text-xl font-display font-bold mb-3 text-chrono-text leading-tight">
             {event.title}
           </h3>
 
           {event.description && (
-            <p className="text-sm font-body font-light text-chrono-text-secondary leading-relaxed line-clamp-3">
+            <p className="text-sm font-body font-extralight leading-relaxed line-clamp-3" style={{ color: "rgba(240,235,225,0.65)" }}>
               {event.description}
             </p>
           )}

@@ -59,8 +59,8 @@ export default function StatCard({ label, value, suffix, delay = 0 }: StatCardPr
       transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
       className="relative group"
     >
-      <div className="bg-chrono-bg p-8 md:p-10 card-hover overflow-hidden">
-        <div className="text-4xl md:text-5xl font-display font-light text-chrono-text mb-3">
+      <div className="bg-chrono-bg p-8 md:p-10 card-hover overflow-hidden border border-white/[0.08]">
+        <div className="text-4xl md:text-5xl font-display font-bold text-chrono-text mb-3">
           {isNumeric ? <AnimatedNumber value={value} suffix={suffix} /> : value}
         </div>
         <div className="section-label">
