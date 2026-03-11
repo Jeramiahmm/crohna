@@ -10,6 +10,7 @@ export interface TimelineEvent {
   description?: string;
   category?: string;
   source?: string;
+  tags?: string[];
 }
 
 export interface AIStory {
@@ -34,6 +35,7 @@ export const demoEvents: TimelineEvent[] = [
     description: "Began my journey at the University of Colorado Boulder, studying Computer Science. The campus nestled against the Flatirons was breathtaking.",
     category: "education",
     source: "manual",
+    tags: ["college", "new-beginnings", "colorado"],
   },
   {
     id: "2",
@@ -46,6 +48,7 @@ export const demoEvents: TimelineEvent[] = [
     description: "Participated in HackCU and built a real-time collaboration tool. Our team won the 'Most Creative' award.",
     category: "achievement",
     source: "calendar",
+    tags: ["hackathon", "coding", "teamwork", "award"],
   },
   {
     id: "3",
@@ -59,6 +62,7 @@ export const demoEvents: TimelineEvent[] = [
     description: "Spent the holidays exploring NYC for the first time. Times Square on New Year's Eve was unforgettable.",
     category: "travel",
     source: "photos",
+    tags: ["nyc", "holidays", "exploration"],
   },
   {
     id: "4",
@@ -71,6 +75,7 @@ export const demoEvents: TimelineEvent[] = [
     description: "Found a cozy apartment on Pearl Street with two roommates. Finally had a proper desk setup for coding.",
     category: "life",
     source: "manual",
+    tags: ["moving", "apartment"],
   },
   {
     id: "5",
@@ -84,6 +89,7 @@ export const demoEvents: TimelineEvent[] = [
     description: "Road trip to LA with friends. Venice Beach, Griffith Observatory, and amazing food everywhere.",
     category: "travel",
     source: "photos",
+    tags: ["road-trip", "friends", "california"],
   },
   {
     id: "6",
@@ -97,6 +103,7 @@ export const demoEvents: TimelineEvent[] = [
     description: "Software engineering internship at a startup in SOMA. Built features used by thousands of users daily.",
     category: "career",
     source: "calendar",
+    tags: ["internship", "startup", "san-francisco"],
   },
   {
     id: "7",
@@ -133,6 +140,7 @@ export const demoEvents: TimelineEvent[] = [
     description: "Co-authored a paper on natural language processing that was accepted to a workshop at NeurIPS.",
     category: "achievement",
     source: "manual",
+    tags: ["research", "nlp", "publication"],
   },
   {
     id: "10",
@@ -208,6 +216,7 @@ export const demoEvents: TimelineEvent[] = [
     description: "Shipped Chrono v1 — a life timeline app. Hit 500 users in the first week.",
     category: "achievement",
     source: "manual",
+    tags: ["product-launch", "startup", "coding"],
   },
   {
     id: "16",
@@ -220,6 +229,7 @@ export const demoEvents: TimelineEvent[] = [
     description: "Accepted a software engineer role starting after graduation. Dreams are becoming reality.",
     category: "career",
     source: "manual",
+    tags: ["career", "milestone", "san-francisco"],
   },
 ];
 

@@ -2,13 +2,15 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useCallback } from "react";
-import { demoStories, insightStats, AIStory } from "@/data/demo";
+import { demoEvents, demoStories, insightStats, AIStory } from "@/data/demo";
 import AIStorySummary from "@/components/timeline/AIStorySummary";
 import StatCard from "@/components/insights/StatCard";
 import CategoryChart from "@/components/insights/CategoryChart";
 import YearChart from "@/components/insights/YearChart";
 import CityChart from "@/components/insights/CityChart";
 import ShareCard from "@/components/share/ShareCard";
+import MemoryStreakTracker from "@/components/insights/MemoryStreakTracker";
+import ExportModal from "@/components/insights/ExportModal";
 import { AIStoryLoadingSkeleton } from "@/components/ui/Skeletons";
 
 export default function InsightsPage() {
@@ -17,6 +19,7 @@ export default function InsightsPage() {
   const [shareOpen, setShareOpen] = useState(false);
   const [shareStory, setShareStory] = useState<AIStory | null>(null);
   const [storyFilter, setStoryFilter] = useState<"all" | "year" | "chapter">("all");
+  const [exportOpen, setExportOpen] = useState(false);
 
   const handleRegenerate = useCallback(async (storyId: string) => {
     setGenerating(true);
@@ -57,10 +60,19 @@ export default function InsightsPage() {
           <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-tight">
             <em className="text-white">Insights</em>
           </h1>
-          <p className="text-base font-body font-light text-chrono-text-secondary max-w-md mx-auto leading-relaxed">
+          <p className="text-base font-body font-light text-chrono-text-secondary max-w-md mx-auto mb-8 leading-relaxed">
             Patterns, highlights, and stories hidden in your
             life&apos;s timeline.
           </p>
+          <button
+            onClick={() => setExportOpen(true)}
+            className="px-6 py-2.5 text-sm font-body font-light text-white/80 border border-white/[0.12] hover:border-white/30 hover:text-white rounded-full transition-all duration-500 flex items-center gap-2 mx-auto"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            Export
+          </button>
         </motion.div>
       </section>
 
@@ -70,6 +82,13 @@ export default function InsightsPage() {
           <StatCard label="Photos captured" value={insightStats.totalPhotos} delay={0.1} />
           <StatCard label="Cities visited" value={insightStats.citiesVisited} delay={0.2} />
           <StatCard label="Most active year" value={insightStats.mostActiveYear.toString()} delay={0.3} />
+        </div>
+      </section>
+
+      {/* Memory Streak Tracker */}
+      <section className="px-6 mb-28">
+        <div className="max-w-5xl mx-auto">
+          <MemoryStreakTracker events={demoEvents} />
         </div>
       </section>
 
@@ -275,6 +294,12 @@ export default function InsightsPage() {
           highlights={shareStory.highlights}
         />
       )}
+
+      <ExportModal
+        isOpen={exportOpen}
+        onClose={() => setExportOpen(false)}
+        events={demoEvents}
+      />
     </div>
   );
 }

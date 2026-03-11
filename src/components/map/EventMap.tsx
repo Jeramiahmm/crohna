@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TimelineEvent } from "@/data/demo";
-import { formatDate, getCategoryColor } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import Image from "next/image";
 
 interface EventMapProps {

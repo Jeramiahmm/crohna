@@ -10,9 +10,13 @@ interface TimelineCardProps {
   index: number;
   isLeft?: boolean;
   onEdit?: () => void;
+  onClick?: () => void;
 }
 
-export default function TimelineCard({ event, index, isLeft = false, onEdit }: TimelineCardProps) {
+export default function TimelineCard({ event, index, isLeft = false, onEdit, onClick }: TimelineCardProps) {
+  const visibleTags = event.tags?.slice(0, 3) || [];
+  const extraTagCount = (event.tags?.length || 0) - 3;
+
   return (
     <motion.div
       initial={{ opacity: 0, x: isLeft ? -40 : 40, y: 20 }}
@@ -25,7 +29,14 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
       }}
       className={`relative group ${isLeft ? "md:pr-12" : "md:pl-12"}`}
     >
-      <div className="relative bg-chrono-card/40 overflow-hidden border border-white/[0.12] card-hover">
+      <div
+        className="relative bg-chrono-card/40 overflow-hidden border border-white/[0.12] card-hover cursor-pointer"
+        onClick={(e) => {
+          const target = e.target as HTMLElement;
+          if (target.closest("[data-action-btn]")) return;
+          onClick?.();
+        }}
+      >
         {event.imageUrl && (
           <div className="relative h-52 md:h-60 overflow-hidden">
             <Image
@@ -51,6 +62,7 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
 
             {onEdit && (
               <button
+                data-action-btn
                 onClick={(e) => { e.stopPropagation(); onEdit(); }}
                 className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white/50 hover:text-white hover:bg-black/50 opacity-0 group-hover:opacity-100 transition-all"
               >
@@ -72,6 +84,7 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
 
         {!event.imageUrl && onEdit && (
           <button
+            data-action-btn
             onClick={(e) => { e.stopPropagation(); onEdit(); }}
             className="absolute top-4 right-4 w-8 h-8 rounded-full bg-chrono-card/80 flex items-center justify-center text-chrono-muted hover:text-chrono-text opacity-0 group-hover:opacity-100 transition-all z-10"
           >
@@ -108,6 +121,22 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
             <p className="text-sm font-body font-extralight leading-relaxed line-clamp-3" style={{ color: "rgba(240,235,225,0.65)" }}>
               {event.description}
             </p>
+          )}
+
+          {visibleTags.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 mt-3">
+              {visibleTags.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-2 py-0.5 text-[10px] font-mono text-white/60 border border-white/[0.12] rounded-full"
+                >
+                  {tag}
+                </span>
+              ))}
+              {extraTagCount > 0 && (
+                <span className="text-[10px] font-mono text-white/40">+{extraTagCount} more</span>
+              )}
+            </div>
           )}
         </div>
       </div>

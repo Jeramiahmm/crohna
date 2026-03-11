@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Home, Clock, BarChart3, Map, Settings } from "lucide-react";
 import { NavBar } from "./tubelight-navbar";
@@ -25,6 +25,7 @@ const tubelightItems = [
 
 export default function Navigation() {
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -112,10 +113,22 @@ export default function Navigation() {
               ))}
             </div>
             <div className="mt-12 flex flex-col gap-4">
-              <button className="w-full py-3 text-sm font-body font-light text-chrono-muted border border-white/[0.12] rounded-full">
+              <button
+                onClick={() => {
+                  setMobileOpen(false);
+                  router.push("/settings");
+                }}
+                className="w-full py-3 text-sm font-body font-light text-chrono-muted border border-white/[0.12] rounded-full"
+              >
                 Sign In
               </button>
-              <button className="w-full py-3 text-sm font-body font-light bg-white text-black rounded-full">
+              <button
+                onClick={() => {
+                  setMobileOpen(false);
+                  router.push("/timeline");
+                }}
+                className="w-full py-3 text-sm font-body font-light bg-white text-black rounded-full"
+              >
                 Get Started
               </button>
             </div>
