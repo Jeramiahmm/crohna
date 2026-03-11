@@ -1,12 +1,32 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import GoogleConnectModal from "@/components/ui/GoogleConnectModal";
 
 export default function SettingsPage() {
   const [demoMode, setDemoMode] = useState(true);
   const [notifications, setNotifications] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [connectModal, setConnectModal] = useState<"Google Photos" | "Google Calendar" | null>(null);
+  const [connectedAccounts, setConnectedAccounts] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const stored = localStorage.getItem("chrono-connected-accounts");
+    if (stored) setConnectedAccounts(JSON.parse(stored));
+  }, []);
+
+  const handleConnect = (service: string) => {
+    const updated = { ...connectedAccounts, [service]: true };
+    setConnectedAccounts(updated);
+    localStorage.setItem("chrono-connected-accounts", JSON.stringify(updated));
+  };
+
+  const handleDisconnect = (service: string) => {
+    const updated = { ...connectedAccounts, [service]: false };
+    setConnectedAccounts(updated);
+    localStorage.setItem("chrono-connected-accounts", JSON.stringify(updated));
+  };
 
   const handleSave = () => {
     setSaved(true);
@@ -29,7 +49,7 @@ export default function SettingsPage() {
         >
           <span className="section-label mb-5 block">Account</span>
           <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-tight">
-            <em className="text-white">Settings</em>
+            <em className="text-chrono-text">Settings</em>
           </h1>
         </motion.div>
       </section>
@@ -40,11 +60,11 @@ export default function SettingsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-chrono-card/30 p-7 border border-white/[0.08]"
+            className="bg-[var(--card-bg)] p-7 border border-[var(--line-strong)]"
           >
             <h3 className="text-sm font-display font-light text-chrono-text mb-4">Profile</h3>
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 border border-white/[0.12] flex items-center justify-center text-white/80 text-xl font-display font-light">
+              <div className="w-16 h-16 border border-[var(--line-strong)] flex items-center justify-center text-chrono-accent text-xl font-display font-light">
                 U
               </div>
               <div>
@@ -59,7 +79,7 @@ export default function SettingsPage() {
                 <input
                   type="text"
                   defaultValue="Demo User"
-                  className="w-full bg-chrono-bg/60 px-4 py-2.5 text-sm font-body font-light text-chrono-text border border-white/[0.08] outline-none focus:border-white/30 transition-colors"
+                  className="w-full bg-[var(--input-bg)] px-4 py-2.5 text-sm font-body font-light text-chrono-text border border-[var(--line-strong)] outline-none focus:border-[var(--line-hover)] transition-colors"
                 />
               </div>
               <div>
@@ -67,7 +87,7 @@ export default function SettingsPage() {
                 <input
                   type="email"
                   defaultValue="demo@chrono.app"
-                  className="w-full bg-chrono-bg/60 px-4 py-2.5 text-sm font-body font-light text-chrono-text border border-white/[0.08] outline-none focus:border-white/30 transition-colors"
+                  className="w-full bg-[var(--input-bg)] px-4 py-2.5 text-sm font-body font-light text-chrono-text border border-[var(--line-strong)] outline-none focus:border-[var(--line-hover)] transition-colors"
                 />
               </div>
             </div>
@@ -77,7 +97,7 @@ export default function SettingsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-chrono-card/30 p-7 border border-white/[0.08]"
+            className="bg-[var(--card-bg)] p-7 border border-[var(--line-strong)]"
           >
             <h3 className="text-sm font-display font-light text-chrono-text mb-4">Preferences</h3>
             <div className="space-y-4">
@@ -88,12 +108,12 @@ export default function SettingsPage() {
                 </div>
                 <button
                   onClick={() => setDemoMode(!demoMode)}
-                  className={`relative w-11 h-6 transition-colors ${
-                    demoMode ? "bg-white/60" : "bg-chrono-border"
+                  className={`relative w-11 h-6 rounded-full transition-colors ${
+                    demoMode ? "bg-chrono-accent" : "bg-[var(--line-strong)]"
                   }`}
                 >
                   <div
-                    className={`absolute top-0.5 w-5 h-5 bg-chrono-text transition-transform ${
+                    className={`absolute top-0.5 w-5 h-5 rounded-full bg-chrono-bg transition-transform ${
                       demoMode ? "translate-x-[22px]" : "translate-x-0.5"
                     }`}
                   />
@@ -107,12 +127,12 @@ export default function SettingsPage() {
                 </div>
                 <button
                   onClick={() => setNotifications(!notifications)}
-                  className={`relative w-11 h-6 transition-colors ${
-                    notifications ? "bg-white/60" : "bg-chrono-border"
+                  className={`relative w-11 h-6 rounded-full transition-colors ${
+                    notifications ? "bg-chrono-accent" : "bg-[var(--line-strong)]"
                   }`}
                 >
                   <div
-                    className={`absolute top-0.5 w-5 h-5 bg-chrono-text transition-transform ${
+                    className={`absolute top-0.5 w-5 h-5 rounded-full bg-chrono-bg transition-transform ${
                       notifications ? "translate-x-[22px]" : "translate-x-0.5"
                     }`}
                   />
@@ -125,33 +145,36 @@ export default function SettingsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-chrono-card/30 p-7 border border-white/[0.08]"
+            className="bg-[var(--card-bg)] p-7 border border-[var(--line-strong)]"
           >
             <h3 className="text-sm font-display font-light text-chrono-text mb-4">Connected Accounts</h3>
             <div className="space-y-3">
-              {[
-                { name: "Google Calendar", connected: false },
-                { name: "Google Photos", connected: false },
-              ].map((account) => (
-                <div key={account.name} className="flex items-center justify-between py-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-chrono-bg/60 border border-white/[0.06] flex items-center justify-center">
-                      <svg className="w-4 h-4 text-chrono-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-                      </svg>
-                    </div>
-                    <div>
-                      <div className="text-sm font-body font-light text-chrono-text">{account.name}</div>
-                      <div className="text-xs font-body font-light text-chrono-muted">
-                        {account.connected ? "Connected" : "Not connected"}
+              {(["Google Calendar", "Google Photos"] as const).map((name) => {
+                const isConnected = !!connectedAccounts[name];
+                return (
+                  <div key={name} className="flex items-center justify-between py-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-[var(--input-bg)] border border-[var(--line)] flex items-center justify-center">
+                        <svg className="w-4 h-4 text-chrono-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="text-sm font-body font-light text-chrono-text">{name}</div>
+                        <div className="text-xs font-body font-light text-chrono-muted">
+                          {isConnected ? "Connected" : "Not connected"}
+                        </div>
                       </div>
                     </div>
+                    <button
+                      onClick={() => setConnectModal(name)}
+                      className="px-4 py-1.5 text-xs font-body font-light border border-[var(--line-strong)] text-chrono-muted hover:text-chrono-text hover:border-[var(--line-hover)] transition-all"
+                    >
+                      {isConnected ? "Manage" : "Connect"}
+                    </button>
                   </div>
-                  <button className="px-4 py-1.5 text-xs font-body font-light border border-white/[0.1] text-chrono-text-secondary hover:text-chrono-text hover:border-white/20 transition-all">
-                    {account.connected ? "Disconnect" : "Connect"}
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </motion.div>
 
@@ -159,17 +182,17 @@ export default function SettingsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-chrono-card/30 p-7 border border-white/[0.08]"
+            className="bg-[var(--card-bg)] p-7 border border-[var(--line-strong)]"
           >
             <h3 className="text-sm font-display font-light text-chrono-text mb-4">Data</h3>
             <div className="space-y-3">
-              <button className="text-sm font-body font-light text-chrono-text-secondary hover:text-white transition-colors">
+              <button className="text-sm font-body font-light text-chrono-muted hover:text-chrono-text transition-colors">
                 Export all data
               </button>
               <br />
               <button
                 onClick={handleClearOnboarding}
-                className="text-sm font-body font-light text-chrono-text-secondary hover:text-white transition-colors"
+                className="text-sm font-body font-light text-chrono-muted hover:text-chrono-text transition-colors"
               >
                 Reset onboarding
               </button>
@@ -188,13 +211,24 @@ export default function SettingsPage() {
           >
             <button
               onClick={handleSave}
-              className="px-8 py-3 text-sm font-body font-light bg-white text-black rounded-full hover:bg-white/90 transition-colors duration-500"
+              className="px-8 py-3 text-sm font-body font-light bg-foreground text-background rounded-full hover:opacity-90 transition-colors duration-500"
             >
               {saved ? "Saved" : "Save Changes"}
             </button>
           </motion.div>
         </div>
       </section>
+
+      {connectModal && (
+        <GoogleConnectModal
+          isOpen={!!connectModal}
+          onClose={() => setConnectModal(null)}
+          service={connectModal}
+          onConnect={() => handleConnect(connectModal)}
+          onDisconnect={() => handleDisconnect(connectModal)}
+          isConnected={!!connectedAccounts[connectModal]}
+        />
+      )}
     </div>
   );
 }

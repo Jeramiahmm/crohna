@@ -17,7 +17,7 @@ export default function CategoryChart({ categories }: { categories: Category[] }
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-      className="bg-chrono-card/40 p-6 md:p-8 border border-white/[0.12]"
+      className="bg-[var(--card-bg)] p-6 md:p-8 border border-[var(--line-strong)]"
     >
       <h3 className="text-lg font-display font-bold text-chrono-text mb-6">
         Events by Category
@@ -27,7 +27,7 @@ export default function CategoryChart({ categories }: { categories: Category[] }
         {categories.map((category, i) => (
           <div key={category.name} className="space-y-1.5">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-body font-light text-chrono-text-secondary">
+              <span className="text-sm font-body font-light text-chrono-muted">
                 {category.name}
               </span>
               <span className="text-sm font-body font-light text-chrono-text">
@@ -44,8 +44,7 @@ export default function CategoryChart({ categories }: { categories: Category[] }
                   delay: 0.2 + i * 0.1,
                   ease: [0.16, 1, 0.3, 1],
                 }}
-                className="h-full"
-                style={{ backgroundColor: "rgba(255,255,255,0.6)" }}
+                className="h-full bg-chrono-accent"
               />
             </div>
           </div>

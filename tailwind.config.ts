@@ -10,22 +10,22 @@ const config: Config = {
     extend: {
       colors: {
         chrono: {
-          bg: "#080808",
-          surface: "#0F0F0F",
-          card: "#141414",
-          border: "#1A1A1A",
-          accent: "rgba(255,255,255,0.8)",
-          "accent-warm": "rgba(255,255,255,0.9)",
-          "accent-glow": "rgba(255,255,255,0.3)",
-          muted: "rgba(240,235,225,0.45)",
-          text: "#F0EBE1",
-          "text-secondary": "rgba(240,235,225,0.65)",
+          bg: "var(--chrono-bg)",
+          surface: "var(--chrono-surface)",
+          card: "var(--chrono-card)",
+          border: "var(--border)",
+          accent: "var(--chrono-accent)",
+          "accent-warm": "var(--chrono-accent)",
+          "accent-glow": "var(--chrono-glow)",
+          muted: "var(--chrono-muted)",
+          text: "var(--chrono-text)",
+          "text-secondary": "var(--chrono-muted)",
         },
-        background: "#080808",
-        foreground: "#F0EBE1",
-        primary: "rgba(255,255,255,0.8)",
-        muted: "rgba(255,255,255,0.06)",
-        border: "rgba(255,255,255,0.12)",
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+        primary: "var(--primary)",
+        muted: "var(--muted)",
+        border: "var(--border)",
       },
       fontFamily: {
         display: ["var(--font-display)", "Georgia", "serif"],
@@ -41,6 +41,8 @@ const config: Config = {
         "star-twinkle": "starTwinkle 3s ease-in-out infinite",
         "white-pulse": "whitePulse 2.5s ease-in-out infinite",
         "marker-ring": "markerRing 2s ease-out infinite",
+        "shimmer-slide": "shimmerSlide 8s ease-in-out infinite",
+        "spin-around": "spinAround 13s linear infinite",
       },
       keyframes: {
         fadeIn: {
@@ -78,6 +80,14 @@ const config: Config = {
         shimmer: {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
+        },
+        shimmerSlide: {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
+        spinAround: {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
         },
       },
       borderRadius: {

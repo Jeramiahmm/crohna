@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { LucideIcon } from "lucide-react"
@@ -15,18 +15,11 @@ interface NavItem {
 interface NavBarProps {
   items: NavItem[]
   className?: string
+  extraActions?: React.ReactNode
 }
 
-export function NavBar({ items, className }: NavBarProps) {
+export function NavBar({ items, className, extraActions }: NavBarProps) {
   const [activeTab, setActiveTab] = useState(items[0].name)
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768)
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
 
   return (
     <div
@@ -75,6 +68,11 @@ export function NavBar({ items, className }: NavBarProps) {
             </Link>
           )
         })}
+        {extraActions && (
+          <div className="flex items-center gap-1 ml-1">
+            {extraActions}
+          </div>
+        )}
       </div>
     </div>
   )

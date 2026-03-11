@@ -4,12 +4,12 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="relative border-t border-white/[0.08] bg-chrono-bg">
+    <footer className="relative border-t border-[var(--line-strong)] bg-chrono-bg">
       <div className="max-w-7xl mx-auto px-6 py-32">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-5">
-              <span className="text-white/60 text-base leading-none select-none">&#x2022;</span>
+              <span className="text-chrono-muted text-base leading-none select-none">&#x2022;</span>
               <span className="text-[13px] font-display font-bold tracking-[0.25em] uppercase text-chrono-text">
                 Chrono
               </span>
@@ -28,8 +28,7 @@ export default function Footer() {
               {["Timeline", "Stories", "Map", "Insights"].map((item) => (
                 <span
                   key={item}
-                  className="text-sm font-body font-extralight hover:text-white cursor-pointer transition-colors duration-300"
-                  style={{ color: "rgba(240,235,225,0.65)" }}
+                  className="text-sm font-body font-extralight text-chrono-muted hover:text-chrono-text cursor-pointer transition-colors duration-300"
                 >
                   {item}
                 </span>
@@ -45,8 +44,7 @@ export default function Footer() {
               {["Twitter", "GitHub", "Discord", "Blog"].map((item) => (
                 <span
                   key={item}
-                  className="text-sm font-body font-extralight hover:text-white cursor-pointer transition-colors duration-300"
-                  style={{ color: "rgba(240,235,225,0.65)" }}
+                  className="text-sm font-body font-extralight text-chrono-muted hover:text-chrono-text cursor-pointer transition-colors duration-300"
                 >
                   {item}
                 </span>
@@ -55,7 +53,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-24 pt-8 border-t border-white/[0.06] flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="mt-24 pt-8 border-t border-[var(--line)] flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs font-body font-extralight text-chrono-muted">
             &copy; {new Date().getFullYear()} Chrono. All rights reserved.
           </p>
@@ -63,7 +61,7 @@ export default function Footer() {
             {["Privacy", "Terms", "Cookies"].map((item) => (
               <span
                 key={item}
-                className="text-xs font-body font-extralight text-chrono-muted hover:text-white cursor-pointer transition-colors duration-300"
+                className="text-xs font-body font-extralight text-chrono-muted hover:text-chrono-text cursor-pointer transition-colors duration-300"
               >
                 {item}
               </span>

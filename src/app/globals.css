@@ -16,6 +16,37 @@
   --primary: rgba(255,255,255,0.8);
   --border: rgba(255,255,255,0.12);
   --muted: rgba(255,255,255,0.06);
+
+  /* Theme-aware accent for borders, dividers, subtle elements */
+  --line: rgba(255,255,255,0.08);
+  --line-strong: rgba(255,255,255,0.12);
+  --line-hover: rgba(255,255,255,0.25);
+  --subtle-text: rgba(240,235,225,0.65);
+  --card-bg: rgba(20,20,20,0.4);
+  --input-bg: rgba(20,20,20,0.4);
+}
+
+html.light {
+  --chrono-bg: #F5F0E8;
+  --chrono-surface: #EDE8DE;
+  --chrono-card: #E4DDD0;
+  --chrono-accent: rgba(0,0,0,0.8);
+  --chrono-glow: rgba(0,0,0,0.15);
+  --chrono-text: #1A1814;
+  --chrono-muted: rgba(26,24,20,0.5);
+
+  --background: #F5F0E8;
+  --foreground: #1A1814;
+  --primary: rgba(0,0,0,0.8);
+  --border: rgba(0,0,0,0.12);
+  --muted: rgba(0,0,0,0.06);
+
+  --line: rgba(0,0,0,0.08);
+  --line-strong: rgba(0,0,0,0.12);
+  --line-hover: rgba(0,0,0,0.25);
+  --subtle-text: rgba(26,24,20,0.6);
+  --card-bg: rgba(228,221,208,0.4);
+  --input-bg: rgba(228,221,208,0.5);
 }
 
 * {
@@ -30,11 +61,16 @@ html {
   scrollbar-color: #1A1A1A transparent;
 }
 
+html.light {
+  scrollbar-color: #C8C0B4 transparent;
+}
+
 body {
   background: var(--chrono-bg);
   color: var(--chrono-text);
   font-family: var(--font-body), system-ui, sans-serif;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Grain texture overlay */
@@ -45,6 +81,10 @@ body::after {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
   pointer-events: none;
   z-index: 9000;
+}
+
+html.light body::after {
+  opacity: 0.02;
 }
 
 ::-webkit-scrollbar {
@@ -64,6 +104,14 @@ body::after {
   background: rgba(255,255,255,0.15);
 }
 
+html.light ::-webkit-scrollbar-thumb {
+  background: #C8C0B4;
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.25);
+}
+
 /* Custom utility classes */
 @layer utilities {
   .text-balance {
@@ -74,14 +122,14 @@ body::after {
     background: rgba(8, 8, 8, 0.7);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.12);
+    border: 1px solid var(--line-strong);
   }
 
   .glass-strong {
     background: rgba(8, 8, 8, 0.94);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid var(--line-strong);
   }
 
   .glow-accent {
@@ -94,18 +142,18 @@ body::after {
   }
 
   .gradient-text {
-    color: #F0EBE1;
+    color: var(--chrono-text);
   }
 
   .gradient-text-subtle {
-    color: rgba(240,235,225,0.65);
+    color: var(--subtle-text);
   }
 
   .section-label {
     font-size: 10px;
     letter-spacing: 0.5em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.8);
+    color: var(--chrono-accent);
     font-family: var(--font-body), system-ui, sans-serif;
     font-weight: 200;
   }
@@ -131,8 +179,8 @@ body::after {
     background: linear-gradient(
       180deg,
       transparent 0%,
-      rgba(255,255,255,0.08) 10%,
-      rgba(255,255,255,0.08) 90%,
+      var(--line) 10%,
+      var(--line) 90%,
       transparent 100%
     );
   }
@@ -145,9 +193,9 @@ body::after {
 
   .card-hover:hover {
     transform: translateY(-6px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4),
-                0 0 40px rgba(255,255,255,0.02);
-    border-color: rgba(255,255,255,0.25);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15),
+                0 0 40px var(--chrono-glow);
+    border-color: var(--line-hover);
   }
 
   .mask-gradient-b {
@@ -160,12 +208,21 @@ body::after {
     -webkit-mask-image: linear-gradient(to top, black 70%, transparent 100%);
   }
 
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   .watermark {
     position: absolute;
     font-family: var(--font-display), Georgia, serif;
     font-weight: 700;
     font-size: clamp(120px, 15vw, 240px);
-    color: rgba(255,255,255,0.03);
+    color: var(--line);
     pointer-events: none;
     user-select: none;
     line-height: 1;
@@ -181,10 +238,15 @@ html.lenis {
   scroll-behavior: auto;
 }
 
-/* Selection color — white */
+/* Selection color */
 ::selection {
   background: rgba(255,255,255,0.15);
   color: #F0EBE1;
+}
+
+html.light ::selection {
+  background: rgba(0,0,0,0.12);
+  color: #1A1814;
 }
 
 /* CSS variables for shadcn/tubelight compatibility */
@@ -196,4 +258,32 @@ html.lenis {
     --muted: 0 0% 8%;
     --border: 0 0% 100%;
   }
+
+  html.light {
+    --background: 37 33% 94%;
+    --foreground: 40 10% 10%;
+    --primary: 0 0% 0%;
+    --muted: 37 20% 88%;
+    --border: 0 0% 0%;
+  }
+}
+
+/* Light mode glass overrides */
+html.light .glass {
+  background: rgba(245,240,232,0.7);
+  border-color: rgba(0,0,0,0.1);
+}
+
+html.light .glass-strong {
+  background: rgba(245,240,232,0.94);
+  border-color: rgba(0,0,0,0.12);
+}
+
+html.light .glow-accent {
+  box-shadow: 0 0 40px rgba(0,0,0,0.04),
+              0 0 80px rgba(0,0,0,0.02);
+}
+
+html.light .glow-text {
+  text-shadow: 0 0 40px rgba(0,0,0,0.1);
 }

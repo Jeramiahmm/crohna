@@ -32,8 +32,7 @@ export default function MarqueeTicker() {
         {Array.from({ length: 8 }).map((_, i) => (
           <span
             key={i}
-            className="font-display font-thin text-[11px] tracking-[0.4em] uppercase"
-            style={{ color: "rgba(255,255,255,0.2)" }}
+            className="font-display font-thin text-[11px] tracking-[0.4em] uppercase text-[var(--line)]"
           >
             {TICKER_TEXT}
           </span>

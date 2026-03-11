@@ -16,7 +16,7 @@ export default function ScrollProgressBar() {
       style={{
         scaleX,
         background:
-          "linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.05) 100%)",
+          "linear-gradient(90deg, var(--line) 0%, var(--chrono-accent) 50%, var(--line) 100%)",
       }}
     />
   );
