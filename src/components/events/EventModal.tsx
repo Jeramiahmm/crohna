@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect, KeyboardEvent } from "react";
 import { TimelineEvent } from "@/data/demo";
 
 const categories = [
@@ -43,10 +43,31 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
     chapter: event?.chapter || "",
   });
 
+  const [tags, setTags] = useState<string[]>(event?.tags || []);
+  const [tagInput, setTagInput] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (isOpen) {
+      setForm({
+        title: event?.title || "",
+        date: event?.date || "",
+        location: event?.location || "",
+        description: event?.description || "",
+        category: event?.category || "",
+        imageUrl: event?.imageUrl || "",
+        chapter: event?.chapter || "",
+      });
+      setTags(event?.tags || []);
+      setTagInput("");
+      setErrors({});
+      setSaving(false);
+      setShowSuccess(false);
+    }
+  }, [isOpen, event]);
 
   const validate = useCallback(() => {
     const errs: Record<string, string> = {};
@@ -69,6 +90,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
     onSave({
       ...event,
       ...form,
+      tags,
       id: event?.id || `evt-${Date.now()}`,
     });
 
@@ -78,7 +100,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
       onClose();
     }, 1200);
     setSaving(false);
-  }, [form, event, validate, onSave, onClose]);
+  }, [form, tags, event, validate, onSave, onClose]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -97,6 +119,48 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
       setForm((f) => ({ ...f, imageUrl: url }));
     }
   }, []);
+
+  const addTag = useCallback((value: string) => {
+    const tag = value.trim().toLowerCase().replace(/,$/,"");
+    if (tag && !tags.includes(tag)) {
+      setTags((prev) => [...prev, tag]);
+    }
+    setTagInput("");
+  }, [tags]);
+
+  const removeTag = useCallback((tag: string) => {
+    setTags((prev) => prev.filter((t) => t !== tag));
+  }, []);
+
+  const handleTagKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      if (tagInput.trim()) addTag(tagInput);
+    } else if (e.key === "Backspace" && !tagInput && tags.length > 0) {
+      setTags((prev) => prev.slice(0, -1));
+    }
+  }, [tagInput, tags, addTag]);
+
+  const handleTagInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (val.includes(",")) {
+      const parts = val.split(",");
+      parts.forEach((p, i) => {
+        if (i < parts.length - 1 && p.trim()) addTag(p);
+      });
+      setTagInput(parts[parts.length - 1]);
+    } else {
+      setTagInput(val);
+    }
+  }, [addTag]);
+
+  useEffect(() => {
+    const handleEsc = (e: globalThis.KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) onClose();
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isOpen, onClose]);
 
   return (
     <AnimatePresence>
@@ -145,7 +209,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
             <div className="flex items-center justify-between p-6 border-b border-white/[0.08]">
               <div>
                 <h2 className="text-xl font-display font-bold text-chrono-text">
-                  {isEditing ? "Edit Event" : "New Event"}
+                  {isEditing ? "Edit Memory" : "Add Memory"}
                 </h2>
                 <p className="text-xs font-body font-extralight text-chrono-muted mt-1">
                   {isEditing ? "Update your memory" : "Add a moment to your timeline"}
@@ -270,6 +334,35 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                 </div>
               </div>
 
+              {/* Tags Input */}
+              <div>
+                <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Tags</label>
+                <div className="flex flex-wrap items-center gap-1.5 bg-chrono-card/40 px-3 py-2 border border-white/[0.08] focus-within:border-white/30 transition-colors min-h-[44px]">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-white/80 border border-white/20 rounded-full"
+                    >
+                      {tag}
+                      <button
+                        onClick={() => removeTag(tag)}
+                        className="w-3.5 h-3.5 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                  <input
+                    type="text"
+                    value={tagInput}
+                    onChange={handleTagInputChange}
+                    onKeyDown={handleTagKeyDown}
+                    placeholder={tags.length === 0 ? "Add tags — press Enter or comma to add" : ""}
+                    className="flex-1 min-w-[120px] bg-transparent text-sm text-chrono-text placeholder:text-chrono-muted/50 outline-none"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">
                   Life Chapter <span className="text-chrono-muted/50">(optional)</span>
@@ -318,7 +411,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                   {saving && (
                     <div className="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                   )}
-                  {isEditing ? "Save Changes" : "Create Event"}
+                  {isEditing ? "Save Changes" : "Create Memory"}
                 </button>
               </div>
             </div>

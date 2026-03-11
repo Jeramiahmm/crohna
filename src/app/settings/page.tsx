@@ -1,12 +1,22 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import OAuthModal from "@/components/ui/OAuthModal";
+import Toast from "@/components/ui/Toast";
 
 export default function SettingsPage() {
   const [demoMode, setDemoMode] = useState(true);
   const [notifications, setNotifications] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [oauthOpen, setOauthOpen] = useState(false);
+  const [oauthService, setOauthService] = useState("");
+  const [connectedAccounts, setConnectedAccounts] = useState<Record<string, boolean>>({
+    "Google Calendar": false,
+    "Google Photos": false,
+  });
+  const [toastMsg, setToastMsg] = useState("");
+  const [toastVisible, setToastVisible] = useState(false);
 
   const handleSave = () => {
     setSaved(true);
@@ -16,6 +26,41 @@ export default function SettingsPage() {
   const handleClearOnboarding = () => {
     localStorage.removeItem("chrono-onboarding-complete");
     localStorage.removeItem("chrono-start-mode");
+    showToast("Onboarding reset");
+  };
+
+  const showToast = useCallback((msg: string) => {
+    setToastMsg(msg);
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 2500);
+  }, []);
+
+  const handleConnectClick = (name: string) => {
+    setOauthService(name);
+    setOauthOpen(true);
+  };
+
+  const handleOAuthConnect = () => {
+    setConnectedAccounts((prev) => ({ ...prev, [oauthService]: true }));
+    showToast(`${oauthService} connected`);
+  };
+
+  const handleExportAll = () => {
+    const data = JSON.stringify({ events: [], settings: { demoMode, notifications } }, null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "chrono-export.json";
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("Data exported");
+  };
+
+  const handleDeleteAll = () => {
+    if (confirm("Are you sure you want to delete all events? This cannot be undone.")) {
+      showToast("All events deleted");
+    }
   };
 
   return (
@@ -129,11 +174,8 @@ export default function SettingsPage() {
           >
             <h3 className="text-sm font-display font-light text-chrono-text mb-4">Connected Accounts</h3>
             <div className="space-y-3">
-              {[
-                { name: "Google Calendar", connected: false },
-                { name: "Google Photos", connected: false },
-              ].map((account) => (
-                <div key={account.name} className="flex items-center justify-between py-2">
+              {["Google Calendar", "Google Photos"].map((name) => (
+                <div key={name} className="flex items-center justify-between py-2">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-chrono-bg/60 border border-white/[0.06] flex items-center justify-center">
                       <svg className="w-4 h-4 text-chrono-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -141,14 +183,24 @@ export default function SettingsPage() {
                       </svg>
                     </div>
                     <div>
-                      <div className="text-sm font-body font-light text-chrono-text">{account.name}</div>
+                      <div className="text-sm font-body font-light text-chrono-text">{name}</div>
                       <div className="text-xs font-body font-light text-chrono-muted">
-                        {account.connected ? "Connected" : "Not connected"}
+                        {connectedAccounts[name] ? "Connected" : "Not connected"}
                       </div>
                     </div>
                   </div>
-                  <button className="px-4 py-1.5 text-xs font-body font-light border border-white/[0.1] text-chrono-text-secondary hover:text-chrono-text hover:border-white/20 transition-all">
-                    {account.connected ? "Disconnect" : "Connect"}
+                  <button
+                    onClick={() => {
+                      if (connectedAccounts[name]) {
+                        setConnectedAccounts((prev) => ({ ...prev, [name]: false }));
+                        showToast(`${name} disconnected`);
+                      } else {
+                        handleConnectClick(name);
+                      }
+                    }}
+                    className="px-4 py-1.5 text-xs font-body font-light border border-white/[0.1] text-chrono-text-secondary hover:text-chrono-text hover:border-white/20 transition-all"
+                  >
+                    {connectedAccounts[name] ? "Disconnect" : "Connect"}
                   </button>
                 </div>
               ))}
@@ -163,7 +215,10 @@ export default function SettingsPage() {
           >
             <h3 className="text-sm font-display font-light text-chrono-text mb-4">Data</h3>
             <div className="space-y-3">
-              <button className="text-sm font-body font-light text-chrono-text-secondary hover:text-white transition-colors">
+              <button
+                onClick={handleExportAll}
+                className="text-sm font-body font-light text-chrono-text-secondary hover:text-white transition-colors"
+              >
                 Export all data
               </button>
               <br />
@@ -174,7 +229,10 @@ export default function SettingsPage() {
                 Reset onboarding
               </button>
               <br />
-              <button className="text-sm font-body font-light text-red-400/70 hover:text-red-400 transition-colors">
+              <button
+                onClick={handleDeleteAll}
+                className="text-sm font-body font-light text-red-400/70 hover:text-red-400 transition-colors"
+              >
                 Delete all events
               </button>
             </div>
@@ -195,6 +253,15 @@ export default function SettingsPage() {
           </motion.div>
         </div>
       </section>
+
+      <OAuthModal
+        isOpen={oauthOpen}
+        onClose={() => setOauthOpen(false)}
+        serviceName={oauthService}
+        onConnect={handleOAuthConnect}
+      />
+
+      <Toast message={toastMsg} isVisible={toastVisible} />
     </div>
   );
 }

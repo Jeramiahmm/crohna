@@ -9,9 +9,10 @@ interface YearSectionProps {
   events: TimelineEvent[];
   yearIndex: number;
   onEditEvent?: (event: TimelineEvent) => void;
+  onCardClick?: (event: TimelineEvent) => void;
 }
 
-export default function YearSection({ year, events, onEditEvent }: YearSectionProps) {
+export default function YearSection({ year, events, onEditEvent, onCardClick }: YearSectionProps) {
   return (
     <div className="relative">
       {/* Ghost watermark year */}
@@ -90,6 +91,7 @@ export default function YearSection({ year, events, onEditEvent }: YearSectionPr
                         index={index}
                         isLeft
                         onEdit={onEditEvent ? () => onEditEvent(event) : undefined}
+                        onClick={onCardClick ? () => onCardClick(event) : undefined}
                       />
                     </div>
                     <div className="hidden md:block" />
@@ -102,6 +104,7 @@ export default function YearSection({ year, events, onEditEvent }: YearSectionPr
                         event={event}
                         index={index}
                         onEdit={onEditEvent ? () => onEditEvent(event) : undefined}
+                        onClick={onCardClick ? () => onCardClick(event) : undefined}
                       />
                     </div>
                   </>

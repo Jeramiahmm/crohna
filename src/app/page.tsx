@@ -67,17 +67,8 @@ function HeroSection() {
   const scale = useTransform(scrollYProgress, [0, 0.8], [1, 0.97]);
 
   return (
-    <section ref={ref} className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section ref={ref} className="relative min-h-screen flex items-center justify-center overflow-hidden" style={{ backgroundColor: "#080808" }}>
       <ParticleField />
-
-      {/* Radial white glow */}
-      <div
-        className="absolute inset-0 z-[1]"
-        style={{
-          background: "radial-gradient(ellipse 60% 50% at 50% 40%, rgba(255,255,255,0.03) 0%, transparent 70%)",
-        }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-chrono-bg/40 via-transparent to-chrono-bg z-[2]" />
 
       <motion.div
         style={{ y, opacity, scale }}
