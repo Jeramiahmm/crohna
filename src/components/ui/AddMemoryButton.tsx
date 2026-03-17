@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 import ShimmerButton from "./shimmer-button";
 
 const categories = [
@@ -16,6 +17,9 @@ export default function AddMemoryButton() {
   const [open, setOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const router = useRouter();
   const [form, setForm] = useState({
     title: "",
     date: "",
@@ -27,6 +31,7 @@ export default function AddMemoryButton() {
 
   const resetForm = () => {
     setForm({ title: "", date: "", location: "", category: "", description: "", imageUrl: "" });
+    setErrors({});
   };
 
   const handleClose = () => {
@@ -34,10 +39,45 @@ export default function AddMemoryButton() {
     resetForm();
   };
 
-  const handleSave = () => {
-    if (!form.title.trim() || !form.date) return;
-    setOpen(false);
-    resetForm();
+  const handleSave = async () => {
+    const errs: Record<string, string> = {};
+    if (!form.title.trim()) errs.title = "Title is required";
+    if (!form.date) errs.date = "Date is required";
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: form.title.trim(),
+          date: form.date,
+          location: form.location.trim() || undefined,
+          category: form.category || "life",
+          description: form.description.trim() || undefined,
+          imageUrl: form.imageUrl || undefined,
+        }),
+      });
+
+      if (res.ok) {
+        setOpen(false);
+        resetForm();
+        router.refresh();
+        // If on timeline page, trigger a re-fetch by dispatching a custom event
+        window.dispatchEvent(new CustomEvent("chrono:event-created"));
+      } else {
+        const data = await res.json();
+        setErrors({ title: data.error || "Failed to save. Please try again." });
+      }
+    } catch {
+      setErrors({ title: "Failed to save. Please try again." });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -80,7 +120,6 @@ export default function AddMemoryButton() {
       <AnimatePresence>
         {open && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -89,7 +128,6 @@ export default function AddMemoryButton() {
               className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm"
             />
 
-            {/* Centered Modal */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -97,7 +135,6 @@ export default function AddMemoryButton() {
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] w-[calc(100%-2rem)] max-w-xl max-h-[90vh] bg-chrono-surface border border-[var(--border)] rounded-lg overflow-hidden flex flex-col"
             >
-              {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-[var(--line)]">
                 <div>
                   <h2 className="text-xl font-display font-bold text-chrono-text">Add Memory</h2>
@@ -115,28 +152,37 @@ export default function AddMemoryButton() {
                 </button>
               </div>
 
-              {/* Scrollable Form */}
               <div className="flex-1 overflow-y-auto p-6 space-y-5">
                 <div>
-                  <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Title</label>
+                  <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">
+                    Title <span className="text-chrono-accent">*</span>
+                  </label>
                   <input
                     type="text"
                     value={form.title}
-                    onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                    onChange={(e) => { setForm((f) => ({ ...f, title: e.target.value })); setErrors((er) => ({ ...er, title: "" })); }}
                     placeholder="What happened?"
-                    className="w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted border border-[var(--line-strong)] transition-colors outline-none focus:border-[var(--line-hover)]"
+                    className={`w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted border transition-colors outline-none focus:border-[var(--line-hover)] ${
+                      errors.title ? "border-red-500/40" : "border-[var(--line-strong)]"
+                    }`}
                   />
+                  {errors.title && <p className="text-xs text-red-400/70 mt-1">{errors.title}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Date</label>
+                    <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">
+                      Date <span className="text-chrono-accent">*</span>
+                    </label>
                     <input
                       type="date"
                       value={form.date}
-                      onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-                      className="w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text border border-[var(--line-strong)] transition-colors outline-none focus:border-[var(--line-hover)]"
+                      onChange={(e) => { setForm((f) => ({ ...f, date: e.target.value })); setErrors((er) => ({ ...er, date: "" })); }}
+                      className={`w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text border transition-colors outline-none focus:border-[var(--line-hover)] ${
+                        errors.date ? "border-red-500/40" : "border-[var(--line-strong)]"
+                      }`}
                     />
+                    {errors.date && <p className="text-xs text-red-400/70 mt-1">{errors.date}</p>}
                   </div>
                   <div>
                     <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Location</label>
@@ -152,20 +198,20 @@ export default function AddMemoryButton() {
 
                 <div>
                   <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Category</label>
-                  <div className="relative">
-                    <select
-                      value={form.category}
-                      onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                      className="w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text border border-[var(--line-strong)] transition-colors outline-none focus:border-[var(--line-hover)] appearance-none"
-                    >
-                      <option value="">Select category</option>
-                      {categories.map((cat) => (
-                        <option key={cat.value} value={cat.value}>{cat.label}</option>
-                      ))}
-                    </select>
-                    <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-chrono-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                    </svg>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((cat) => (
+                      <button
+                        key={cat.value}
+                        onClick={() => setForm((f) => ({ ...f, category: f.category === cat.value ? "" : cat.value }))}
+                        className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
+                          form.category === cat.value
+                            ? "bg-foreground text-background border-2 border-foreground"
+                            : "border border-[var(--line-strong)] text-chrono-muted hover:border-[var(--line-hover)]"
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
@@ -216,14 +262,13 @@ export default function AddMemoryButton() {
                 </div>
               </div>
 
-              {/* Footer */}
               <div className="p-6 border-t border-[var(--line)]">
                 <ShimmerButton
                   onClick={handleSave}
-                  disabled={!form.title.trim() || !form.date}
+                  disabled={saving}
                   className="w-full py-3 text-sm font-body font-medium disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  Save Memory
+                  {saving ? "Saving..." : "Save Memory"}
                 </ShimmerButton>
               </div>
             </motion.div>

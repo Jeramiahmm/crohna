@@ -3,6 +3,32 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
 
+function calculateLongestStreak(dates: Date[]): string {
+  if (dates.length < 2) return dates.length === 1 ? "1 day" : "—";
+
+  const sorted = [...dates].sort((a, b) => a.getTime() - b.getTime());
+  const dayMs = 86400000;
+  let maxStreak = 1;
+  let currentStreak = 1;
+
+  for (let i = 1; i < sorted.length; i++) {
+    const diffDays = Math.round(
+      (sorted[i].getTime() - sorted[i - 1].getTime()) / dayMs
+    );
+    if (diffDays <= 7) {
+      // Events within a week count as part of the same "active streak"
+      currentStreak++;
+    } else {
+      maxStreak = Math.max(maxStreak, currentStreak);
+      currentStreak = 1;
+    }
+  }
+  maxStreak = Math.max(maxStreak, currentStreak);
+
+  if (maxStreak === 1) return "1 event";
+  return `${maxStreak} events`;
+}
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -33,6 +59,7 @@ export async function GET() {
     const yearMap: Record<number, number> = {};
     const cityMap: Record<string, number> = {};
     let photosCount = 0;
+    const allDates: Date[] = [];
 
     for (const e of events) {
       const cat = e.category || "uncategorized";
@@ -46,6 +73,7 @@ export async function GET() {
       }
 
       if (e.imageUrl) photosCount++;
+      allDates.push(e.date);
     }
 
     const categories = Object.entries(categoryMap)
@@ -77,7 +105,7 @@ export async function GET() {
         mostActiveYear,
         mostVisitedCity: cityVisits[0]?.city || "None",
         topCategory: categories[0]?.name || "None",
-        longestStreak: "—",
+        longestStreak: calculateLongestStreak(allDates),
         categories,
         yearlyEvents,
         cityVisits,

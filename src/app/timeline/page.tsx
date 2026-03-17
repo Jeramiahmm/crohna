@@ -67,7 +67,7 @@ export default function TimelinePage() {
   const [editingEvent, setEditingEvent] = useState<TimelineEvent | undefined>();
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
+  const fetchEvents = useCallback(() => {
     fetch("/api/events")
       .then((res) => res.json())
       .then((data) => {
@@ -76,6 +76,14 @@ export default function TimelinePage() {
       })
       .catch(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    fetchEvents();
+    // Listen for events created from the floating AddMemoryButton
+    const handler = () => fetchEvents();
+    window.addEventListener("chrono:event-created", handler);
+    return () => window.removeEventListener("chrono:event-created", handler);
+  }, [fetchEvents]);
 
   const handleToggleCategory = useCallback((cat: string) => {
     if (cat === "All") { setSelectedCategories(new Set()); return; }
