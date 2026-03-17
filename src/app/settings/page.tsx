@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import GoogleConnectModal from "@/components/ui/GoogleConnectModal";
@@ -126,7 +127,7 @@ export default function SettingsPage() {
             <h3 className="text-sm font-display font-light text-chrono-text mb-4">Profile</h3>
             <div className="flex items-center gap-4 mb-6">
               {session?.user?.image ? (
-                <img src={session.user.image} alt="" className="w-16 h-16 rounded-full border border-[var(--line-strong)]" />
+                <Image src={session.user.image} alt="" width={64} height={64} className="w-16 h-16 rounded-full border border-[var(--line-strong)]" />
               ) : (
                 <div className="w-16 h-16 border border-[var(--line-strong)] flex items-center justify-center text-chrono-accent text-xl font-display font-light rounded-full">
                   {userInitial}

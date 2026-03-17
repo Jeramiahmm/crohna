@@ -3,11 +3,10 @@
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { demoEvents, demoStories, getEventsByYear, TimelineEvent, AIStory } from "@/data/demo";
+import { demoEvents, demoStories, getEventsByYear } from "@/data/demo";
 import TimelineCard from "@/components/timeline/TimelineCard";
 import AIStorySummary from "@/components/timeline/AIStorySummary";
 import OnboardingWizard from "@/components/onboarding/OnboardingWizard";
-import { useSession, signIn } from "next-auth/react";
 import ParticleField from "@/components/three/ParticleField";
 import MarqueeTicker from "@/components/ui/MarqueeTicker";
 import LoadingScreen from "@/components/ui/LoadingScreen";

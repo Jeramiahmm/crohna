@@ -10,7 +10,7 @@ import EmptyState from "@/components/ui/EmptyState";
 
 const CATEGORIES = ["All", "Travel", "Achievement", "Education", "Life", "Career"];
 
-function getChapterForYear(year: string) {
+function getChapterForYear(_year: string) {
   return null; // Chapters are for demo data only; users build their own story
 }
 
