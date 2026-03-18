@@ -829,8 +829,8 @@ export default function Home() {
   useEffect(() => {
     if (!session?.user) return;
     Promise.all([
-      fetch("/api/events").then((r) => r.json()),
-      fetch("/api/stories").then((r) => r.json()),
+      fetch("/api/events").then((r) => r.ok ? r.json() : { events: [] }),
+      fetch("/api/stories").then((r) => r.ok ? r.json() : { stories: [] }),
     ])
       .then(([eventsData, storiesData]) => {
         setUserEvents(eventsData.events || []);

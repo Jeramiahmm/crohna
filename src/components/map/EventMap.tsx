@@ -6,6 +6,15 @@ import { TimelineEvent } from "@/data/demo";
 import { formatDate } from "@/lib/utils";
 import Image from "next/image";
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 interface EventMapProps {
   events: TimelineEvent[];
 }
@@ -93,10 +102,10 @@ export default function EventMap({ events }: EventMapProps) {
             min-width:160px;
           ">
             <div style="font-size:13px;color:#F0EBE1;font-weight:200;margin-bottom:4px;">
-              ${event.title}
+              ${escapeHtml(event.title)}
             </div>
             <div style="font-size:11px;color:rgba(240,235,225,0.45);">
-              ${event.location || ""}
+              ${escapeHtml(event.location || "")}
             </div>
           </div>
         `;
@@ -145,6 +154,15 @@ export default function EventMap({ events }: EventMapProps) {
   return (
     <div className="relative w-full h-full min-h-[360px] md:min-h-[700px] bg-chrono-surface overflow-hidden border border-[var(--line-strong)]">
       <div ref={mapRef} className="absolute inset-0 z-0" />
+
+      {mapLoaded && eventsWithCoords.length === 0 && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+          <div className="text-sm font-body font-extralight text-chrono-muted text-center px-6">
+            <p className="mb-1">No pinned locations yet</p>
+            <p className="text-xs text-chrono-muted/60">Add events with coordinates to see them on the map</p>
+          </div>
+        </div>
+      )}
 
       {!mapLoaded && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-chrono-surface">

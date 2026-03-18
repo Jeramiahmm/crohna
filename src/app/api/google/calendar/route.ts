@@ -77,7 +77,10 @@ export async function POST(req: NextRequest) {
       const endDate = item.end?.dateTime || item.end?.date;
       if (!startDate) continue;
 
-      const dateStr = new Date(startDate).toISOString().split("T")[0];
+      const parsedDate = new Date(startDate);
+      if (isNaN(parsedDate.getTime())) continue;
+
+      const dateStr = parsedDate.toISOString().split("T")[0];
       const key = `${item.summary.trim()}|${dateStr}`;
       if (existingSet.has(key)) continue;
 
@@ -87,7 +90,7 @@ export async function POST(req: NextRequest) {
         data: {
           userId: user.id,
           title: item.summary.trim(),
-          date: new Date(startDate),
+          date: parsedDate,
           endDate: endDate ? new Date(endDate) : null,
           location,
           description: item.description?.trim()?.substring(0, 5000) || null,

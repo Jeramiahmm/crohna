@@ -79,7 +79,10 @@ export default function TimelinePage() {
       return;
     }
     fetch("/api/events")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch");
+        return res.json();
+      })
       .then((data) => {
         const real = data.events || [];
         if (real.length === 0) {
@@ -91,7 +94,11 @@ export default function TimelinePage() {
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        setEvents(demoEvents);
+        setIsShowingDemo(true);
+        setLoading(false);
+      });
   }, [session, status]);
 
   const [searchQuery, setSearchQuery] = useState("");

@@ -48,6 +48,7 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
 
             {onEdit && (
               <button
+                type="button"
                 onClick={(e) => { e.stopPropagation(); onEdit(); }}
                 className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white/50 hover:text-white hover:bg-black/50 opacity-0 group-hover:opacity-100 transition-all"
               >
@@ -69,6 +70,7 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
 
         {!event.imageUrl && onEdit && (
           <button
+            type="button"
             onClick={(e) => { e.stopPropagation(); onEdit(); }}
             className="absolute top-4 right-4 w-8 h-8 rounded-full bg-chrono-card flex items-center justify-center text-chrono-muted hover:text-chrono-text opacity-0 group-hover:opacity-100 transition-all z-10"
           >

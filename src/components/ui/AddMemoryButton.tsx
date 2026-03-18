@@ -186,6 +186,7 @@ export default function AddMemoryButton() {
                 </div>
                 <button
                   onClick={handleClose}
+                  aria-label="Close modal"
                   className="w-8 h-8 rounded-full bg-chrono-card flex items-center justify-center text-chrono-muted hover:text-chrono-text transition-all"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

@@ -23,6 +23,7 @@ export async function GET() {
     const dbStories = await prisma.aIStory.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
+      take: 100,
     });
 
     const stories = dbStories.map((s) => ({

@@ -89,6 +89,7 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
               <h2 className="text-lg font-display font-light text-chrono-text">Share & Export</h2>
               <button
                 onClick={onClose}
+                aria-label="Close modal"
                 className="w-8 h-8 bg-chrono-card flex items-center justify-center text-chrono-muted hover:text-chrono-text transition-all"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -142,6 +143,7 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
             <div className="px-6 pb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
                 onClick={handleCopy}
+                aria-label="Copy to clipboard"
                 className="flex flex-col items-center gap-2 py-3 bg-[var(--card-bg)] border border-[var(--line-strong)] hover:border-[var(--line-hover)] transition-all"
               >
                 {copied ? (
@@ -161,6 +163,7 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
               <button
                 onClick={handleExport}
                 disabled={exporting}
+                aria-label="Download as text file"
                 className="flex flex-col items-center gap-2 py-3 bg-[var(--card-bg)] border border-[var(--line-strong)] hover:border-[var(--line-hover)] transition-all disabled:opacity-50"
               >
                 {exporting ? (
@@ -175,6 +178,7 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
 
               <button
                 onClick={handleShare}
+                aria-label="Share content"
                 className="flex flex-col items-center gap-2 py-3 bg-[var(--muted)] border border-[var(--line-strong)] hover:bg-[var(--card-bg)] transition-all"
               >
                 <svg className="w-5 h-5 text-chrono-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

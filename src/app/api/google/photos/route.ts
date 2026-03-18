@@ -98,6 +98,7 @@ export async function POST(req: NextRequest) {
       if (existingUrls.has(imageUrl)) continue;
 
       const creationTime = new Date(item.mediaMetadata.creationTime);
+      if (isNaN(creationTime.getTime())) continue;
       const title = item.description?.trim() || `Photo from ${creationTime.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
 
       await prisma.event.create({

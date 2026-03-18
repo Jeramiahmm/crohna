@@ -215,6 +215,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
               </div>
               <button
                 onClick={onClose}
+                aria-label="Close modal"
                 className="w-8 h-8 rounded-full bg-chrono-card flex items-center justify-center text-chrono-muted hover:text-chrono-text hover:bg-[var(--muted)] transition-all"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -265,14 +266,17 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                 </label>
                 <input
                   type="text"
+                  autoFocus
                   value={form.title}
                   onChange={(e) => { setForm((f) => ({ ...f, title: e.target.value })); setErrors((er) => ({ ...er, title: "" })); }}
                   placeholder="What happened?"
+                  aria-invalid={!!errors.title}
+                  aria-describedby={errors.title ? "title-error" : undefined}
                   className={`w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border transition-colors outline-none focus:border-[var(--line-hover)] ${
                     errors.title ? "border-red-500/40" : "border-[var(--line-strong)]"
                   }`}
                 />
-                {errors.title && <p className="text-xs text-red-400/70 mt-1">{errors.title}</p>}
+                {errors.title && <p id="title-error" className="text-xs text-red-400/70 mt-1" role="alert">{errors.title}</p>}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -284,11 +288,13 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                     type="date"
                     value={form.date}
                     onChange={(e) => { setForm((f) => ({ ...f, date: e.target.value })); setErrors((er) => ({ ...er, date: "" })); }}
+                    aria-invalid={!!errors.date}
+                    aria-describedby={errors.date ? "date-error" : undefined}
                     className={`w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text border transition-colors outline-none focus:border-[var(--line-hover)] ${
                       errors.date ? "border-red-500/40" : "border-[var(--line-strong)]"
                     }`}
                   />
-                  {errors.date && <p className="text-xs text-red-400/70 mt-1">{errors.date}</p>}
+                  {errors.date && <p id="date-error" className="text-xs text-red-400/70 mt-1" role="alert">{errors.date}</p>}
                 </div>
                 <div>
                   <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Location</label>

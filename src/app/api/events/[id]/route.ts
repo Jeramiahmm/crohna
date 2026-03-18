@@ -47,6 +47,17 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Longitude must be between -180 and 180" }, { status: 400 });
     }
 
+    if (imageUrl && typeof imageUrl === "string") {
+      try {
+        const parsed = new URL(imageUrl);
+        if (!["http:", "https:"].includes(parsed.protocol)) {
+          return NextResponse.json({ error: "Invalid image URL" }, { status: 400 });
+        }
+      } catch {
+        return NextResponse.json({ error: "Invalid image URL" }, { status: 400 });
+      }
+    }
+
     const event = await prisma.event.update({
       where: { id },
       data: {
