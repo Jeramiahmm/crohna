@@ -12,6 +12,8 @@ import ParticleField from "@/components/three/ParticleField";
 import MarqueeTicker from "@/components/ui/MarqueeTicker";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import ShimmerButton from "@/components/ui/shimmer-button";
+import { useEvents } from "@/hooks/useEvents";
+import { useStories } from "@/hooks/useStories";
 
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   return (
@@ -826,22 +828,8 @@ function CTASection() {
 }
 
 export default function Home() {
-  const { data: session } = useSession();
-  const [userEvents, setUserEvents] = useState<TimelineEvent[]>([]);
-  const [userStories, setUserStories] = useState<AIStory[]>([]);
-
-  useEffect(() => {
-    if (!session?.user) return;
-    Promise.all([
-      fetch("/api/events").then((r) => r.ok ? r.json() : { events: [] }),
-      fetch("/api/stories").then((r) => r.ok ? r.json() : { stories: [] }),
-    ])
-      .then(([eventsData, storiesData]) => {
-        setUserEvents(eventsData.events || []);
-        setUserStories(storiesData.stories || []);
-      })
-      .catch(() => {});
-  }, [session]);
+  const { events: userEvents } = useEvents();
+  const { stories: userStories } = useStories();
 
   return (
     <>

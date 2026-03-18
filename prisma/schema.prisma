@@ -15,6 +15,8 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  preferences Json?
+
   accounts  Account[]
   sessions  Session[]
   events    Event[]
@@ -62,6 +64,7 @@ model Event {
   description String?   @db.VarChar(5000)
   category    String?   @db.VarChar(50)
   source      String    @default("manual") @db.VarChar(50)
+  deletedAt   DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -70,6 +73,7 @@ model Event {
   @@index([userId, date])
   @@index([userId, category])
   @@index([userId, source])
+  @@index([userId, deletedAt])
 }
 
 model AIStory {

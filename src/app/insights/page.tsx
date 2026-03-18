@@ -2,8 +2,8 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback } from "react";
-import { useSession, signIn } from "next-auth/react";
-import { AIStory, demoStories, insightStats as demoInsightStats } from "@/data/demo";
+import { signIn } from "next-auth/react";
+import { AIStory } from "@/data/demo";
 import AIStorySummary from "@/components/timeline/AIStorySummary";
 import StatCard from "@/components/insights/StatCard";
 import CategoryChart from "@/components/insights/CategoryChart";
@@ -13,65 +13,17 @@ import ShareCard from "@/components/share/ShareCard";
 import { AIStoryLoadingSkeleton } from "@/components/ui/Skeletons";
 import EmptyState from "@/components/ui/EmptyState";
 import { toast } from "sonner";
-
-interface InsightStats {
-  totalEvents: number;
-  totalPhotos: number;
-  citiesVisited: number;
-  mostActiveYear: number;
-  mostVisitedCity: string;
-  topCategory: string;
-  longestStreak: string;
-  categories: { name: string; count: number; color: string }[];
-  yearlyEvents: { year: number; count: number }[];
-  cityVisits: { city: string; count: number }[];
-}
+import { useStories } from "@/hooks/useStories";
+import { useInsights } from "@/hooks/useInsights";
 
 export default function InsightsPage() {
-  const { data: session, status } = useSession();
-  const [stories, setStories] = useState<AIStory[]>([]);
-  const [stats, setStats] = useState<InsightStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isShowingDemo, setIsShowingDemo] = useState(false);
+  const { stories, isLoading: storiesLoading, isShowingDemo, mutate: mutateStories } = useStories();
+  const { stats, isLoading: statsLoading } = useInsights();
+  const loading = storiesLoading || statsLoading;
   const [generating, setGenerating] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [shareStory, setShareStory] = useState<AIStory | null>(null);
   const [storyFilter, setStoryFilter] = useState<"all" | "year" | "chapter">("all");
-
-  useEffect(() => {
-    if (status === "loading") return;
-    if (!session) {
-      setStories(demoStories);
-      setStats(demoInsightStats);
-      setIsShowingDemo(true);
-      setLoading(false);
-      return;
-    }
-    Promise.all([
-      fetch("/api/stories").then((r) => r.ok ? r.json() : { stories: [] }),
-      fetch("/api/insights").then((r) => r.ok ? r.json() : { stats: null }),
-    ])
-      .then(([storiesData, insightsData]) => {
-        const realStories = storiesData.stories || [];
-        const realStats = insightsData.stats || null;
-        if (!realStats) {
-          setStories(demoStories);
-          setStats(demoInsightStats);
-          setIsShowingDemo(true);
-        } else {
-          setStories(realStories);
-          setStats(realStats);
-          setIsShowingDemo(false);
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        setStories(demoStories);
-        setStats(demoInsightStats);
-        setIsShowingDemo(true);
-        setLoading(false);
-      });
-  }, [session, status]);
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -89,17 +41,14 @@ export default function InsightsPage() {
     try {
       const res = await fetch(`/api/stories/${storyId}`, { method: "PUT" });
       if (res.ok) {
-        const data = await res.json();
-        setStories((prev) =>
-          prev.map((s) => (s.id === storyId ? data.story : s))
-        );
+        mutateStories();
       }
     } catch (err) {
       console.error("Failed to regenerate story:", err);
     } finally {
       setGenerating(false);
     }
-  }, []);
+  }, [mutateStories]);
 
   const handleShare = useCallback((story: AIStory) => {
     setShareStory(story);

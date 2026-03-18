@@ -20,22 +20,49 @@ export default function SettingsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // Privacy preferences (persisted to localStorage until backend supports them)
+  // Privacy preferences (server-backed with localStorage cache)
   const [privacySettings, setPrivacySettings] = useState({
     shareableStories: true,
     showLocationOnShared: true,
   });
 
+  // Load from localStorage immediately, then sync from server
   useEffect(() => {
     const stored = localStorage.getItem("chrono-privacy");
     if (stored) {
-      try { setPrivacySettings(JSON.parse(stored)); } catch {}
+      try { setPrivacySettings(JSON.parse(stored)); } catch { /* ignore */ }
     }
-  }, []);
+    if (!session) return;
+    fetch("/api/user")
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        const prefs = data?.user?.preferences;
+        if (prefs && typeof prefs === "object") {
+          const merged = {
+            shareableStories: prefs.shareableStories ?? true,
+            showLocationOnShared: prefs.showLocationOnShared ?? true,
+          };
+          setPrivacySettings(merged);
+          localStorage.setItem("chrono-privacy", JSON.stringify(merged));
+        }
+      })
+      .catch(() => {});
+  }, [session]);
 
-  useEffect(() => {
-    localStorage.setItem("chrono-privacy", JSON.stringify(privacySettings));
-  }, [privacySettings]);
+  // Save to both localStorage and server
+  const updatePrivacy = (update: Partial<typeof privacySettings>) => {
+    setPrivacySettings((prev) => {
+      const next = { ...prev, ...update };
+      localStorage.setItem("chrono-privacy", JSON.stringify(next));
+      // Fire-and-forget save to server
+      fetch("/api/user", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ preferences: next }),
+      }).catch(() => {});
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (session?.user) {
@@ -345,7 +372,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => setPrivacySettings((p) => ({ ...p, shareableStories: !p.shareableStories }))}
+                  onClick={() => updatePrivacy({ shareableStories: !privacySettings.shareableStories })}
                   className="relative w-11 h-6 rounded-full border border-[var(--line-strong)] transition-colors flex-shrink-0"
                   style={{ background: privacySettings.shareableStories ? "var(--chrono-accent)" : "var(--card-bg)" }}
                   role="switch"
@@ -366,7 +393,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => setPrivacySettings((p) => ({ ...p, showLocationOnShared: !p.showLocationOnShared }))}
+                  onClick={() => updatePrivacy({ showLocationOnShared: !privacySettings.showLocationOnShared })}
                   className="relative w-11 h-6 rounded-full border border-[var(--line-strong)] transition-colors flex-shrink-0"
                   style={{ background: privacySettings.showLocationOnShared ? "var(--chrono-accent)" : "var(--card-bg)" }}
                   role="switch"

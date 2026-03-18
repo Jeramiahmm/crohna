@@ -21,7 +21,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     const existing = await prisma.event.findFirst({
-      where: { id, userId: user.id },
+      where: { id, userId: user.id, deletedAt: null },
     });
     if (!existing) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
@@ -112,13 +112,13 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     }
 
     const existing = await prisma.event.findFirst({
-      where: { id, userId: user.id },
+      where: { id, userId: user.id, deletedAt: null },
     });
     if (!existing) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
-    await prisma.event.delete({ where: { id } });
+    await prisma.event.update({ where: { id }, data: { deletedAt: new Date() } });
 
     return NextResponse.json({ success: true });
   } catch (error) {

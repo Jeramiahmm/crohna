@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
     const limitParam = searchParams.get("limit");
     const limit = Math.min(Math.max(parseInt(limitParam || "50", 10) || 50, 1), 100);
 
-    const where: Record<string, unknown> = { userId: user.id };
+    const where: Record<string, unknown> = { userId: user.id, deletedAt: null };
     if (year) {
       const yearNum = parseInt(year, 10);
       if (isNaN(yearNum) || yearNum < 1900 || yearNum > 2100) {
@@ -191,8 +191,9 @@ export async function DELETE() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const result = await prisma.event.deleteMany({
-      where: { userId: user.id },
+    const result = await prisma.event.updateMany({
+      where: { userId: user.id, deletedAt: null },
+      data: { deletedAt: new Date() },
     });
 
     return NextResponse.json({ success: true, deleted: result.count });

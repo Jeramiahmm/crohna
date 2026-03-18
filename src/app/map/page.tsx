@@ -2,47 +2,13 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { useSession, signIn } from "next-auth/react";
-import { TimelineEvent, demoEvents } from "@/data/demo";
+import { signIn } from "next-auth/react";
 import EventMap from "@/components/map/EventMap";
 import EmptyState from "@/components/ui/EmptyState";
+import { useEvents } from "@/hooks/useEvents";
 
 export default function MapPage() {
-  const { data: session, status } = useSession();
-  const [events, setEvents] = useState<TimelineEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isShowingDemo, setIsShowingDemo] = useState(false);
-
-  useEffect(() => {
-    if (status === "loading") return;
-    if (!session) {
-      setEvents(demoEvents);
-      setIsShowingDemo(true);
-      setLoading(false);
-      return;
-    }
-    fetch("/api/events")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch");
-        return res.json();
-      })
-      .then((data) => {
-        const real = data.events || [];
-        if (real.length === 0) {
-          setEvents(demoEvents);
-          setIsShowingDemo(true);
-        } else {
-          setEvents(real);
-          setIsShowingDemo(false);
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        setEvents(demoEvents);
-        setIsShowingDemo(true);
-        setLoading(false);
-      });
-  }, [session, status]);
+  const { events, isLoading, isShowingDemo } = useEvents();
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -55,7 +21,7 @@ export default function MapPage() {
     return () => window.removeEventListener("chrono:search", searchHandler);
   }, []);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen pt-24 pb-32 flex items-center justify-center">
         <div className="text-sm font-body font-light text-chrono-muted animate-pulse">Loading your map...</div>

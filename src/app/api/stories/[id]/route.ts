@@ -42,7 +42,7 @@ export async function PUT(
     }
 
     // Get user's events for the story's period
-    const whereClause: Record<string, unknown> = { userId: user.id };
+    const whereClause: Record<string, unknown> = { userId: user.id, deletedAt: null };
     if (existing.year) {
       const start = new Date(`${existing.year}-01-01`);
       const end = new Date(`${existing.year + 1}-01-01`);

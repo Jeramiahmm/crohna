@@ -97,7 +97,9 @@ export async function POST(req: NextRequest) {
       const endDate = item.end?.dateTime || item.end?.date;
       if (!startDate) continue;
 
-      const parsedDate = new Date(startDate);
+      // For date-only strings (YYYY-MM-DD), append T00:00:00 to avoid UTC midnight shift
+      const isDateOnly = !item.start?.dateTime;
+      const parsedDate = isDateOnly ? new Date(startDate + "T00:00:00") : new Date(startDate);
       if (isNaN(parsedDate.getTime())) continue;
 
       const dateStr = parsedDate.toISOString().split("T")[0];
