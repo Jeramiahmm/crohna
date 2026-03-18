@@ -40,7 +40,7 @@ function AnimatedWord() {
   }, []);
 
   return (
-    <span className="inline-block relative overflow-hidden align-bottom text-right" style={{ lineHeight: "inherit", paddingRight: "0.05em" }}>
+    <span className="inline-block relative overflow-hidden align-bottom text-right" style={{ lineHeight: "inherit", paddingRight: "0.08em", paddingBottom: "0.1em" }}>
       {/* invisible sizer — holds natural width/height for longest word */}
       <span className="invisible italic" aria-hidden="true">beautifully</span>
       <AnimatePresence mode="wait">
@@ -64,19 +64,16 @@ function AnimatedWord() {
 function HeroButtons() {
   const { data: session, status } = useSession();
 
-  // Determine the "Get Started" href:
-  // - Signed in → go straight to timeline
-  // - Signed out → trigger Google sign-in via NextAuth
   const getStartedHref =
     status !== "loading" && session
       ? "/timeline"
       : "/api/auth/signin/google?callbackUrl=%2Ftimeline";
 
   return (
-    <div className="relative z-50 flex flex-col sm:flex-row items-center justify-center gap-4 mt-16">
+    <div className="absolute left-0 right-0 z-50 flex flex-col sm:flex-row items-center justify-center gap-4" style={{ bottom: "18vh" }}>
       <a
         href={getStartedHref}
-        className="group relative z-0 inline-flex cursor-pointer items-center justify-center overflow-hidden whitespace-nowrap rounded-full px-10 py-4 text-sm font-body font-light tracking-wide transition-all duration-300 bg-[var(--foreground)] text-[var(--background)] hover:scale-[1.02] active:scale-[0.98]"
+        className="inline-flex cursor-pointer items-center justify-center rounded-full px-10 py-4 text-sm font-body font-light tracking-wide transition-all duration-300 bg-[var(--foreground)] text-[var(--background)] hover:scale-[1.02] active:scale-[0.98]"
       >
         Get Started
       </a>
@@ -145,24 +142,20 @@ function HeroSection() {
         >
           A visual timeline of your memories, milestones, and places.
         </motion.p>
-
-        <HeroButtons />
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2, duration: 1.5 }}
-          className="absolute bottom-16 left-1/2 -translate-x-1/2 pointer-events-none"
-        >
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            className="w-5 h-9 border border-[var(--line-strong)] rounded-full flex justify-center pt-2"
-          >
-            <div className="w-0.5 h-1.5 bg-chrono-muted rounded-full" />
-          </motion.div>
-        </motion.div>
       </motion.div>
+
+      {/* Buttons placed OUTSIDE the motion.div to avoid transform stacking context trapping pointer events */}
+      <HeroButtons />
+
+      <div className="absolute bottom-16 left-1/2 -translate-x-1/2 pointer-events-none z-[1]">
+        <motion.div
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="w-5 h-9 border border-[var(--line-strong)] rounded-full flex justify-center pt-2"
+        >
+          <div className="w-0.5 h-1.5 bg-chrono-muted rounded-full" />
+        </motion.div>
+      </div>
     </section>
   );
 }
