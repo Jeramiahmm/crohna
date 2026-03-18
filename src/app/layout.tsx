@@ -52,6 +52,7 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#050505" />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem("chrono-theme");if(t==="light")document.documentElement.classList.add("light")}catch(e){}})()` }} />
       </head>
       <body className="font-body antialiased bg-chrono-bg text-chrono-text">
         <SessionProvider>

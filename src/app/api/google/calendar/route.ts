@@ -89,7 +89,18 @@ export async function POST(req: NextRequest) {
       existingCalendarEvents.map((e) => `${e.title}|${e.date.toISOString().split("T")[0]}`)
     );
 
-    let imported = 0;
+    // Collect new events for batch insert
+    const newEvents: {
+      userId: string;
+      title: string;
+      date: Date;
+      endDate: Date | null;
+      location: string | null;
+      description: string | null;
+      category: string;
+      source: string;
+    }[] = [];
+
     for (const item of items) {
       if (!item.summary || item.summary.trim().length === 0) continue;
 
@@ -108,21 +119,25 @@ export async function POST(req: NextRequest) {
 
       const location = item.location || null;
 
-      await prisma.event.create({
-        data: {
-          userId: user.id,
-          title: item.summary.trim(),
-          date: parsedDate,
-          endDate: endDate ? new Date(endDate) : null,
-          location,
-          description: item.description?.trim()?.substring(0, 5000) || null,
-          category: "life",
-          source: "calendar",
-        },
+      newEvents.push({
+        userId: user.id,
+        title: item.summary.trim(),
+        date: parsedDate,
+        endDate: endDate ? new Date(endDate) : null,
+        location,
+        description: item.description?.trim()?.substring(0, 5000) || null,
+        category: "life",
+        source: "calendar",
       });
 
       existingSet.add(key);
-      imported++;
+    }
+
+    // Batch insert all new events at once
+    let imported = 0;
+    if (newEvents.length > 0) {
+      const result = await prisma.event.createMany({ data: newEvents });
+      imported = result.count;
     }
 
     return NextResponse.json({ success: true, imported });
