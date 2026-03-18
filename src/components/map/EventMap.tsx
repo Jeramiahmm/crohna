@@ -154,7 +154,7 @@ export default function EventMap({ events }: EventMapProps) {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 20, scale: 0.95 }}
             transition={{ ease: [0.16, 1, 0.3, 1] }}
-            className="absolute top-4 right-4 w-80 glass-strong overflow-hidden z-20"
+            className="absolute top-4 right-4 left-4 sm:left-auto sm:w-80 glass-strong overflow-hidden z-20"
           >
             {selectedEvent.imageUrl && (
               <div className="relative h-40">

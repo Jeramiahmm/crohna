@@ -21,7 +21,7 @@ export default function AIStorySummary({ story, index }: AIStorySummaryProps) {
       }}
       className="relative group"
     >
-      <div className="relative bg-[var(--card-bg)] p-8 md:p-12 border border-[var(--line-strong)] overflow-hidden card-hover">
+      <div className="relative bg-[var(--card-bg)] p-4 sm:p-8 md:p-12 border border-[var(--line-strong)] overflow-hidden card-hover">
         <div className="relative flex items-center gap-2 mb-6">
           <span className="section-label">
             Story

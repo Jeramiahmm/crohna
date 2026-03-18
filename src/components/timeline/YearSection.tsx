@@ -57,7 +57,7 @@ export default function YearSection({ year, events, onEditEvent }: YearSectionPr
           />
         </div>
 
-        <div className="space-y-10 md:space-y-16">
+        <div className="space-y-6 md:space-y-16">
           {events.map((event, index) => {
             const isLeft = index % 2 === 0;
             return (

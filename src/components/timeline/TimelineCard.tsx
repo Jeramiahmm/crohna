@@ -32,7 +32,7 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
     >
       <div className="relative bg-[var(--card-bg)] overflow-hidden border border-[var(--line-strong)] card-hover transition-all duration-300">
         {event.imageUrl && (
-          <div className="relative h-52 md:h-60 overflow-hidden">
+          <div className="relative h-40 sm:h-52 md:h-60 overflow-hidden">
             <Image
               src={event.imageUrl}
               alt={event.title}
@@ -83,7 +83,7 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
           </button>
         )}
 
-        <div className="p-6 md:p-7">
+        <div className="p-4 sm:p-6 md:p-7">
           <div className="flex items-center gap-2 mb-1.5">
             <span className="text-[10px] font-body font-extralight text-chrono-accent uppercase tracking-[0.2em]">
               {getSeason(event.date)}

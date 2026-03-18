@@ -257,7 +257,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                 {errors.title && <p className="text-xs text-red-400/70 mt-1">{errors.title}</p>}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">
                     Date <span className="text-chrono-accent">*</span>

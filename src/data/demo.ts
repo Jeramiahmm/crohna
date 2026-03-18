@@ -205,7 +205,7 @@ export const demoEvents: TimelineEvent[] = [
     latitude: 40.015,
     longitude: -105.2705,
     imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
-    description: "Shipped Chrono v1 — a life timeline app. Hit 500 users in the first week.",
+    description: "Shipped Crohna v1 — a life timeline app. Hit 500 users in the first week.",
     category: "achievement",
     source: "manual",
   },
@@ -232,7 +232,7 @@ export const demoStories: AIStory[] = [
     summary: "2024 was a year of breakthroughs. You completed your second internship at a major tech company in Seattle, summited Mount Rainier, launched your first product, and secured a full-time job offer. You traveled to four cities and captured over 600 photos. This was the year your ambitions became achievements.",
     highlights: [
       "Completed internship at a major tech company",
-      "Launched Chrono and reached 500 users",
+      "Launched Crohna and reached 500 users",
       "Accepted full-time software engineer offer",
       "Summited Camp Muir on Mount Rainier",
       "Gave first conference lightning talk",

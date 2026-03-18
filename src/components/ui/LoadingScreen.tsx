@@ -33,7 +33,7 @@ export default function LoadingScreen() {
               transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
               className="text-[13px] font-display font-bold tracking-[0.35em] uppercase text-chrono-text"
             >
-              Chrono
+              Crohna
             </motion.span>
           </div>
         </motion.div>

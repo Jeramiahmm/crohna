@@ -38,9 +38,9 @@ export default function EmptyState({ title, description, actionLabel, onAction, 
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col items-center justify-center py-24 px-6 text-center"
+      className="flex flex-col items-center justify-center py-12 sm:py-24 px-6 text-center"
     >
-      <div className="w-20 h-20 bg-[var(--card-bg)] border border-[var(--line-strong)] rounded-full flex items-center justify-center text-chrono-muted mb-6">
+      <div className="w-14 h-14 sm:w-20 sm:h-20 bg-[var(--card-bg)] border border-[var(--line-strong)] rounded-full flex items-center justify-center text-chrono-muted mb-6">
         {icons[icon]}
       </div>
       <h3 className="text-xl font-display font-bold text-chrono-text mb-2">{title}</h3>

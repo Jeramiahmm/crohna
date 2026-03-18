@@ -17,7 +17,7 @@ export default function CategoryChart({ categories }: { categories: Category[] }
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-      className="bg-[var(--card-bg)] p-6 md:p-8 border border-[var(--line-strong)]"
+      className="bg-[var(--card-bg)] p-4 sm:p-6 md:p-8 border border-[var(--line-strong)]"
     >
       <h3 className="text-lg font-display font-bold text-chrono-text mb-6">
         Events by Category
