@@ -357,8 +357,12 @@ export default function InsightsPage() {
                       </button>
                       <button
                         onClick={async () => {
-                          await navigator.clipboard.writeText(story.summary);
-                          toast.success("Copied to clipboard");
+                          try {
+                            await navigator.clipboard.writeText(story.summary);
+                            toast.success("Copied to clipboard");
+                          } catch {
+                            toast.error("Failed to copy to clipboard");
+                          }
                         }}
                         className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-body font-light text-chrono-muted hover:text-chrono-text border border-[var(--line-strong)] hover:border-[var(--line-hover)] transition-all"
                       >

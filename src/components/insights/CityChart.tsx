@@ -8,7 +8,7 @@ interface CityData {
 }
 
 export default function CityChart({ data }: { data: CityData[] }) {
-  const maxCount = Math.max(...data.map((d) => d.count));
+  const maxCount = data.length === 0 ? 1 : Math.max(...data.map((d) => d.count));
 
   return (
     <motion.div

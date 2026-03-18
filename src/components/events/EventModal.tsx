@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { TimelineEvent } from "@/data/demo";
 import { CATEGORIES } from "@/lib/constants";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 const chapters = [
   "College Years",
@@ -35,6 +36,8 @@ const EMPTY_FORM = {
 export default function EventModal({ isOpen, onClose, onSave, event, onDelete }: EventModalProps) {
   const isEditing = !!event;
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, isOpen);
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -173,6 +176,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
           />
 
           <motion.div
+            ref={modalRef}
             initial={{ opacity: 0, y: 40, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.97 }}

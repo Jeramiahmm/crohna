@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface ShareCardProps {
   isOpen: boolean;
@@ -15,8 +16,10 @@ interface ShareCardProps {
 
 export default function ShareCard({ isOpen, onClose, type, title, content, stats, highlights }: ShareCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
+  useFocusTrap(modalRef, isOpen);
 
   // Escape key to close
   useEffect(() => {
@@ -30,9 +33,13 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
 
   const handleCopy = useCallback(async () => {
     const text = `${title}\n\n${content}${highlights ? "\n\n" + highlights.map((h) => `- ${h}`).join("\n") : ""}`;
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard permission denied — silent fail
+    }
   }, [title, content, highlights]);
 
   const handleExport = useCallback(async () => {
@@ -55,14 +62,18 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
         await navigator.share({ title, text });
       } catch {
         // User cancelled or share failed, fall back to copy
+        try {
+          await navigator.clipboard.writeText(text);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } catch { /* clipboard denied */ }
+      }
+    } else {
+      try {
         await navigator.clipboard.writeText(text);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
-      }
-    } else {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      } catch { /* clipboard denied */ }
     }
   }, [title, content]);
 
@@ -79,6 +90,7 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
           />
 
           <motion.div
+            ref={modalRef}
             initial={{ opacity: 0, y: 40, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.97 }}

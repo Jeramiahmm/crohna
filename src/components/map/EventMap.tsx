@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TimelineEvent } from "@/data/demo";
 import { formatDate } from "@/lib/utils";
@@ -23,24 +23,55 @@ export default function EventMap({ events }: EventMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const leafletMap = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const markersRef = useRef<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const polylinesRef = useRef<any[]>([]);
+  const linkRef = useRef<HTMLLinkElement | null>(null);
+  const scriptRef = useRef<HTMLScriptElement | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
-  const eventsWithCoords = events.filter(
-    (e) => e.latitude !== undefined && e.longitude !== undefined
+  const eventsWithCoords = useMemo(
+    () => events.filter((e) => e.latitude !== undefined && e.longitude !== undefined),
+    [events]
   );
 
+  // Derive legend from actual event categories
+  const legendCategories = useMemo(() => {
+    const cats = new Set<string>();
+    eventsWithCoords.forEach((e) => {
+      if (e.category) cats.add(e.category.charAt(0).toUpperCase() + e.category.slice(1));
+    });
+    return Array.from(cats);
+  }, [eventsWithCoords]);
+
+  // Effect 1: Load Leaflet scripts and initialize map (runs once)
   useEffect(() => {
     if (!mapRef.current || leafletMap.current) return;
+
+    // Check if Leaflet is already loaded
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((window as any).L) {
+      initMap();
+      return;
+    }
 
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
     document.head.appendChild(link);
+    linkRef.current = link;
 
     const script = document.createElement("script");
     script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-    script.onload = () => {
+    script.onload = () => initMap();
+    script.onerror = () => setLoadError(true);
+    document.head.appendChild(script);
+    scriptRef.current = script;
+
+    function initMap() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const L = (window as any).L;
       if (!L || !mapRef.current) return;
@@ -56,104 +87,138 @@ export default function EventMap({ events }: EventMapProps) {
 
       L.tileLayer(
         "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-        {
-          maxZoom: 19,
-          subdomains: "abcd",
-        }
+        { maxZoom: 19, subdomains: "abcd" }
       ).addTo(map);
-
-      eventsWithCoords.forEach((event) => {
-        const markerHtml = `
-          <div style="position:relative;width:12px;height:12px;">
-            <div style="
-              width:12px;height:12px;border-radius:50%;
-              background:rgba(255,255,255,0.12);
-              border:1.5px solid rgba(255,255,255,0.8);
-              box-shadow:0 0 20px rgba(255,255,255,0.4);
-            "></div>
-            <div style="
-              position:absolute;inset:-4px;border-radius:50%;
-              border:1px solid rgba(255,255,255,0.3);
-              animation:markerPulse 2s ease-out infinite;
-            "></div>
-            <div style="
-              position:absolute;inset:-8px;border-radius:50%;
-              border:1px solid rgba(255,255,255,0.15);
-              animation:markerPulse 2s ease-out infinite 0.5s;
-            "></div>
-          </div>
-        `;
-
-        const icon = L.divIcon({
-          html: markerHtml,
-          className: "",
-          iconSize: [20, 20],
-          iconAnchor: [10, 10],
-        });
-
-        const marker = L.marker([event.latitude!, event.longitude!], { icon }).addTo(map);
-
-        const popupContent = `
-          <div style="
-            background:rgba(5,5,5,0.95);
-            border:1px solid rgba(255,255,255,0.12);
-            padding:12px 16px;
-            font-family:var(--font-body),system-ui,sans-serif;
-            min-width:160px;
-          ">
-            <div style="font-size:13px;color:#F0EBE1;font-weight:200;margin-bottom:4px;">
-              ${escapeHtml(event.title)}
-            </div>
-            <div style="font-size:11px;color:rgba(240,235,225,0.45);">
-              ${escapeHtml(event.location || "")}
-            </div>
-          </div>
-        `;
-
-        marker.bindPopup(popupContent, {
-          className: "chrono-popup",
-          closeButton: false,
-          offset: [0, -5],
-        });
-
-        marker.on("click", () => {
-          setSelectedEvent(event);
-        });
-      });
-
-      if (eventsWithCoords.length > 1) {
-        const latlngs = eventsWithCoords.map((e) => [e.latitude!, e.longitude!]);
-        L.polyline(latlngs, {
-          color: "rgba(255,255,255,0.1)",
-          weight: 1,
-          dashArray: "4 8",
-        }).addTo(map);
-      }
-
-      // Auto-fit map to event bounds
-      if (eventsWithCoords.length > 0) {
-        const latlngs = eventsWithCoords.map((e) => [e.latitude!, e.longitude!]);
-        const bounds = L.latLngBounds(latlngs);
-        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
-      }
 
       leafletMap.current = map;
       setMapLoaded(true);
-    };
-    document.head.appendChild(script);
+    }
 
     return () => {
       if (leafletMap.current) {
         leafletMap.current.remove();
         leafletMap.current = null;
       }
+      if (linkRef.current) {
+        linkRef.current.remove();
+        linkRef.current = null;
+      }
+      if (scriptRef.current) {
+        scriptRef.current.remove();
+        scriptRef.current = null;
+      }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Effect 2: Manage markers when events change (runs whenever events or mapLoaded changes)
+  useEffect(() => {
+    if (!mapLoaded || !leafletMap.current) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const L = (window as any).L;
+    if (!L) return;
+    const map = leafletMap.current;
+
+    // Clear existing markers and polylines
+    markersRef.current.forEach((m) => m.remove());
+    markersRef.current = [];
+    polylinesRef.current.forEach((p) => p.remove());
+    polylinesRef.current = [];
+
+    // Add new markers
+    eventsWithCoords.forEach((event) => {
+      const markerHtml = `
+        <div style="position:relative;width:12px;height:12px;">
+          <div style="
+            width:12px;height:12px;border-radius:50%;
+            background:rgba(255,255,255,0.12);
+            border:1.5px solid rgba(255,255,255,0.8);
+            box-shadow:0 0 20px rgba(255,255,255,0.4);
+          "></div>
+          <div style="
+            position:absolute;inset:-4px;border-radius:50%;
+            border:1px solid rgba(255,255,255,0.3);
+            animation:markerPulse 2s ease-out infinite;
+          "></div>
+          <div style="
+            position:absolute;inset:-8px;border-radius:50%;
+            border:1px solid rgba(255,255,255,0.15);
+            animation:markerPulse 2s ease-out infinite 0.5s;
+          "></div>
+        </div>
+      `;
+
+      const icon = L.divIcon({
+        html: markerHtml,
+        className: "",
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+      });
+
+      const marker = L.marker([event.latitude!, event.longitude!], { icon }).addTo(map);
+
+      const popupContent = `
+        <div style="
+          background:rgba(5,5,5,0.95);
+          border:1px solid rgba(255,255,255,0.12);
+          padding:12px 16px;
+          font-family:var(--font-body),system-ui,sans-serif;
+          min-width:160px;
+        ">
+          <div style="font-size:13px;color:#F0EBE1;font-weight:200;margin-bottom:4px;">
+            ${escapeHtml(event.title)}
+          </div>
+          <div style="font-size:11px;color:rgba(240,235,225,0.45);">
+            ${escapeHtml(event.location || "")}
+          </div>
+        </div>
+      `;
+
+      marker.bindPopup(popupContent, {
+        className: "chrono-popup",
+        closeButton: false,
+        offset: [0, -5],
+      });
+
+      marker.on("click", () => setSelectedEvent(event));
+      markersRef.current.push(marker);
+    });
+
+    // Add polylines connecting markers
+    if (eventsWithCoords.length > 1) {
+      const latlngs = eventsWithCoords.map((e) => [e.latitude!, e.longitude!]);
+      const polyline = L.polyline(latlngs, {
+        color: "rgba(255,255,255,0.1)",
+        weight: 1,
+        dashArray: "4 8",
+      }).addTo(map);
+      polylinesRef.current.push(polyline);
+    }
+
+    // Auto-fit map to event bounds
+    if (eventsWithCoords.length > 0) {
+      const latlngs = eventsWithCoords.map((e) => [e.latitude!, e.longitude!]);
+      const bounds = L.latLngBounds(latlngs);
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
+    }
+  }, [mapLoaded, eventsWithCoords]);
 
   return (
     <div className="relative w-full h-full min-h-[360px] md:min-h-[700px] bg-chrono-surface overflow-hidden border border-[var(--line-strong)]">
       <div ref={mapRef} className="absolute inset-0 z-0" />
+
+      {loadError && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-chrono-surface">
+          <div className="text-center px-6">
+            <svg className="w-10 h-10 mx-auto mb-4 text-chrono-muted/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
+            </svg>
+            <p className="text-sm font-body font-light text-chrono-muted mb-2">Failed to load map</p>
+            <p className="text-xs font-body font-extralight text-chrono-muted/60">
+              Please check your connection and refresh the page
+            </p>
+          </div>
+        </div>
+      )}
 
       {mapLoaded && eventsWithCoords.length === 0 && (
         <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
@@ -164,7 +229,7 @@ export default function EventMap({ events }: EventMapProps) {
         </div>
       )}
 
-      {!mapLoaded && (
+      {!mapLoaded && !loadError && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-chrono-surface">
           <div className="text-sm font-body font-extralight text-chrono-muted animate-pulse">
             Loading map...
@@ -227,25 +292,21 @@ export default function EventMap({ events }: EventMapProps) {
         )}
       </AnimatePresence>
 
-      <div className="absolute bottom-4 left-4 glass px-4 py-3 z-20">
-        <div className="section-label mb-2">Legend</div>
-        <div className="flex flex-wrap gap-3">
-          {[
-            { label: "Travel" },
-            { label: "Career" },
-            { label: "Achievement" },
-            { label: "Education" },
-            { label: "Life" },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-chrono-accent" />
-              <span className="text-[11px] font-body font-extralight text-chrono-muted">
-                {item.label}
-              </span>
-            </div>
-          ))}
+      {legendCategories.length > 0 && (
+        <div className="absolute bottom-4 left-4 glass px-4 py-3 z-20">
+          <div className="section-label mb-2">Legend</div>
+          <div className="flex flex-wrap gap-3">
+            {legendCategories.map((label) => (
+              <div key={label} className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-chrono-accent" />
+                <span className="text-[11px] font-body font-extralight text-chrono-muted">
+                  {label}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <style jsx global>{`
         @keyframes markerPulse {

@@ -4,12 +4,22 @@ import { getToken } from "next-auth/jwt";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
+import { createRateLimiter } from "@/lib/rate-limit";
+
+const checkImportLimit = createRateLimiter("google-import", 5, 60_000);
 
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!checkImportLimit(session.user.email).allowed) {
+      return NextResponse.json(
+        { error: "Too many import requests. Please wait a minute." },
+        { status: 429 }
+      );
     }
 
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
@@ -33,31 +43,41 @@ export async function POST(req: NextRequest) {
     timeMin.setFullYear(timeMin.getFullYear() - 2);
     const timeMax = new Date();
 
-    const calendarUrl = new URL("https://www.googleapis.com/calendar/v3/calendars/primary/events");
-    calendarUrl.searchParams.set("timeMin", timeMin.toISOString());
-    calendarUrl.searchParams.set("timeMax", timeMax.toISOString());
-    calendarUrl.searchParams.set("maxResults", "100");
-    calendarUrl.searchParams.set("singleEvents", "true");
-    calendarUrl.searchParams.set("orderBy", "startTime");
+    // Paginate through all calendar events (cap at 500)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const items: any[] = [];
+    let pageToken: string | undefined;
+    const MAX_ITEMS = 500;
 
-    const calRes = await fetch(calendarUrl.toString(), {
-      headers: { Authorization: `Bearer ${token.accessToken}` },
-    });
+    do {
+      const calendarUrl = new URL("https://www.googleapis.com/calendar/v3/calendars/primary/events");
+      calendarUrl.searchParams.set("timeMin", timeMin.toISOString());
+      calendarUrl.searchParams.set("timeMax", timeMax.toISOString());
+      calendarUrl.searchParams.set("maxResults", "250");
+      calendarUrl.searchParams.set("singleEvents", "true");
+      calendarUrl.searchParams.set("orderBy", "startTime");
+      if (pageToken) calendarUrl.searchParams.set("pageToken", pageToken);
 
-    if (!calRes.ok) {
-      const errData = await calRes.json().catch(() => ({}));
-      if (calRes.status === 401 || calRes.status === 403) {
-        return NextResponse.json(
-          { error: "Google access expired. Please sign out and sign in again." },
-          { status: 401 }
-        );
+      const calRes = await fetch(calendarUrl.toString(), {
+        headers: { Authorization: `Bearer ${token.accessToken}` },
+      });
+
+      if (!calRes.ok) {
+        const errData = await calRes.json().catch(() => ({}));
+        if (calRes.status === 401 || calRes.status === 403) {
+          return NextResponse.json(
+            { error: "Google access expired. Please sign out and sign in again." },
+            { status: 401 }
+          );
+        }
+        console.error("Google Calendar API error:", errData);
+        return NextResponse.json({ error: "Failed to fetch calendar events" }, { status: 500 });
       }
-      console.error("Google Calendar API error:", errData);
-      return NextResponse.json({ error: "Failed to fetch calendar events" }, { status: 500 });
-    }
 
-    const calData = await calRes.json();
-    const items = calData.items || [];
+      const calData = await calRes.json();
+      items.push(...(calData.items || []));
+      pageToken = calData.nextPageToken;
+    } while (pageToken && items.length < MAX_ITEMS);
 
     // Filter out all-day events without meaningful titles and deduplicate
     const existingCalendarEvents = await prisma.event.findMany({

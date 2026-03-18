@@ -3,6 +3,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
 import { VALID_CATEGORIES } from "@/lib/constants";
+import { createRateLimiter } from "@/lib/rate-limit";
+
+const checkEventLimit = createRateLimiter("events", 30, 60_000);
 
 function formatEvent(e: {
   id: string;
@@ -91,6 +94,13 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!checkEventLimit(session.user.email).allowed) {
+      return NextResponse.json(
+        { error: "Too many events created. Please wait a minute." },
+        { status: 429 }
+      );
     }
 
     const prisma = getPrisma();

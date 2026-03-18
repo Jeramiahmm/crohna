@@ -8,8 +8,9 @@ import YearSection from "@/components/timeline/YearSection";
 import EventModal from "@/components/events/EventModal";
 import EmptyState from "@/components/ui/EmptyState";
 import { toast } from "sonner";
+import { CATEGORIES } from "@/lib/constants";
 
-const CATEGORIES = ["All", "Travel", "Achievement", "Education", "Life", "Career"];
+const FILTER_OPTIONS = ["All", ...CATEGORIES.map((c) => c.label)];
 
 
 function CategoryFilterBar({ selected, onToggle }: { selected: Set<string>; onToggle: (cat: string) => void }) {
@@ -20,7 +21,7 @@ function CategoryFilterBar({ selected, onToggle }: { selected: Set<string>; onTo
       transition={{ delay: 0.2, duration: 0.6 }}
       className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide justify-center flex-wrap"
     >
-      {CATEGORIES.map((cat) => {
+      {FILTER_OPTIONS.map((cat) => {
         const isSelected = cat === "All" ? selected.size === 0 : selected.has(cat.toLowerCase());
         return (
           <button
@@ -340,9 +341,9 @@ export default function TimelinePage() {
         <section className="px-6">
           <div className="space-y-28">
             <AnimatePresence mode="sync">
-              {years.map((year, i) => (
+              {years.map((year) => (
                   <motion.div key={year} data-year={year} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.4 }}>
-                    <YearSection year={year} events={eventsByYear[year]} yearIndex={i} onEditEvent={isShowingDemo ? undefined : (event) => { setEditingEvent(event); setEventModalOpen(true); }} />
+                    <YearSection year={year} events={eventsByYear[year]} onEditEvent={isShowingDemo ? undefined : (event) => { setEditingEvent(event); setEventModalOpen(true); }} />
                   </motion.div>
               ))}
             </AnimatePresence>
