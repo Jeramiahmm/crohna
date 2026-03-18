@@ -71,6 +71,9 @@ export default function TimelinePage() {
   const [editingEvent, setEditingEvent] = useState<TimelineEvent | undefined>();
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
 
+  const [nextCursor, setNextCursor] = useState<string | undefined>();
+  const [loadingMore, setLoadingMore] = useState(false);
+
   const fetchEvents = useCallback(() => {
     if (status === "loading") return;
     if (!session) {
@@ -79,7 +82,7 @@ export default function TimelinePage() {
       setLoading(false);
       return;
     }
-    fetch("/api/events")
+    fetch("/api/events?limit=50")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch");
         return res.json();
@@ -93,6 +96,7 @@ export default function TimelinePage() {
           setEvents(real);
           setIsShowingDemo(false);
         }
+        setNextCursor(data.nextCursor);
         setLoading(false);
       })
       .catch(() => {
@@ -101,6 +105,21 @@ export default function TimelinePage() {
         setLoading(false);
       });
   }, [session, status]);
+
+  const loadMore = useCallback(() => {
+    if (!nextCursor || loadingMore || isShowingDemo) return;
+    setLoadingMore(true);
+    fetch(`/api/events?limit=50&cursor=${nextCursor}`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data?.events) {
+          setEvents((prev) => [...prev, ...data.events]);
+          setNextCursor(data.nextCursor);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingMore(false));
+  }, [nextCursor, loadingMore, isShowingDemo]);
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -302,6 +321,18 @@ export default function TimelinePage() {
             </AnimatePresence>
           </div>
         </section>
+      )}
+
+      {nextCursor && !isShowingDemo && (
+        <div className="text-center mt-16">
+          <button
+            onClick={loadMore}
+            disabled={loadingMore}
+            className="px-6 py-2.5 text-sm font-body font-light text-chrono-muted border border-[var(--line-strong)] hover:border-[var(--line-hover)] hover:text-chrono-text rounded-full transition-all duration-500 disabled:opacity-50"
+          >
+            {loadingMore ? "Loading..." : "Load More"}
+          </button>
+        </div>
       )}
 
       {events.length > 0 && !isShowingDemo && (

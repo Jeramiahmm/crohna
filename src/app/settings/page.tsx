@@ -9,7 +9,6 @@ import GoogleConnectModal from "@/components/ui/GoogleConnectModal";
 
 export default function SettingsPage() {
   const { data: session } = useSession();
-  const [notifications, setNotifications] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [connectModal, setConnectModal] = useState<"Google Photos" | "Google Calendar" | null>(null);
@@ -26,30 +25,37 @@ export default function SettingsPage() {
     }
   }, [session]);
 
+  // Load connection status from DB
   useEffect(() => {
-    const stored = localStorage.getItem("chrono-connected-accounts");
-    if (stored) setConnectedAccounts(JSON.parse(stored));
-    const notifPref = localStorage.getItem("chrono-notifications");
-    if (notifPref) setNotifications(notifPref === "true");
+    fetch("/api/google/status")
+      .then((res) => res.ok ? res.json() : { calendar: false, photos: false })
+      .then((data) => {
+        setConnectedAccounts({
+          "Google Calendar": data.calendar,
+          "Google Photos": data.photos,
+        });
+      })
+      .catch(() => {});
   }, []);
 
-  const handleConnect = (service: string) => {
-    const updated = { ...connectedAccounts, [service]: true };
-    setConnectedAccounts(updated);
-    localStorage.setItem("chrono-connected-accounts", JSON.stringify(updated));
+  const refreshConnectionStatus = () => {
+    fetch("/api/google/status")
+      .then((res) => res.ok ? res.json() : { calendar: false, photos: false })
+      .then((data) => {
+        setConnectedAccounts({
+          "Google Calendar": data.calendar,
+          "Google Photos": data.photos,
+        });
+      })
+      .catch(() => {});
   };
 
-  const handleDisconnect = (service: string) => {
-    const updated = { ...connectedAccounts, [service]: false };
-    setConnectedAccounts(updated);
-    localStorage.setItem("chrono-connected-accounts", JSON.stringify(updated));
+  const handleConnect = () => {
+    refreshConnectionStatus();
   };
 
-  const handleToggleNotifications = () => {
-    const next = !notifications;
-    setNotifications(next);
-    localStorage.setItem("chrono-notifications", String(next));
-    toast.success(next ? "Notifications enabled" : "Notifications disabled");
+  const handleDisconnect = () => {
+    refreshConnectionStatus();
   };
 
   const handleSave = async () => {
@@ -201,38 +207,6 @@ export default function SettingsPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-[var(--card-bg)] p-7 border border-[var(--line-strong)]"
-          >
-            <h3 className="text-sm font-display font-light text-chrono-text mb-4">Preferences</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-body font-light text-chrono-text">Story Notifications</div>
-                  <div className="text-xs font-body font-light text-chrono-muted">Get notified when new stories are ready</div>
-                </div>
-                <button
-                  onClick={handleToggleNotifications}
-                  role="switch"
-                  aria-checked={notifications}
-                  aria-label="Toggle story notifications"
-                  className={`relative w-11 h-6 rounded-full transition-colors ${
-                    notifications ? "bg-chrono-accent" : "bg-[var(--line-strong)]"
-                  }`}
-                >
-                  <div
-                    className={`absolute top-0.5 w-5 h-5 rounded-full bg-chrono-bg transition-transform ${
-                      notifications ? "translate-x-[22px]" : "translate-x-0.5"
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
             className="bg-[var(--card-bg)] p-7 border border-[var(--line-strong)]"
           >
@@ -327,8 +301,8 @@ export default function SettingsPage() {
           isOpen={!!connectModal}
           onClose={() => setConnectModal(null)}
           service={connectModal}
-          onConnect={() => handleConnect(connectModal)}
-          onDisconnect={() => handleDisconnect(connectModal)}
+          onConnect={handleConnect}
+          onDisconnect={handleDisconnect}
           isConnected={!!connectedAccounts[connectModal]}
         />
       )}
