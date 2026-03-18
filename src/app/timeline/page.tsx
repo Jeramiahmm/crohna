@@ -2,13 +2,15 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback } from "react";
-import { useSession, signIn } from "next-auth/react";
-import { TimelineEvent, getEventsByYear, demoEvents } from "@/data/demo";
+import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
+import { TimelineEvent, getEventsByYear } from "@/data/demo";
 import YearSection from "@/components/timeline/YearSection";
 import EventModal from "@/components/events/EventModal";
 import EmptyState from "@/components/ui/EmptyState";
 import { toast } from "sonner";
 import { CATEGORIES } from "@/lib/constants";
+import { useEvents } from "@/hooks/useEvents";
 
 const FILTER_OPTIONS = ["All", ...CATEGORIES.map((c) => c.label)];
 
@@ -63,76 +65,21 @@ function YearScrubber({ years, activeYear, onYearClick }: { years: string[]; act
 }
 
 export default function TimelinePage() {
-  const { data: session, status } = useSession();
-  const [events, setEvents] = useState<TimelineEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isShowingDemo, setIsShowingDemo] = useState(false);
+  const { events, isLoading, isShowingDemo, nextCursor, loadingMore, loadMore, mutate } = useEvents(50);
   const [activeYear, setActiveYear] = useState<string>("");
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<TimelineEvent | undefined>();
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
 
-  const [nextCursor, setNextCursor] = useState<string | undefined>();
-  const [loadingMore, setLoadingMore] = useState(false);
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("q") || "";
 
-  const fetchEvents = useCallback(() => {
-    if (status === "loading") return;
-    if (!session) {
-      setEvents(demoEvents);
-      setIsShowingDemo(true);
-      setLoading(false);
-      return;
-    }
-    fetch("/api/events?limit=50")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch");
-        return res.json();
-      })
-      .then((data) => {
-        const real = data.events || [];
-        setEvents(real);
-        setIsShowingDemo(false);
-        setNextCursor(data.nextCursor);
-        setLoading(false);
-      })
-      .catch(() => {
-        setEvents([]);
-        setIsShowingDemo(false);
-        setLoading(false);
-      });
-  }, [session, status]);
-
-  const loadMore = useCallback(() => {
-    if (!nextCursor || loadingMore || isShowingDemo) return;
-    setLoadingMore(true);
-    fetch(`/api/events?limit=50&cursor=${nextCursor}`)
-      .then((res) => res.ok ? res.json() : null)
-      .then((data) => {
-        if (data?.events) {
-          setEvents((prev) => [...prev, ...data.events]);
-          setNextCursor(data.nextCursor);
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoadingMore(false));
-  }, [nextCursor, loadingMore, isShowingDemo]);
-
-  const [searchQuery, setSearchQuery] = useState("");
-
+  // Re-fetch when events are created via AddMemoryButton
   useEffect(() => {
-    fetchEvents();
-    const handler = () => fetchEvents();
+    const handler = () => mutate();
     window.addEventListener("chrono:event-created", handler);
-    const searchHandler = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      setSearchQuery(detail?.query || "");
-    };
-    window.addEventListener("chrono:search", searchHandler);
-    return () => {
-      window.removeEventListener("chrono:event-created", handler);
-      window.removeEventListener("chrono:search", searchHandler);
-    };
-  }, [fetchEvents]);
+    return () => window.removeEventListener("chrono:event-created", handler);
+  }, [mutate]);
 
   const handleToggleCategory = useCallback((cat: string) => {
     if (cat === "All") { setSelectedCategories(new Set()); return; }
@@ -176,15 +123,14 @@ export default function TimelinePage() {
         body: JSON.stringify(eventData),
       });
       if (res.ok) {
-        const { event } = await res.json();
-        setEvents((prev) => [event, ...prev]);
+        mutate();
       } else {
         toast.error("Failed to create event. Please try again.");
       }
     } catch {
       toast.error("Failed to create event. Please try again.");
     }
-  }, []);
+  }, [mutate]);
 
   const handleEditEvent = useCallback(async (eventData: Partial<TimelineEvent>) => {
     try {
@@ -194,8 +140,7 @@ export default function TimelinePage() {
         body: JSON.stringify(eventData),
       });
       if (res.ok) {
-        const { event } = await res.json();
-        setEvents((prev) => prev.map((e) => (e.id === event.id ? event : e)));
+        mutate();
       } else {
         toast.error("Failed to update event. Please try again.");
       }
@@ -203,13 +148,13 @@ export default function TimelinePage() {
       toast.error("Failed to update event. Please try again.");
     }
     setEditingEvent(undefined);
-  }, []);
+  }, [mutate]);
 
   const handleDeleteEvent = useCallback(async (id: string) => {
     try {
       const res = await fetch(`/api/events/${id}`, { method: "DELETE" });
       if (res.ok) {
-        setEvents((prev) => prev.filter((e) => e.id !== id));
+        mutate();
       } else {
         toast.error("Failed to delete event. Please try again.");
       }
@@ -218,14 +163,14 @@ export default function TimelinePage() {
     }
     setEditingEvent(undefined);
     setEventModalOpen(false);
-  }, []);
+  }, [mutate]);
 
   const scrollToYear = (year: string) => {
     const el = document.querySelector(`[data-year="${year}"]`);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen pt-24 pb-32 flex items-center justify-center">
         <div className="text-sm font-body font-light text-chrono-muted animate-pulse">Loading your timeline...</div>

@@ -264,14 +264,15 @@ function HowItWorksSection() {
   );
 }
 
-function PlayYourStorySection() {
+function PlayYourStorySection({ events }: { events?: TimelineEvent[] }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentYearIndex, setCurrentYearIndex] = useState(-1);
   const [currentEventIndex, setCurrentEventIndex] = useState(-1);
   const [showEvent, setShowEvent] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const eventsByYear = getEventsByYear(demoEvents);
+  const source = events && events.length > 0 ? events : demoEvents;
+  const eventsByYear = getEventsByYear(source);
   const years = Object.keys(eventsByYear);
 
   const cleanup = useCallback(() => {
@@ -812,7 +813,7 @@ export default function Home() {
       <OnThisDayWidget events={userEvents} />
       <MarqueeTicker />
       <HowItWorksSection />
-      <PlayYourStorySection />
+      <PlayYourStorySection events={userEvents} />
       <MarqueeTicker />
       <FeaturesSection />
       <TimelinePreview events={userEvents} />

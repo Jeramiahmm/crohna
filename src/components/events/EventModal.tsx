@@ -5,6 +5,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { TimelineEvent } from "@/data/demo";
 import { CATEGORIES } from "@/lib/constants";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useEventForm } from "@/hooks/useEventForm";
 
 const chapters = [
   "College Years",
@@ -23,33 +24,25 @@ interface EventModalProps {
   onDelete?: (id: string) => void;
 }
 
-const EMPTY_FORM = {
-  title: "",
-  date: "",
-  location: "",
-  description: "",
-  category: "",
-  imageUrl: "",
-  chapter: "",
-};
-
 export default function EventModal({ isOpen, onClose, onSave, event, onDelete }: EventModalProps) {
   const isEditing = !!event;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(modalRef, isOpen);
 
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [dragOver, setDragOver] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const {
+    form, setField, toggleField,
+    dragOver, setDragOver, saving, setSaving,
+    errors, setErrors, resetForm, validate,
+    uploadImageIfNeeded, handleDrop, handleFileSelect,
+  } = useEventForm();
+
   const [showSuccess, setShowSuccess] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Reset form when modal opens or event changes
   useEffect(() => {
     if (isOpen) {
-      setForm({
+      resetForm({
         title: event?.title || "",
         date: event?.date || "",
         location: event?.location || "",
@@ -58,19 +51,9 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
         imageUrl: event?.imageUrl || "",
         chapter: event?.chapter || "",
       });
-      setErrors({});
       setShowSuccess(false);
-      setSaving(false);
-      setImageFile(null);
     }
-  }, [isOpen, event]);
-
-  const validate = useCallback(() => {
-    const errs: Record<string, string> = {};
-    if (!form.title.trim()) errs.title = "Title is required";
-    if (!form.date) errs.date = "Date is required";
-    return errs;
-  }, [form.title, form.date]);
+  }, [isOpen, event, resetForm, setShowSuccess]);
 
   const handleSave = useCallback(async () => {
     const errs = validate();
@@ -81,32 +64,17 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
     setErrors({});
     setSaving(true);
 
-    let finalImageUrl = form.imageUrl;
-
-    if (imageFile) {
-      const uploadForm = new FormData();
-      uploadForm.append("file", imageFile);
-      try {
-        const uploadRes = await fetch("/api/upload", { method: "POST", body: uploadForm });
-        if (!uploadRes.ok) {
-          const data = await uploadRes.json();
-          setErrors({ title: data.error || "Image upload failed" });
-          setSaving(false);
-          return;
-        }
-        const { url } = await uploadRes.json();
-        finalImageUrl = url;
-      } catch {
-        setErrors({ title: "Image upload failed" });
-        setSaving(false);
-        return;
-      }
+    const { url: finalImageUrl, error: uploadError } = await uploadImageIfNeeded();
+    if (uploadError) {
+      setErrors({ title: uploadError });
+      setSaving(false);
+      return;
     }
 
     onSave({
       ...event,
       ...form,
-      imageUrl: finalImageUrl,
+      imageUrl: finalImageUrl || "",
       id: event?.id || `evt-${Date.now()}`,
     });
 
@@ -116,16 +84,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
       onClose();
     }, 1200);
     setSaving(false);
-  }, [form, event, validate, onSave, onClose, imageFile]);
-
-  // Revoke blob URLs on cleanup to prevent memory leaks
-  useEffect(() => {
-    return () => {
-      if (form.imageUrl && form.imageUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(form.imageUrl);
-      }
-    };
-  }, [form.imageUrl]);
+  }, [form, event, validate, onSave, onClose, uploadImageIfNeeded, setErrors, setSaving, setShowSuccess]);
 
   // Escape key to close modal
   useEffect(() => {
@@ -136,32 +95,6 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith("image/")) {
-      if (form.imageUrl && form.imageUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(form.imageUrl);
-      }
-      const url = URL.createObjectURL(file);
-      setForm((f) => ({ ...f, imageUrl: url }));
-      setImageFile(file);
-    }
-  }, [form.imageUrl]);
-
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type.startsWith("image/")) {
-      if (form.imageUrl && form.imageUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(form.imageUrl);
-      }
-      const url = URL.createObjectURL(file);
-      setForm((f) => ({ ...f, imageUrl: url }));
-      setImageFile(file);
-    }
-  }, [form.imageUrl]);
 
   return (
     <AnimatePresence>
@@ -272,7 +205,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                   type="text"
                   autoFocus
                   value={form.title}
-                  onChange={(e) => { setForm((f) => ({ ...f, title: e.target.value })); setErrors((er) => ({ ...er, title: "" })); }}
+                  onChange={(e) => setField("title", e.target.value)}
                   placeholder="What happened?"
                   aria-invalid={!!errors.title}
                   aria-describedby={errors.title ? "title-error" : undefined}
@@ -291,7 +224,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                   <input
                     type="date"
                     value={form.date}
-                    onChange={(e) => { setForm((f) => ({ ...f, date: e.target.value })); setErrors((er) => ({ ...er, date: "" })); }}
+                    onChange={(e) => setField("date", e.target.value)}
                     aria-invalid={!!errors.date}
                     aria-describedby={errors.date ? "date-error" : undefined}
                     className={`w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text border transition-colors outline-none focus:border-[var(--line-hover)] ${
@@ -305,7 +238,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                   <input
                     type="text"
                     value={form.location}
-                    onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
+                    onChange={(e) => setField("location", e.target.value)}
                     placeholder="City, State"
                     className="w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border border-[var(--line-strong)] transition-colors outline-none focus:border-[var(--line-hover)]"
                   />
@@ -316,7 +249,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                 <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Description</label>
                 <textarea
                   value={form.description}
-                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                  onChange={(e) => setField("description", e.target.value)}
                   placeholder="Tell the story behind this moment..."
                   rows={3}
                   className="w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted/50 border border-[var(--line-strong)] transition-colors outline-none focus:border-[var(--line-hover)] resize-none"
@@ -329,7 +262,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                   {CATEGORIES.map((cat) => (
                     <button
                       key={cat.value}
-                      onClick={() => setForm((f) => ({ ...f, category: f.category === cat.value ? "" : cat.value }))}
+                      onClick={() => toggleField("category", cat.value)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
                         form.category === cat.value
                           ? "bg-foreground text-background border-2 border-foreground"
@@ -350,7 +283,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                   {chapters.map((ch) => (
                     <button
                       key={ch}
-                      onClick={() => setForm((f) => ({ ...f, chapter: f.chapter === ch ? "" : ch }))}
+                      onClick={() => toggleField("chapter", ch)}
                       className={`px-3 py-1.5 text-xs rounded-full transition-all ${
                         form.chapter === ch
                           ? "bg-[var(--muted)] border border-[var(--line-hover)] text-chrono-text"

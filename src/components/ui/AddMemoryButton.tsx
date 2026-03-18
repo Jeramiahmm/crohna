@@ -1,35 +1,24 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import ShimmerButton from "./shimmer-button";
 import { CATEGORIES } from "@/lib/constants";
+import { useEventForm } from "@/hooks/useEventForm";
 
 export default function AddMemoryButton() {
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [dragOver, setDragOver] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [form, setForm] = useState({
-    title: "",
-    date: "",
-    location: "",
-    category: "",
-    description: "",
-    imageUrl: "",
-  });
-
-  const resetForm = () => {
-    setForm({ title: "", date: "", location: "", category: "", description: "", imageUrl: "" });
-    setImageFile(null);
-    setErrors({});
-  };
+  const {
+    form, setField, toggleField,
+    dragOver, setDragOver, saving, setSaving,
+    errors, setErrors, resetForm, validate,
+    uploadImageIfNeeded, handleDrop, handleFileSelect,
+  } = useEventForm();
 
   const handleClose = () => {
     setOpen(false);
@@ -37,9 +26,7 @@ export default function AddMemoryButton() {
   };
 
   const handleSave = async () => {
-    const errs: Record<string, string> = {};
-    if (!form.title.trim()) errs.title = "Title is required";
-    if (!form.date) errs.date = "Date is required";
+    const errs = validate();
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;
@@ -47,20 +34,11 @@ export default function AddMemoryButton() {
 
     setSaving(true);
     try {
-      let uploadedImageUrl = form.imageUrl || undefined;
-
-      if (imageFile) {
-        const uploadForm = new FormData();
-        uploadForm.append("file", imageFile);
-        const uploadRes = await fetch("/api/upload", { method: "POST", body: uploadForm });
-        if (!uploadRes.ok) {
-          const data = await uploadRes.json();
-          setErrors({ title: data.error || "Image upload failed" });
-          setSaving(false);
-          return;
-        }
-        const { url } = await uploadRes.json();
-        uploadedImageUrl = url;
+      const { url: uploadedImageUrl, error: uploadError } = await uploadImageIfNeeded();
+      if (uploadError) {
+        setErrors({ title: uploadError });
+        setSaving(false);
+        return;
       }
 
       const res = await fetch("/api/events", {
@@ -80,7 +58,6 @@ export default function AddMemoryButton() {
         setOpen(false);
         resetForm();
         router.refresh();
-        // If on timeline page, trigger a re-fetch by dispatching a custom event
         window.dispatchEvent(new CustomEvent("chrono:event-created"));
       } else {
         const data = await res.json();
@@ -93,59 +70,20 @@ export default function AddMemoryButton() {
     }
   };
 
-  // Revoke blob URLs on cleanup to prevent memory leaks
-  useEffect(() => {
-    return () => {
-      if (form.imageUrl && form.imageUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(form.imageUrl);
-      }
-    };
-  }, [form.imageUrl]);
-
   // Escape key to close modal
   useEffect(() => {
     if (!open) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setOpen(false);
-        resetForm();
-      }
+      if (e.key === "Escape") handleClose();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open]);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith("image/")) {
-      if (form.imageUrl && form.imageUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(form.imageUrl);
-      }
-      const url = URL.createObjectURL(file);
-      setForm((f) => ({ ...f, imageUrl: url }));
-      setImageFile(file);
-    }
-  }, [form.imageUrl]);
-
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type.startsWith("image/")) {
-      if (form.imageUrl && form.imageUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(form.imageUrl);
-      }
-      const url = URL.createObjectURL(file);
-      setForm((f) => ({ ...f, imageUrl: url }));
-      setImageFile(file);
-    }
-  }, [form.imageUrl]);
-
   if (!session) return null;
 
   return (
     <>
-      {/* Floating Button */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -161,7 +99,6 @@ export default function AddMemoryButton() {
         </ShimmerButton>
       </motion.div>
 
-      {/* Modal */}
       <AnimatePresence>
         {open && (
           <>
@@ -206,7 +143,7 @@ export default function AddMemoryButton() {
                   <input
                     type="text"
                     value={form.title}
-                    onChange={(e) => { setForm((f) => ({ ...f, title: e.target.value })); setErrors((er) => ({ ...er, title: "" })); }}
+                    onChange={(e) => setField("title", e.target.value)}
                     placeholder="What happened?"
                     className={`w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted border transition-colors outline-none focus:border-[var(--line-hover)] ${
                       errors.title ? "border-red-500/40" : "border-[var(--line-strong)]"
@@ -223,7 +160,7 @@ export default function AddMemoryButton() {
                     <input
                       type="date"
                       value={form.date}
-                      onChange={(e) => { setForm((f) => ({ ...f, date: e.target.value })); setErrors((er) => ({ ...er, date: "" })); }}
+                      onChange={(e) => setField("date", e.target.value)}
                       className={`w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text border transition-colors outline-none focus:border-[var(--line-hover)] ${
                         errors.date ? "border-red-500/40" : "border-[var(--line-strong)]"
                       }`}
@@ -235,7 +172,7 @@ export default function AddMemoryButton() {
                     <input
                       type="text"
                       value={form.location}
-                      onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
+                      onChange={(e) => setField("location", e.target.value)}
                       placeholder="City, State"
                       className="w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted border border-[var(--line-strong)] transition-colors outline-none focus:border-[var(--line-hover)]"
                     />
@@ -248,7 +185,7 @@ export default function AddMemoryButton() {
                     {CATEGORIES.map((cat) => (
                       <button
                         key={cat.value}
-                        onClick={() => setForm((f) => ({ ...f, category: f.category === cat.value ? "" : cat.value }))}
+                        onClick={() => toggleField("category", cat.value)}
                         className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
                           form.category === cat.value
                             ? "bg-foreground text-background border-2 border-foreground"
@@ -265,7 +202,7 @@ export default function AddMemoryButton() {
                   <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Description</label>
                   <textarea
                     value={form.description}
-                    onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                    onChange={(e) => setField("description", e.target.value)}
                     placeholder="Tell the story behind this moment..."
                     rows={3}
                     className="w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted border border-[var(--line-strong)] transition-colors outline-none focus:border-[var(--line-hover)] resize-none"

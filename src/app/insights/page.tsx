@@ -1,8 +1,9 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { AIStory } from "@/data/demo";
 import AIStorySummary from "@/components/timeline/AIStorySummary";
 import StatCard from "@/components/insights/StatCard";
@@ -25,16 +26,8 @@ export default function InsightsPage() {
   const [shareStory, setShareStory] = useState<AIStory | null>(null);
   const [storyFilter, setStoryFilter] = useState<"all" | "year" | "chapter">("all");
 
-  const [searchQuery, setSearchQuery] = useState("");
-
-  useEffect(() => {
-    const searchHandler = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      setSearchQuery(detail?.query || "");
-    };
-    window.addEventListener("chrono:search", searchHandler);
-    return () => window.removeEventListener("chrono:search", searchHandler);
-  }, []);
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("q") || "";
 
   const handleRegenerate = useCallback(async (storyId: string) => {
     setGenerating(true);
