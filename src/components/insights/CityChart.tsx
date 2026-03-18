@@ -16,7 +16,7 @@ export default function CityChart({ data }: { data: CityData[] }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-      className="bg-[var(--card-bg)] p-6 md:p-8 border border-[var(--line-strong)]"
+      className="bg-[var(--card-bg)] p-4 sm:p-6 md:p-8 border border-[var(--line-strong)]"
     >
       <h3 className="text-lg font-display font-bold text-chrono-text mb-6">
         Most Visited Cities
@@ -32,7 +32,7 @@ export default function CityChart({ data }: { data: CityData[] }) {
             transition={{ delay: 0.2 + i * 0.08 }}
             className="flex items-center gap-4"
           >
-            <div className="w-24 md:w-32 text-sm font-body font-light text-chrono-muted truncate text-right flex-shrink-0">
+            <div className="w-20 sm:w-24 md:w-32 text-sm font-body font-light text-chrono-muted truncate text-right flex-shrink-0">
               {item.city}
             </div>
             <div className="flex-1 h-[2px] bg-chrono-bg overflow-hidden">

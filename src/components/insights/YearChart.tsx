@@ -16,13 +16,13 @@ export default function YearChart({ data }: { data: YearData[] }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-      className="bg-[var(--card-bg)] p-6 md:p-8 border border-[var(--line-strong)]"
+      className="bg-[var(--card-bg)] p-4 sm:p-6 md:p-8 border border-[var(--line-strong)]"
     >
       <h3 className="text-lg font-display font-bold text-chrono-text mb-6">
         Events by Year
       </h3>
 
-      <div className="flex items-end gap-4 h-48">
+      <div className="flex items-end gap-2 sm:gap-4 h-48">
         {data.map((item, i) => (
           <div key={item.year} className="flex-1 flex flex-col items-center gap-2">
             <span className="text-sm font-body font-light text-chrono-text">

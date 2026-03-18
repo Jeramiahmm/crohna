@@ -23,9 +23,9 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Chrono \u2014 Your Life, Beautifully Mapped",
+  title: "Crohna \u2014 Your Life, Beautifully Mapped",
   description:
-    "Chrono transforms your memories into a stunning visual timeline. A premium digital life story.",
+    "Crohna transforms your memories into a stunning visual timeline. A premium digital life story.",
   keywords: ["timeline", "life events", "memories", "digital story"],
 };
 

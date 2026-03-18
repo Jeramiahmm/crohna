@@ -149,7 +149,7 @@ function HeroSection() {
             </ShimmerButton>
           </Link>
           <Link href="/insights">
-            <button className="px-10 py-4 text-chrono-text hover:text-foreground border border-[var(--line-strong)] hover:border-[var(--line-hover)] rounded-full transition-all duration-500 text-sm font-body font-light tracking-wide">
+            <button className="px-6 py-3 md:px-10 md:py-4 text-chrono-text hover:text-foreground border border-[var(--line-strong)] hover:border-[var(--line-hover)] rounded-full transition-all duration-500 text-sm font-body font-light tracking-wide">
               View Insights
             </button>
           </Link>
@@ -201,7 +201,7 @@ function OnThisDayWidget({ events }: { events?: TimelineEvent[] }) {
                   return (
                     <div
                       key={event.id}
-                      className="flex-shrink-0 w-60 px-5 py-4 border border-[var(--line)] bg-[var(--card-bg)] hover:border-[var(--line-hover)] transition-all"
+                      className="flex-shrink-0 w-48 sm:w-60 px-5 py-4 border border-[var(--line)] bg-[var(--card-bg)] hover:border-[var(--line-hover)] transition-all"
                     >
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-lg font-display font-bold text-chrono-text">{year}</span>
@@ -247,7 +247,7 @@ function HowItWorksSection() {
     {
       number: "03",
       title: "Discover your narrative",
-      description: "Chrono crafts personal narratives about your life chapters.",
+      description: "Crohna crafts personal narratives about your life chapters.",
     },
   ];
 
@@ -263,7 +263,7 @@ function HowItWorksSection() {
           </h2>
         </FadeUp>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16">
           {steps.map((step, i) => (
             <FadeUp key={step.number} delay={i * 0.15} className="relative text-center">
               {i < steps.length - 1 && (
@@ -386,7 +386,7 @@ function PlayYourStorySection() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               onClick={play}
-              className="group flex items-center gap-4 px-10 py-5 bg-[var(--card-bg)] border border-[var(--line)] rounded-full card-hover"
+              className="group flex items-center gap-4 px-6 py-3 sm:px-10 sm:py-5 bg-[var(--card-bg)] border border-[var(--line)] rounded-full card-hover"
             >
               <div className="w-12 h-12 rounded-full border border-[var(--line-strong)] flex items-center justify-center group-hover:border-[var(--line-hover)] transition-colors duration-500">
                 <svg className="w-5 h-5 text-chrono-muted ml-0.5" fill="currentColor" viewBox="0 0 24 24">
@@ -411,7 +411,7 @@ function PlayYourStorySection() {
                   transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                   className="text-center mb-10"
                 >
-                  <div className="text-7xl md:text-[8rem] font-display font-bold text-chrono-text leading-none">
+                  <div className="text-5xl sm:text-7xl md:text-[8rem] font-display font-bold text-chrono-text leading-none">
                     {currentYear}
                   </div>
                 </motion.div>
@@ -519,7 +519,7 @@ function FeaturesSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-[var(--line)]">
           {features.map((feature, i) => (
             <FadeUp key={feature.title} delay={i * 0.1}>
-              <div className="group bg-chrono-bg p-10 card-hover h-full">
+              <div className="group bg-chrono-bg p-5 sm:p-8 md:p-10 card-hover h-full">
                 <h3 className="text-lg font-display font-bold mb-3 text-chrono-text tracking-tight">
                   {feature.title}
                 </h3>
@@ -554,7 +554,7 @@ function TimelinePreview({ events }: { events?: TimelineEvent[] }) {
           </p>
         </FadeUp>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8 mb-20">
           {previewEvents.map((event, i) => (
             <TimelineCard key={event.id} event={event} index={i} />
           ))}
@@ -562,7 +562,7 @@ function TimelinePreview({ events }: { events?: TimelineEvent[] }) {
 
         <FadeUp className="text-center">
           <Link href="/timeline">
-            <button className="px-10 py-4 text-sm font-body font-light text-chrono-text border border-[var(--line-strong)] hover:border-[var(--line-hover)] hover:text-foreground rounded-full transition-all duration-500">
+            <button className="px-6 py-3 md:px-10 md:py-4 text-sm font-body font-light text-chrono-text border border-[var(--line-strong)] hover:border-[var(--line-hover)] hover:text-foreground rounded-full transition-all duration-500">
               Explore Full Timeline
             </button>
           </Link>
@@ -597,7 +597,7 @@ function MapPreview() {
         </FadeUp>
 
         <FadeUp>
-          <div className="relative bg-[var(--card-bg)] p-10 border border-[var(--line-strong)] overflow-hidden">
+          <div className="relative bg-[var(--card-bg)] p-5 sm:p-8 md:p-10 border border-[var(--line-strong)] overflow-hidden">
             <div className="relative h-64 md:h-80 flex items-center justify-center">
               <div className="relative w-full h-full">
                 {locations.map((loc, i) => (
@@ -656,7 +656,7 @@ function MapPreview() {
               </div>
             </div>
 
-            <div className="flex items-center justify-center gap-8 mt-6 pt-6 border-t border-[var(--line)]">
+            <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap mt-6 pt-6 border-t border-[var(--line)]">
               <div className="text-center">
                 <div className="text-lg font-display font-bold text-chrono-text">7</div>
                 <div className="text-[10px] font-body font-extralight text-chrono-muted uppercase tracking-[0.15em]">Cities</div>
@@ -677,7 +677,7 @@ function MapPreview() {
 
         <FadeUp className="text-center mt-14">
           <Link href="/map">
-            <button className="px-10 py-4 text-sm font-body font-light text-chrono-text border border-[var(--line-strong)] hover:border-[var(--line-hover)] hover:text-foreground rounded-full transition-all duration-500">
+            <button className="px-6 py-3 md:px-10 md:py-4 text-sm font-body font-light text-chrono-text border border-[var(--line-strong)] hover:border-[var(--line-hover)] hover:text-foreground rounded-full transition-all duration-500">
               Explore Life Map
             </button>
           </Link>
@@ -707,7 +707,7 @@ function StoriesPreview({ stories }: { stories?: AIStory[] }) {
 
         <FadeUp className="text-center mt-16">
           <Link href="/insights">
-            <button className="px-10 py-4 text-sm font-body font-light text-chrono-text border border-[var(--line-strong)] hover:border-[var(--line-hover)] hover:text-foreground rounded-full transition-all duration-500">
+            <button className="px-6 py-3 md:px-10 md:py-4 text-sm font-body font-light text-chrono-text border border-[var(--line-strong)] hover:border-[var(--line-hover)] hover:text-foreground rounded-full transition-all duration-500">
               View All Stories
             </button>
           </Link>
@@ -722,7 +722,7 @@ function TestimonialsSection() {
     {
       name: "Sarah K.",
       role: "Designer",
-      quote: "Chrono turned three years of scattered photos and memories into the most beautiful timeline. I was moved reading my life story.",
+      quote: "Crohna turned three years of scattered photos and memories into the most beautiful timeline. I was moved reading my life story.",
     },
     {
       name: "Marcus T.",
@@ -749,7 +749,7 @@ function TestimonialsSection() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-[1px] bg-[var(--line)]">
           {testimonials.map((t, i) => (
             <FadeUp key={t.name} delay={i * 0.12}>
-              <div className="bg-chrono-bg p-10 h-full flex flex-col">
+              <div className="bg-chrono-bg p-5 sm:p-8 md:p-10 h-full flex flex-col">
                 <p className="text-lg font-display font-bold italic leading-relaxed mb-8 flex-1 text-chrono-muted">
                   &ldquo;{t.quote}&rdquo;
                 </p>
@@ -791,7 +791,7 @@ function CTASection() {
             </ShimmerButton>
           </Link>
           <Link href="/insights">
-            <button className="px-10 py-4 text-chrono-text hover:text-foreground border border-[var(--line-strong)] hover:border-[var(--line-hover)] rounded-full transition-all duration-500 text-sm font-body font-light">
+            <button className="px-6 py-3 md:px-10 md:py-4 text-chrono-text hover:text-foreground border border-[var(--line-strong)] hover:border-[var(--line-hover)] rounded-full transition-all duration-500 text-sm font-body font-light">
               See a Demo
             </button>
           </Link>

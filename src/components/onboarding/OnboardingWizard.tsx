@@ -57,8 +57,8 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
       className="fixed inset-0 z-[100] bg-chrono-bg flex items-center justify-center"
     >
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--muted)] rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[var(--muted)] rounded-full blur-[120px]" />
+        <div className="absolute top-1/4 left-1/4 w-48 h-48 md:w-96 md:h-96 bg-[var(--muted)] rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 md:w-96 md:h-96 bg-[var(--muted)] rounded-full blur-[120px]" />
       </div>
 
       <div className="relative w-full max-w-2xl mx-auto px-6">
@@ -92,13 +92,13 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
                 </span>
               </button>
               {i < steps.length - 1 && (
-                <div className={`w-12 h-px transition-colors duration-500 ${i < step ? "bg-chrono-accent" : "bg-[var(--line-strong)]"}`} />
+                <div className={`w-6 sm:w-12 h-px transition-colors duration-500 ${i < step ? "bg-chrono-accent" : "bg-[var(--line-strong)]"}`} />
               )}
             </div>
           ))}
         </div>
 
-        <div className="relative min-h-[420px] flex items-center">
+        <div className="relative min-h-[320px] sm:min-h-[420px] flex items-center">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={step}
@@ -154,7 +154,7 @@ function WelcomeStep() {
       >
         <span className="text-chrono-muted text-2xl leading-none select-none">&#x2022;</span>
         <span className="text-lg font-display font-bold tracking-[0.25em] uppercase text-chrono-text">
-          Chrono
+          Crohna
         </span>
       </motion.div>
 
@@ -162,25 +162,25 @@ function WelcomeStep() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="text-4xl md:text-5xl font-display font-bold mb-4 tracking-tight text-chrono-text"
+        className="text-2xl sm:text-4xl md:text-5xl font-display font-bold mb-4 tracking-tight text-chrono-text"
       >
-        Welcome to Chrono
+        Welcome to Crohna
       </motion.h1>
 
       <motion.p
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.35 }}
-        className="text-lg max-w-md mx-auto leading-relaxed text-chrono-muted"
+        className="text-base sm:text-lg max-w-md mx-auto leading-relaxed text-chrono-muted"
       >
-        Your life is a story worth telling. Chrono transforms your memories, milestones, and moments into a beautiful, interactive timeline.
+        Your life is a story worth telling. Crohna transforms your memories, milestones, and moments into a beautiful, interactive timeline.
       </motion.p>
 
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="flex items-center justify-center gap-6 mt-12"
+        className="flex items-center justify-center gap-3 sm:gap-6 mt-12"
       >
         {[
           { label: "Stories" },
@@ -218,7 +218,7 @@ function ExplainStep() {
     {
       number: "03",
       title: "Discover your story",
-      description: "Chrono generates emotional, personalized narratives about your life chapters and milestones.",
+      description: "Crohna generates emotional, personalized narratives about your life chapters and milestones.",
     },
   ];
 
@@ -228,9 +228,9 @@ function ExplainStep() {
         <motion.h2
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-3xl md:text-4xl font-display font-bold mb-3 tracking-tight text-chrono-text"
+          className="text-xl sm:text-3xl md:text-4xl font-display font-bold mb-3 tracking-tight text-chrono-text"
         >
-          How Chrono works
+          How Crohna works
         </motion.h2>
         <motion.p
           initial={{ opacity: 0, y: 10 }}
@@ -249,7 +249,7 @@ function ExplainStep() {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.15 + i * 0.12 }}
-            className="flex items-start gap-5 bg-[var(--card-bg)] p-5 border border-[var(--line-strong)]"
+            className="flex items-start gap-5 bg-[var(--card-bg)] p-3 sm:p-5 border border-[var(--line-strong)]"
           >
             <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-display font-bold flex-shrink-0 bg-[var(--muted)] text-chrono-accent">
               {s.number}
@@ -270,7 +270,7 @@ function ChooseStep({ onComplete }: { onComplete: (choice: "demo" | "manual" | "
     {
       id: "demo" as const,
       title: "Explore with demo data",
-      description: "See Chrono in action with a sample life timeline. You can always clear this later.",
+      description: "See Crohna in action with a sample life timeline. You can always clear this later.",
       icon: (
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
@@ -308,7 +308,7 @@ function ChooseStep({ onComplete }: { onComplete: (choice: "demo" | "manual" | "
         <motion.h2
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-3xl md:text-4xl font-display font-bold mb-3 tracking-tight text-chrono-text"
+          className="text-xl sm:text-3xl md:text-4xl font-display font-bold mb-3 tracking-tight text-chrono-text"
         >
           How would you like to start?
         </motion.h2>
@@ -330,7 +330,7 @@ function ChooseStep({ onComplete }: { onComplete: (choice: "demo" | "manual" | "
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 + i * 0.1 }}
             onClick={() => onComplete(option.id)}
-            className="w-full group relative bg-[var(--card-bg)] p-5 border border-[var(--line-strong)] hover:border-[var(--line-hover)] transition-all text-left flex items-start gap-5 card-hover"
+            className="w-full group relative bg-[var(--card-bg)] p-3 sm:p-5 border border-[var(--line-strong)] hover:border-[var(--line-hover)] transition-all text-left flex items-start gap-5 card-hover"
           >
             <div className="relative w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-[var(--muted)] text-chrono-accent">
               {option.icon}

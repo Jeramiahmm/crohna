@@ -44,6 +44,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState(EMPTY_FORM);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -64,6 +65,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
       setErrors({});
       setShowSuccess(false);
       setSaving(false);
+      setImageFile(null);
     }
   }, [isOpen, event]);
 
@@ -83,9 +85,32 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
     setErrors({});
     setSaving(true);
 
+    let finalImageUrl = form.imageUrl;
+
+    if (imageFile) {
+      const uploadForm = new FormData();
+      uploadForm.append("file", imageFile);
+      try {
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: uploadForm });
+        if (!uploadRes.ok) {
+          const data = await uploadRes.json();
+          setErrors({ title: data.error || "Image upload failed" });
+          setSaving(false);
+          return;
+        }
+        const { url } = await uploadRes.json();
+        finalImageUrl = url;
+      } catch {
+        setErrors({ title: "Image upload failed" });
+        setSaving(false);
+        return;
+      }
+    }
+
     onSave({
       ...event,
       ...form,
+      imageUrl: finalImageUrl,
       id: event?.id || `evt-${Date.now()}`,
     });
 
@@ -95,7 +120,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
       onClose();
     }, 1200);
     setSaving(false);
-  }, [form, event, validate, onSave, onClose]);
+  }, [form, event, validate, onSave, onClose, imageFile]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -104,6 +129,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
     if (file && file.type.startsWith("image/")) {
       const url = URL.createObjectURL(file);
       setForm((f) => ({ ...f, imageUrl: url }));
+      setImageFile(file);
     }
   }, []);
 
@@ -112,6 +138,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
     if (file && file.type.startsWith("image/")) {
       const url = URL.createObjectURL(file);
       setForm((f) => ({ ...f, imageUrl: url }));
+      setImageFile(file);
     }
   }, []);
 
@@ -230,7 +257,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                 {errors.title && <p className="text-xs text-red-400/70 mt-1">{errors.title}</p>}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">
                     Date <span className="text-chrono-accent">*</span>

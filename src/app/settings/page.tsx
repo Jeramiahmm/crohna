@@ -86,7 +86,7 @@ export default function SettingsPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `chrono-export-${new Date().toISOString().split("T")[0]}.json`;
+      a.download = `crohna-export-${new Date().toISOString().split("T")[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {
@@ -121,7 +121,7 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-32">
-      <section className="relative py-28 px-6 overflow-hidden">
+      <section className="relative py-16 md:py-28 px-6 overflow-hidden">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -129,7 +129,7 @@ export default function SettingsPage() {
           className="relative max-w-4xl mx-auto text-center"
         >
           <span className="section-label mb-5 block">Account</span>
-          <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-tight">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-display font-bold mb-6 tracking-tight">
             <em className="text-chrono-text">Settings</em>
           </h1>
         </motion.div>

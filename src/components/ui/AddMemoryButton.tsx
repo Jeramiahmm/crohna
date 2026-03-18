@@ -20,6 +20,7 @@ export default function AddMemoryButton() {
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     title: "",
     date: "",
@@ -31,6 +32,7 @@ export default function AddMemoryButton() {
 
   const resetForm = () => {
     setForm({ title: "", date: "", location: "", category: "", description: "", imageUrl: "" });
+    setImageFile(null);
     setErrors({});
   };
 
@@ -50,6 +52,22 @@ export default function AddMemoryButton() {
 
     setSaving(true);
     try {
+      let uploadedImageUrl = form.imageUrl || undefined;
+
+      if (imageFile) {
+        const uploadForm = new FormData();
+        uploadForm.append("file", imageFile);
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: uploadForm });
+        if (!uploadRes.ok) {
+          const data = await uploadRes.json();
+          setErrors({ title: data.error || "Image upload failed" });
+          setSaving(false);
+          return;
+        }
+        const { url } = await uploadRes.json();
+        uploadedImageUrl = url;
+      }
+
       const res = await fetch("/api/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -59,7 +77,7 @@ export default function AddMemoryButton() {
           location: form.location.trim() || undefined,
           category: form.category || "life",
           description: form.description.trim() || undefined,
-          imageUrl: form.imageUrl || undefined,
+          imageUrl: uploadedImageUrl,
         }),
       });
 
@@ -87,6 +105,7 @@ export default function AddMemoryButton() {
     if (file && file.type.startsWith("image/")) {
       const url = URL.createObjectURL(file);
       setForm((f) => ({ ...f, imageUrl: url }));
+      setImageFile(file);
     }
   }, []);
 
@@ -95,6 +114,7 @@ export default function AddMemoryButton() {
     if (file && file.type.startsWith("image/")) {
       const url = URL.createObjectURL(file);
       setForm((f) => ({ ...f, imageUrl: url }));
+      setImageFile(file);
     }
   }, []);
 
@@ -169,7 +189,7 @@ export default function AddMemoryButton() {
                   {errors.title && <p className="text-xs text-red-400/70 mt-1">{errors.title}</p>}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">
                       Date <span className="text-chrono-accent">*</span>

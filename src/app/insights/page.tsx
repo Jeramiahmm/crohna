@@ -86,7 +86,7 @@ export default function InsightsPage() {
   if (!stats) {
     return (
       <div className="min-h-screen pt-24 pb-32">
-        <section className="relative py-28 px-6 overflow-hidden">
+        <section className="relative py-16 md:py-28 px-6 overflow-hidden">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -94,7 +94,7 @@ export default function InsightsPage() {
             className="relative max-w-4xl mx-auto text-center"
           >
             <span className="section-label mb-5 block">Discover</span>
-            <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-tight">
+            <h1 className="text-3xl sm:text-5xl md:text-7xl font-display font-bold mb-6 tracking-tight">
               <em className="text-chrono-text">Insights</em>
             </h1>
           </motion.div>
@@ -112,7 +112,7 @@ export default function InsightsPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-32">
-      <section className="relative py-28 px-6 overflow-hidden">
+      <section className="relative py-16 md:py-28 px-6 overflow-hidden">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -122,7 +122,7 @@ export default function InsightsPage() {
           <span className="section-label mb-5 block">
             Discover
           </span>
-          <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-tight">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-display font-bold mb-6 tracking-tight">
             <em className="text-chrono-text">Insights</em>
           </h1>
           <p className="text-base font-body font-light text-chrono-muted max-w-md mx-auto leading-relaxed">

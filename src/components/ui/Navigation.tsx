@@ -300,7 +300,7 @@ export default function Navigation() {
           <Link href="/" className="flex items-center gap-2 group">
             <span className="text-chrono-muted text-base leading-none select-none">&#x2022;</span>
             <span className="text-[13px] font-display font-bold tracking-[0.25em] uppercase text-chrono-text">
-              Chrono
+              Crohna
             </span>
           </Link>
 
@@ -338,7 +338,7 @@ export default function Navigation() {
             className="fixed inset-0 z-40 backdrop-blur-2xl pt-24 px-8 md:hidden"
             style={{ background: "color-mix(in srgb, var(--chrono-bg) 98%, transparent)" }}
           >
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4">
               {navItems.map((item, i) => (
                 <motion.div
                   key={item.href}
@@ -349,7 +349,7 @@ export default function Navigation() {
                   <Link
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
-                    className={`block text-3xl font-display font-bold py-3 ${
+                    className={`block text-xl sm:text-2xl font-display font-bold py-3 ${
                       pathname === item.href
                         ? "text-chrono-text"
                         : "text-chrono-muted"

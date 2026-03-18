@@ -32,7 +32,7 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `chrono-${type}-${title.replace(/\s+/g, "-").toLowerCase()}.txt`;
+    a.download = `crohna-${type}-${title.replace(/\s+/g, "-").toLowerCase()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
     setExporting(false);
@@ -96,7 +96,7 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
 
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-5 h-5 rounded-full bg-[var(--muted)]" />
-                  <span className="text-[10px] text-chrono-muted uppercase tracking-[0.15em]">Chrono</span>
+                  <span className="text-[10px] text-chrono-muted uppercase tracking-[0.15em]">Crohna</span>
                   <span className="text-[10px] text-chrono-muted">
                     {type === "year-review" ? "Year in Review" : type === "story" ? "Story" : "Timeline"}
                   </span>
@@ -129,7 +129,7 @@ export default function ShareCard({ isOpen, onClose, type, title, content, stats
               </div>
             </div>
 
-            <div className="px-6 pb-6 grid grid-cols-3 gap-3">
+            <div className="px-6 pb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
                 onClick={handleCopy}
                 className="flex flex-col items-center gap-2 py-3 bg-[var(--card-bg)] border border-[var(--line-strong)] hover:border-[var(--line-hover)] transition-all"
