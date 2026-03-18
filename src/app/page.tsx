@@ -555,14 +555,54 @@ function TimelinePreview({ events }: { events?: TimelineEvent[] }) {
   );
 }
 
-function MapPreview() {
-  const locations = [
-    { name: "Boulder, CO", count: 7, x: 28, y: 38 },
-    { name: "San Francisco", count: 3, x: 15, y: 40 },
-    { name: "New York", count: 1, x: 78, y: 36 },
-    { name: "Seattle", count: 2, x: 16, y: 28 },
-    { name: "Denver", count: 1, x: 30, y: 40 },
+const FALLBACK_LOCATIONS = [
+  { name: "Boulder, CO", count: 7, x: 28, y: 38 },
+  { name: "San Francisco", count: 3, x: 15, y: 40 },
+  { name: "New York", count: 1, x: 78, y: 36 },
+  { name: "Seattle", count: 2, x: 16, y: 28 },
+  { name: "Denver", count: 1, x: 30, y: 40 },
+];
+
+function deriveMapLocations(events: TimelineEvent[]) {
+  const withLocation = events.filter((e) => e.location);
+  if (withLocation.length === 0) return null;
+
+  // Group by location name and count
+  const locationMap = new Map<string, number>();
+  for (const e of withLocation) {
+    const loc = e.location!;
+    locationMap.set(loc, (locationMap.get(loc) || 0) + 1);
+  }
+
+  // Take top 5 locations, distribute across the visual area
+  const sorted = Array.from(locationMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  // Simple deterministic positioning based on index
+  const positions = [
+    { x: 28, y: 38 }, { x: 15, y: 40 }, { x: 78, y: 36 },
+    { x: 16, y: 28 }, { x: 55, y: 45 },
   ];
+
+  return {
+    locations: sorted.map(([name, count], i) => ({
+      name,
+      count,
+      x: positions[i].x,
+      y: positions[i].y,
+    })),
+    totalCities: locationMap.size,
+    totalMemories: withLocation.length,
+  };
+}
+
+function MapPreview({ events }: { events?: TimelineEvent[] }) {
+  const source = events && events.length > 0 ? events : demoEvents;
+  const derived = deriveMapLocations(source);
+  const locations = derived?.locations || FALLBACK_LOCATIONS;
+  const totalCities = derived?.totalCities || 7;
+  const totalMemories = derived?.totalMemories || 16;
 
   return (
     <section className="relative py-[80px] md:py-[160px] px-6">
@@ -611,47 +651,33 @@ function MapPreview() {
                 ))}
 
                 <svg className="absolute inset-0 w-full h-full" style={{ zIndex: -1 }}>
-                  <motion.line
-                    x1="28%" y1="38%" x2="15%" y2="40%"
-                    stroke="var(--line)" strokeWidth="0.5"
-                    initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }}
-                    viewport={{ once: true }} transition={{ delay: 0.5, duration: 1.5 }}
-                  />
-                  <motion.line
-                    x1="28%" y1="38%" x2="78%" y2="36%"
-                    stroke="var(--line)" strokeWidth="0.5"
-                    initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }}
-                    viewport={{ once: true }} transition={{ delay: 0.7, duration: 1.5 }}
-                  />
-                  <motion.line
-                    x1="15%" y1="40%" x2="16%" y2="28%"
-                    stroke="var(--line)" strokeWidth="0.5"
-                    initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }}
-                    viewport={{ once: true }} transition={{ delay: 0.6, duration: 1.5 }}
-                  />
-                  <motion.line
-                    x1="28%" y1="38%" x2="30%" y2="40%"
-                    stroke="var(--line)" strokeWidth="0.5"
-                    initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }}
-                    viewport={{ once: true }} transition={{ delay: 0.8, duration: 1.5 }}
-                  />
+                  {locations.slice(1).map((loc, i) => (
+                    <motion.line
+                      key={loc.name}
+                      x1={`${locations[0].x}%`} y1={`${locations[0].y}%`}
+                      x2={`${loc.x}%`} y2={`${loc.y}%`}
+                      stroke="var(--line)" strokeWidth="0.5"
+                      initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }}
+                      viewport={{ once: true }} transition={{ delay: 0.5 + i * 0.15, duration: 1.5 }}
+                    />
+                  ))}
                 </svg>
               </div>
             </div>
 
             <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap mt-6 pt-6 border-t border-[var(--line)]">
               <div className="text-center">
-                <div className="text-lg font-display font-bold text-chrono-text">7</div>
+                <div className="text-lg font-display font-bold text-chrono-text">{totalCities}</div>
                 <div className="text-[10px] font-body font-extralight text-chrono-muted uppercase tracking-[0.15em]">Cities</div>
               </div>
               <div className="w-px h-8 bg-[var(--line)]" />
               <div className="text-center">
-                <div className="text-lg font-display font-bold text-chrono-text">6</div>
-                <div className="text-[10px] font-body font-extralight text-chrono-muted uppercase tracking-[0.15em]">States</div>
+                <div className="text-lg font-display font-bold text-chrono-text">{locations.length}</div>
+                <div className="text-[10px] font-body font-extralight text-chrono-muted uppercase tracking-[0.15em]">Top Locations</div>
               </div>
               <div className="w-px h-8 bg-[var(--line)]" />
               <div className="text-center">
-                <div className="text-lg font-display font-bold text-chrono-text">16</div>
+                <div className="text-lg font-display font-bold text-chrono-text">{totalMemories}</div>
                 <div className="text-[10px] font-body font-extralight text-chrono-muted uppercase tracking-[0.15em]">Memories</div>
               </div>
             </div>
@@ -822,7 +848,7 @@ export default function Home() {
       <FeaturesSection />
       <TimelinePreview events={userEvents} />
       <MarqueeTicker />
-      <MapPreview />
+      <MapPreview events={userEvents} />
       <StoriesPreview stories={userStories} />
       <UseCasesSection />
       <CTASection />
