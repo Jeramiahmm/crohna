@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!checkImportLimit(session.user.email).allowed) {
+    if (!(await checkImportLimit(session.user.email)).allowed) {
       return NextResponse.json(
         { error: "Too many import requests. Please wait a minute." },
         { status: 429 }

@@ -17,7 +17,7 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!checkStoryLimit(session.user.email).allowed) {
+    if (!(await checkStoryLimit(session.user.email)).allowed) {
       return NextResponse.json(
         { error: "Too many regeneration requests. Please wait a minute." },
         { status: 429 }

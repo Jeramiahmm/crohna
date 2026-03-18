@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!checkEventLimit(session.user.email).allowed) {
+    if (!(await checkEventLimit(session.user.email)).allowed) {
       return NextResponse.json(
         { error: "Too many events created. Please wait a minute." },
         { status: 429 }
