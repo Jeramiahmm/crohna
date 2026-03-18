@@ -40,7 +40,7 @@ function AnimatedWord() {
   }, []);
 
   return (
-    <span className="inline-block relative overflow-hidden align-bottom text-right" style={{ lineHeight: "inherit", paddingRight: "0.08em", paddingBottom: "0.1em" }}>
+    <span className="inline-block relative overflow-hidden align-bottom text-right" style={{ lineHeight: "inherit", paddingRight: "0.08em", paddingBottom: "0.18em" }}>
       {/* invisible sizer — holds natural width/height for longest word */}
       <span className="invisible italic" aria-hidden="true">beautifully</span>
       <AnimatePresence mode="wait">
@@ -147,15 +147,6 @@ function HeroSection() {
       {/* Buttons placed OUTSIDE the motion.div to avoid transform stacking context trapping pointer events */}
       <HeroButtons />
 
-      <div className="absolute bottom-16 left-1/2 -translate-x-1/2 pointer-events-none z-[1]">
-        <motion.div
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          className="w-5 h-9 border border-[var(--line-strong)] rounded-full flex justify-center pt-2"
-        >
-          <div className="w-0.5 h-1.5 bg-chrono-muted rounded-full" />
-        </motion.div>
-      </div>
     </section>
   );
 }
