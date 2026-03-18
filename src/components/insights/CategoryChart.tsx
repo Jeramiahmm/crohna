@@ -9,7 +9,7 @@ interface Category {
 }
 
 export default function CategoryChart({ categories }: { categories: Category[] }) {
-  const maxCount = Math.max(...categories.map((c) => c.count));
+  const maxCount = categories.length === 0 ? 1 : Math.max(...categories.map((c) => c.count));
 
   return (
     <motion.div

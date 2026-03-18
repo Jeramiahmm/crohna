@@ -2,15 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getSupabase } from "@/lib/supabase";
+import { createRateLimiter } from "@/lib/rate-limit";
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+const checkUploadLimit = createRateLimiter("upload", 10, 60_000);
 
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = session.user.email || "unknown";
+    if (!checkUploadLimit(userId).allowed) {
+      return NextResponse.json(
+        { error: "Too many uploads. Please wait a minute and try again." },
+        { status: 429 }
+      );
     }
 
     const supabase = getSupabase();

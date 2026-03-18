@@ -4,12 +4,22 @@ import { getToken } from "next-auth/jwt";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
+import { createRateLimiter } from "@/lib/rate-limit";
+
+const checkImportLimit = createRateLimiter("google-import", 5, 60_000);
 
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!checkImportLimit(session.user.email).allowed) {
+      return NextResponse.json(
+        { error: "Too many import requests. Please wait a minute." },
+        { status: 429 }
+      );
     }
 
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
@@ -46,38 +56,48 @@ export async function POST(req: NextRequest) {
       ],
     };
 
-    const photosRes = await fetch(
-      "https://photoslibrary.googleapis.com/v1/mediaItems:search",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token.accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          pageSize: 50,
-          filters: {
-            dateFilter,
-            mediaTypeFilter: { mediaTypes: ["PHOTO"] },
+    // Paginate through photos (cap at 500)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mediaItems: any[] = [];
+    let nextPageToken: string | undefined;
+    const MAX_PHOTOS = 500;
+
+    do {
+      const photosRes = await fetch(
+        "https://photoslibrary.googleapis.com/v1/mediaItems:search",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token.accessToken}`,
+            "Content-Type": "application/json",
           },
-        }),
-      }
-    );
+          body: JSON.stringify({
+            pageSize: 100,
+            pageToken: nextPageToken,
+            filters: {
+              dateFilter,
+              mediaTypeFilter: { mediaTypes: ["PHOTO"] },
+            },
+          }),
+        }
+      );
 
-    if (!photosRes.ok) {
-      const errData = await photosRes.json().catch(() => ({}));
-      if (photosRes.status === 401 || photosRes.status === 403) {
-        return NextResponse.json(
-          { error: "Google access expired. Please sign out and sign in again." },
-          { status: 401 }
-        );
+      if (!photosRes.ok) {
+        const errData = await photosRes.json().catch(() => ({}));
+        if (photosRes.status === 401 || photosRes.status === 403) {
+          return NextResponse.json(
+            { error: "Google access expired. Please sign out and sign in again." },
+            { status: 401 }
+          );
+        }
+        console.error("Google Photos API error:", errData);
+        return NextResponse.json({ error: "Failed to fetch photos" }, { status: 500 });
       }
-      console.error("Google Photos API error:", errData);
-      return NextResponse.json({ error: "Failed to fetch photos" }, { status: 500 });
-    }
 
-    const photosData = await photosRes.json();
-    const mediaItems = photosData.mediaItems || [];
+      const photosData = await photosRes.json();
+      mediaItems.push(...(photosData.mediaItems || []));
+      nextPageToken = photosData.nextPageToken;
+    } while (nextPageToken && mediaItems.length < MAX_PHOTOS);
 
     // Deduplicate by checking existing photo-sourced events
     const existingPhotoEvents = await prisma.event.findMany({

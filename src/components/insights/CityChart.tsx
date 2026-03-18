@@ -8,7 +8,7 @@ interface CityData {
 }
 
 export default function CityChart({ data }: { data: CityData[] }) {
-  const maxCount = Math.max(...data.map((d) => d.count));
+  const maxCount = data.length === 0 ? 1 : Math.max(...data.map((d) => d.count));
 
   return (
     <motion.div
@@ -32,7 +32,7 @@ export default function CityChart({ data }: { data: CityData[] }) {
             transition={{ delay: 0.2 + i * 0.08 }}
             className="flex items-center gap-4"
           >
-            <div className="w-20 sm:w-24 md:w-32 text-sm font-body font-light text-chrono-muted truncate text-right flex-shrink-0">
+            <div className="min-w-[5rem] max-w-[8rem] text-sm font-body font-light text-chrono-muted truncate text-right flex-shrink-0" title={item.city}>
               {item.city}
             </div>
             <div className="flex-1 h-[2px] bg-chrono-bg overflow-hidden">

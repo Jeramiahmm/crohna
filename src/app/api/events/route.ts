@@ -3,6 +3,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
 import { VALID_CATEGORIES } from "@/lib/constants";
+import { createRateLimiter } from "@/lib/rate-limit";
+
+const checkEventLimit = createRateLimiter("events", 30, 60_000);
 
 function formatEvent(e: {
   id: string;
@@ -51,8 +54,11 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const year = searchParams.get("year");
+    const cursor = searchParams.get("cursor");
+    const limitParam = searchParams.get("limit");
+    const limit = Math.min(Math.max(parseInt(limitParam || "50", 10) || 50, 1), 100);
 
-    const where: Record<string, unknown> = { userId: user.id };
+    const where: Record<string, unknown> = { userId: user.id, deletedAt: null };
     if (year) {
       const yearNum = parseInt(year, 10);
       if (isNaN(yearNum) || yearNum < 1900 || yearNum > 2100) {
@@ -66,12 +72,16 @@ export async function GET(req: NextRequest) {
     const dbEvents = await prisma.event.findMany({
       where,
       orderBy: { date: "desc" },
-      take: 500,
+      take: limit + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
     });
 
-    const events = dbEvents.map(formatEvent);
+    const hasMore = dbEvents.length > limit;
+    const sliced = hasMore ? dbEvents.slice(0, limit) : dbEvents;
+    const events = sliced.map(formatEvent);
+    const nextCursor = hasMore ? sliced[sliced.length - 1].id : undefined;
 
-    return NextResponse.json({ events, total: events.length });
+    return NextResponse.json({ events, total: events.length, nextCursor });
   } catch (error) {
     console.error("GET /api/events error:", error);
     return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
@@ -84,6 +94,13 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!checkEventLimit(session.user.email).allowed) {
+      return NextResponse.json(
+        { error: "Too many events created. Please wait a minute." },
+        { status: 429 }
+      );
     }
 
     const prisma = getPrisma();
@@ -174,8 +191,9 @@ export async function DELETE() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const result = await prisma.event.deleteMany({
-      where: { userId: user.id },
+    const result = await prisma.event.updateMany({
+      where: { userId: user.id, deletedAt: null },
+      data: { deletedAt: new Date() },
     });
 
     return NextResponse.json({ success: true, deleted: result.count });

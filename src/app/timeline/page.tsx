@@ -8,8 +8,9 @@ import YearSection from "@/components/timeline/YearSection";
 import EventModal from "@/components/events/EventModal";
 import EmptyState from "@/components/ui/EmptyState";
 import { toast } from "sonner";
+import { CATEGORIES } from "@/lib/constants";
 
-const CATEGORIES = ["All", "Travel", "Achievement", "Education", "Life", "Career"];
+const FILTER_OPTIONS = ["All", ...CATEGORIES.map((c) => c.label)];
 
 
 function CategoryFilterBar({ selected, onToggle }: { selected: Set<string>; onToggle: (cat: string) => void }) {
@@ -20,7 +21,7 @@ function CategoryFilterBar({ selected, onToggle }: { selected: Set<string>; onTo
       transition={{ delay: 0.2, duration: 0.6 }}
       className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide justify-center flex-wrap"
     >
-      {CATEGORIES.map((cat) => {
+      {FILTER_OPTIONS.map((cat) => {
         const isSelected = cat === "All" ? selected.size === 0 : selected.has(cat.toLowerCase());
         return (
           <button
@@ -71,6 +72,9 @@ export default function TimelinePage() {
   const [editingEvent, setEditingEvent] = useState<TimelineEvent | undefined>();
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
 
+  const [nextCursor, setNextCursor] = useState<string | undefined>();
+  const [loadingMore, setLoadingMore] = useState(false);
+
   const fetchEvents = useCallback(() => {
     if (status === "loading") return;
     if (!session) {
@@ -79,7 +83,7 @@ export default function TimelinePage() {
       setLoading(false);
       return;
     }
-    fetch("/api/events")
+    fetch("/api/events?limit=50")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch");
         return res.json();
@@ -93,6 +97,7 @@ export default function TimelinePage() {
           setEvents(real);
           setIsShowingDemo(false);
         }
+        setNextCursor(data.nextCursor);
         setLoading(false);
       })
       .catch(() => {
@@ -101,6 +106,21 @@ export default function TimelinePage() {
         setLoading(false);
       });
   }, [session, status]);
+
+  const loadMore = useCallback(() => {
+    if (!nextCursor || loadingMore || isShowingDemo) return;
+    setLoadingMore(true);
+    fetch(`/api/events?limit=50&cursor=${nextCursor}`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data?.events) {
+          setEvents((prev) => [...prev, ...data.events]);
+          setNextCursor(data.nextCursor);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingMore(false));
+  }, [nextCursor, loadingMore, isShowingDemo]);
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -284,9 +304,36 @@ export default function TimelinePage() {
 
       <YearScrubber years={allYears} activeYear={activeYear} onYearClick={scrollToYear} />
 
-      {filteredEvents.length === 0 && selectedCategories.size > 0 ? (
+      {searchQuery && (
+        <motion.div
+          initial={{ opacity: 0, y: -5 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-4"
+        >
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-body font-light text-chrono-muted border border-[var(--line)] rounded-full">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            {filteredEvents.length} result{filteredEvents.length !== 1 ? "s" : ""} for &ldquo;{searchQuery}&rdquo;
+          </span>
+        </motion.div>
+      )}
+
+      {filteredEvents.length === 0 && (searchQuery || selectedCategories.size > 0) ? (
         <div className="text-center py-32">
-          <p className="text-sm font-body font-extralight text-chrono-muted italic">No memories in the selected categories.</p>
+          <svg className="w-10 h-10 mx-auto mb-4 text-chrono-muted/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+          <p className="text-sm font-body font-extralight text-chrono-muted italic">
+            {searchQuery
+              ? `No memories matching "${searchQuery}"`
+              : "No memories in the selected categories."}
+          </p>
+          {searchQuery && (
+            <p className="text-xs font-body font-extralight text-chrono-muted mt-2">
+              Try a different search term or clear your filters
+            </p>
+          )}
         </div>
       ) : events.length === 0 && !isShowingDemo ? (
         <EmptyState icon="timeline" title="Your story starts here" description="Add your first life event to begin building your personal timeline. Every moment matters." actionLabel="Create First Event" onAction={() => setEventModalOpen(true)} />
@@ -294,14 +341,26 @@ export default function TimelinePage() {
         <section className="px-6">
           <div className="space-y-28">
             <AnimatePresence mode="sync">
-              {years.map((year, i) => (
+              {years.map((year) => (
                   <motion.div key={year} data-year={year} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.4 }}>
-                    <YearSection year={year} events={eventsByYear[year]} yearIndex={i} onEditEvent={isShowingDemo ? undefined : (event) => { setEditingEvent(event); setEventModalOpen(true); }} />
+                    <YearSection year={year} events={eventsByYear[year]} onEditEvent={isShowingDemo ? undefined : (event) => { setEditingEvent(event); setEventModalOpen(true); }} />
                   </motion.div>
               ))}
             </AnimatePresence>
           </div>
         </section>
+      )}
+
+      {nextCursor && !isShowingDemo && (
+        <div className="text-center mt-16">
+          <button
+            onClick={loadMore}
+            disabled={loadingMore}
+            className="px-6 py-2.5 text-sm font-body font-light text-chrono-muted border border-[var(--line-strong)] hover:border-[var(--line-hover)] hover:text-chrono-text rounded-full transition-all duration-500 disabled:opacity-50"
+          >
+            {loadingMore ? "Loading..." : "Load More"}
+          </button>
+        </div>
       )}
 
       {events.length > 0 && !isShowingDemo && (

@@ -1,0 +1,16 @@
+{
+  "name": "Crohna",
+  "short_name": "Crohna",
+  "description": "A digital life timeline — your memories, beautifully mapped",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}

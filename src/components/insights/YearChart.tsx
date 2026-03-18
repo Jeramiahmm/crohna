@@ -8,7 +8,7 @@ interface YearData {
 }
 
 export default function YearChart({ data }: { data: YearData[] }) {
-  const maxCount = Math.max(...data.map((d) => d.count));
+  const maxCount = data.length === 0 ? 1 : Math.max(...data.map((d) => d.count));
 
   return (
     <motion.div

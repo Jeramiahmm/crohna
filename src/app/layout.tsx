@@ -49,6 +49,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#050505" />
+      </head>
       <body className="font-body antialiased bg-chrono-bg text-chrono-text">
         <SessionProvider>
           <ThemeProvider>

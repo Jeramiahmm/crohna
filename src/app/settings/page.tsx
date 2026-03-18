@@ -3,13 +3,14 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signIn, signOut } from "next-auth/react";
 import { toast } from "sonner";
+import { useTheme } from "@/components/ui/ThemeProvider";
 import GoogleConnectModal from "@/components/ui/GoogleConnectModal";
 
 export default function SettingsPage() {
-  const { data: session } = useSession();
-  const [notifications, setNotifications] = useState(false);
+  const { data: session, status } = useSession();
+  const { theme, toggle: toggleTheme } = useTheme();
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [connectModal, setConnectModal] = useState<"Google Photos" | "Google Calendar" | null>(null);
@@ -19,6 +20,50 @@ export default function SettingsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // Privacy preferences (server-backed with localStorage cache)
+  const [privacySettings, setPrivacySettings] = useState({
+    shareableStories: true,
+    showLocationOnShared: true,
+  });
+
+  // Load from localStorage immediately, then sync from server
+  useEffect(() => {
+    const stored = localStorage.getItem("chrono-privacy");
+    if (stored) {
+      try { setPrivacySettings(JSON.parse(stored)); } catch { /* ignore */ }
+    }
+    if (!session) return;
+    fetch("/api/user")
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        const prefs = data?.user?.preferences;
+        if (prefs && typeof prefs === "object") {
+          const merged = {
+            shareableStories: prefs.shareableStories ?? true,
+            showLocationOnShared: prefs.showLocationOnShared ?? true,
+          };
+          setPrivacySettings(merged);
+          localStorage.setItem("chrono-privacy", JSON.stringify(merged));
+        }
+      })
+      .catch(() => {});
+  }, [session]);
+
+  // Save to both localStorage and server
+  const updatePrivacy = (update: Partial<typeof privacySettings>) => {
+    setPrivacySettings((prev) => {
+      const next = { ...prev, ...update };
+      localStorage.setItem("chrono-privacy", JSON.stringify(next));
+      // Fire-and-forget save to server
+      fetch("/api/user", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ preferences: next }),
+      }).catch(() => {});
+      return next;
+    });
+  };
+
   useEffect(() => {
     if (session?.user) {
       setDisplayName(session.user.name || "");
@@ -26,30 +71,30 @@ export default function SettingsPage() {
     }
   }, [session]);
 
+  // Load connection status from DB
   useEffect(() => {
-    const stored = localStorage.getItem("chrono-connected-accounts");
-    if (stored) setConnectedAccounts(JSON.parse(stored));
-    const notifPref = localStorage.getItem("chrono-notifications");
-    if (notifPref) setNotifications(notifPref === "true");
-  }, []);
+    if (!session) return;
+    fetch("/api/google/status")
+      .then((res) => res.ok ? res.json() : { calendar: false, photos: false })
+      .then((data) => {
+        setConnectedAccounts({
+          "Google Calendar": data.calendar,
+          "Google Photos": data.photos,
+        });
+      })
+      .catch(() => {});
+  }, [session]);
 
-  const handleConnect = (service: string) => {
-    const updated = { ...connectedAccounts, [service]: true };
-    setConnectedAccounts(updated);
-    localStorage.setItem("chrono-connected-accounts", JSON.stringify(updated));
-  };
-
-  const handleDisconnect = (service: string) => {
-    const updated = { ...connectedAccounts, [service]: false };
-    setConnectedAccounts(updated);
-    localStorage.setItem("chrono-connected-accounts", JSON.stringify(updated));
-  };
-
-  const handleToggleNotifications = () => {
-    const next = !notifications;
-    setNotifications(next);
-    localStorage.setItem("chrono-notifications", String(next));
-    toast.success(next ? "Notifications enabled" : "Notifications disabled");
+  const refreshConnectionStatus = () => {
+    fetch("/api/google/status")
+      .then((res) => res.ok ? res.json() : { calendar: false, photos: false })
+      .then((data) => {
+        setConnectedAccounts({
+          "Google Calendar": data.calendar,
+          "Google Photos": data.photos,
+        });
+      })
+      .catch(() => {});
   };
 
   const handleSave = async () => {
@@ -134,7 +179,46 @@ export default function SettingsPage() {
     }
   };
 
-  const userInitial = session?.user?.name?.[0] || session?.user?.email?.[0]?.toUpperCase() || "U";
+  // Loading state
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen pt-24 pb-32 flex items-center justify-center">
+        <div className="text-sm font-body font-light text-chrono-muted animate-pulse">Loading...</div>
+      </div>
+    );
+  }
+
+  // Not authenticated — show sign-in prompt (NOT a redirect to homepage)
+  if (!session) {
+    return (
+      <div className="min-h-screen pt-24 pb-32">
+        <section className="relative py-16 md:py-28 px-6 overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            className="relative max-w-lg mx-auto text-center"
+          >
+            <span className="section-label mb-5 block">Account</span>
+            <h1 className="text-3xl sm:text-5xl font-display font-bold mb-6 tracking-tight">
+              <em className="text-chrono-text">Settings</em>
+            </h1>
+            <p className="text-base font-body font-light text-chrono-muted max-w-md mx-auto mb-12 leading-relaxed">
+              Sign in to access your account settings, preferences, and connected services.
+            </p>
+            <button
+              onClick={() => signIn("google", { callbackUrl: "/settings" })}
+              className="px-8 py-3 text-sm font-body font-light bg-foreground text-background rounded-full hover:opacity-90 transition-all duration-500"
+            >
+              Sign in with Google
+            </button>
+          </motion.div>
+        </section>
+      </div>
+    );
+  }
+
+  const userInitial = session.user?.name?.[0] || session.user?.email?.[0]?.toUpperCase() || "U";
 
   return (
     <div className="min-h-screen pt-24 pb-32">
@@ -154,6 +238,7 @@ export default function SettingsPage() {
 
       <section className="px-6">
         <div className="max-w-2xl mx-auto space-y-6">
+          {/* Profile */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -162,7 +247,7 @@ export default function SettingsPage() {
           >
             <h3 className="text-sm font-display font-light text-chrono-text mb-4">Profile</h3>
             <div className="flex items-center gap-4 mb-6">
-              {session?.user?.image ? (
+              {session.user?.image ? (
                 <Image src={session.user.image} alt={session.user.name || "Profile"} width={64} height={64} className="w-16 h-16 rounded-full border border-[var(--line-strong)]" />
               ) : (
                 <div className="w-16 h-16 border border-[var(--line-strong)] flex items-center justify-center text-chrono-accent text-xl font-display font-light rounded-full">
@@ -170,8 +255,8 @@ export default function SettingsPage() {
                 </div>
               )}
               <div>
-                <div className="text-chrono-text font-body font-light">{session?.user?.name || "User"}</div>
-                <div className="text-sm font-body font-light text-chrono-muted">{session?.user?.email || ""}</div>
+                <div className="text-chrono-text font-body font-light">{session.user?.name || "User"}</div>
+                <div className="text-sm font-body font-light text-chrono-muted">{session.user?.email || ""}</div>
               </div>
             </div>
 
@@ -198,38 +283,41 @@ export default function SettingsPage() {
             </div>
           </motion.div>
 
+          {/* Appearance */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             className="bg-[var(--card-bg)] p-7 border border-[var(--line-strong)]"
           >
-            <h3 className="text-sm font-display font-light text-chrono-text mb-4">Preferences</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-body font-light text-chrono-text">Story Notifications</div>
-                  <div className="text-xs font-body font-light text-chrono-muted">Get notified when new stories are ready</div>
+            <h3 className="text-sm font-display font-light text-chrono-text mb-4">Appearance</h3>
+            <div className="flex items-center justify-between py-2">
+              <div>
+                <div className="text-sm font-body font-light text-chrono-text">Theme</div>
+                <div className="text-xs font-body font-light text-chrono-muted mt-0.5">
+                  Switch between dark and light mode
                 </div>
-                <button
-                  onClick={handleToggleNotifications}
-                  role="switch"
-                  aria-checked={notifications}
-                  aria-label="Toggle story notifications"
-                  className={`relative w-11 h-6 rounded-full transition-colors ${
-                    notifications ? "bg-chrono-accent" : "bg-[var(--line-strong)]"
-                  }`}
-                >
-                  <div
-                    className={`absolute top-0.5 w-5 h-5 rounded-full bg-chrono-bg transition-transform ${
-                      notifications ? "translate-x-[22px]" : "translate-x-0.5"
-                    }`}
-                  />
-                </button>
               </div>
+              <button
+                onClick={toggleTheme}
+                className="relative w-14 h-7 rounded-full border border-[var(--line-strong)] transition-colors"
+                style={{ background: theme === "dark" ? "var(--card-bg)" : "var(--muted)" }}
+                aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+              >
+                <motion.div
+                  animate={{ x: theme === "dark" ? 2 : 24 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  className="absolute top-0.5 w-6 h-6 rounded-full bg-foreground flex items-center justify-center"
+                >
+                  <span className="text-background text-[10px]">
+                    {theme === "dark" ? "D" : "L"}
+                  </span>
+                </motion.div>
+              </button>
             </div>
           </motion.div>
 
+          {/* Connected Accounts */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -267,10 +355,65 @@ export default function SettingsPage() {
             </div>
           </motion.div>
 
+          {/* Privacy */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
+            className="bg-[var(--card-bg)] p-7 border border-[var(--line-strong)]"
+          >
+            <h3 className="text-sm font-display font-light text-chrono-text mb-4">Privacy</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between py-1">
+                <div>
+                  <div className="text-sm font-body font-light text-chrono-text">Allow shareable stories</div>
+                  <div className="text-xs font-body font-light text-chrono-muted mt-0.5">
+                    When enabled, shared story links can be viewed by anyone with the link
+                  </div>
+                </div>
+                <button
+                  onClick={() => updatePrivacy({ shareableStories: !privacySettings.shareableStories })}
+                  className="relative w-11 h-6 rounded-full border border-[var(--line-strong)] transition-colors flex-shrink-0"
+                  style={{ background: privacySettings.shareableStories ? "var(--chrono-accent)" : "var(--card-bg)" }}
+                  role="switch"
+                  aria-checked={privacySettings.shareableStories}
+                >
+                  <motion.div
+                    animate={{ x: privacySettings.shareableStories ? 20 : 2 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    className="absolute top-0.5 w-5 h-5 rounded-full bg-foreground"
+                  />
+                </button>
+              </div>
+              <div className="flex items-center justify-between py-1">
+                <div>
+                  <div className="text-sm font-body font-light text-chrono-text">Show location on shared cards</div>
+                  <div className="text-xs font-body font-light text-chrono-muted mt-0.5">
+                    Include location details when sharing events or stories
+                  </div>
+                </div>
+                <button
+                  onClick={() => updatePrivacy({ showLocationOnShared: !privacySettings.showLocationOnShared })}
+                  className="relative w-11 h-6 rounded-full border border-[var(--line-strong)] transition-colors flex-shrink-0"
+                  style={{ background: privacySettings.showLocationOnShared ? "var(--chrono-accent)" : "var(--card-bg)" }}
+                  role="switch"
+                  aria-checked={privacySettings.showLocationOnShared}
+                >
+                  <motion.div
+                    animate={{ x: privacySettings.showLocationOnShared ? 20 : 2 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    className="absolute top-0.5 w-5 h-5 rounded-full bg-foreground"
+                  />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Data */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
             className="bg-[var(--card-bg)] p-7 border border-[var(--line-strong)]"
           >
             <h3 className="text-sm font-display font-light text-chrono-text mb-4">Data</h3>
@@ -299,10 +442,11 @@ export default function SettingsPage() {
             </div>
           </motion.div>
 
+          {/* Actions */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.6 }}
             className="flex justify-between"
           >
             <button
@@ -327,8 +471,8 @@ export default function SettingsPage() {
           isOpen={!!connectModal}
           onClose={() => setConnectModal(null)}
           service={connectModal}
-          onConnect={() => handleConnect(connectModal)}
-          onDisconnect={() => handleDisconnect(connectModal)}
+          onConnect={refreshConnectionStatus}
+          onDisconnect={refreshConnectionStatus}
           isConnected={!!connectedAccounts[connectModal]}
         />
       )}

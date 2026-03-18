@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
+import { createRateLimiter } from "@/lib/rate-limit";
+
+const checkStoryLimit = createRateLimiter("stories", 5, 60_000);
 
 // PUT /api/stories/[id] — regenerate a story
 export async function PUT(
@@ -12,6 +15,13 @@ export async function PUT(
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!checkStoryLimit(session.user.email).allowed) {
+      return NextResponse.json(
+        { error: "Too many regeneration requests. Please wait a minute." },
+        { status: 429 }
+      );
     }
 
     const prisma = getPrisma();
@@ -32,7 +42,7 @@ export async function PUT(
     }
 
     // Get user's events for the story's period
-    const whereClause: Record<string, unknown> = { userId: user.id };
+    const whereClause: Record<string, unknown> = { userId: user.id, deletedAt: null };
     if (existing.year) {
       const start = new Date(`${existing.year}-01-01`);
       const end = new Date(`${existing.year + 1}-01-01`);

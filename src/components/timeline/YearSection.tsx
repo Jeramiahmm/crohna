@@ -7,7 +7,6 @@ import TimelineCard from "./TimelineCard";
 interface YearSectionProps {
   year: string;
   events: TimelineEvent[];
-  yearIndex: number;
   onEditEvent?: (event: TimelineEvent) => void;
 }
 

@@ -12,6 +12,8 @@ import ParticleField from "@/components/three/ParticleField";
 import MarqueeTicker from "@/components/ui/MarqueeTicker";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import ShimmerButton from "@/components/ui/shimmer-button";
+import { useEvents } from "@/hooks/useEvents";
+import { useStories } from "@/hooks/useStories";
 
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   return (
@@ -31,23 +33,6 @@ const HERO_WORDS = ["beautifully", "elegantly", "perfectly", "intimately", "vivi
 
 function AnimatedWord() {
   const [index, setIndex] = useState(0);
-  const containerRef = useRef<HTMLSpanElement>(null);
-  const [fixedWidth, setFixedWidth] = useState<number>(0);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const container = containerRef.current;
-    const measurer = document.createElement("span");
-    measurer.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap;font-style:italic;font-size:1.35em;line-height:0.85;font-family:inherit;font-weight:inherit;";
-    container.appendChild(measurer);
-    let maxW = 0;
-    for (const word of HERO_WORDS) {
-      measurer.textContent = word;
-      maxW = Math.max(maxW, measurer.getBoundingClientRect().width);
-    }
-    container.removeChild(measurer);
-    setFixedWidth(Math.ceil(maxW) + 4);
-  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -57,20 +42,16 @@ function AnimatedWord() {
   }, []);
 
   return (
-    <span
-      ref={containerRef}
-      className="inline-block relative overflow-hidden align-bottom"
-      style={{ height: "1.15em", minWidth: fixedWidth > 0 ? fixedWidth : "7ch", width: fixedWidth > 0 ? fixedWidth : "7ch" }}
-    >
+    <span className="inline-block relative overflow-hidden align-baseline" style={{ width: "5.5em", height: "1.2em", verticalAlign: "baseline" }}>
       <AnimatePresence mode="wait">
         <motion.span
           key={HERO_WORDS[index]}
-          initial={{ y: "100%", opacity: 0 }}
+          initial={{ y: "110%", opacity: 0 }}
           animate={{ y: "0%", opacity: 1 }}
-          exit={{ y: "-100%", opacity: 0 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute left-0 top-0 whitespace-nowrap italic"
-          style={{ fontSize: "1.35em", lineHeight: "0.85" }}
+          exit={{ y: "-110%", opacity: 0 }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          className="absolute inset-0 whitespace-nowrap italic text-chrono-accent"
+          style={{ lineHeight: "1.2" }}
         >
           {HERO_WORDS[index]}
         </motion.span>
@@ -80,16 +61,41 @@ function AnimatedWord() {
 }
 
 function useGetStarted() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
-  return useCallback(() => {
-    if (session) router.push("/timeline");
-    else signIn("google", { callbackUrl: "/timeline" });
-  }, [session, router]);
+  const [pending, setPending] = useState(false);
+
+  const trigger = useCallback(() => {
+    if (pending) return;
+    if (status === "loading") {
+      // Session still resolving — wait briefly then retry
+      setPending(true);
+      return;
+    }
+    if (session) {
+      router.push("/timeline");
+    } else {
+      signIn("google", { callbackUrl: "/timeline" });
+    }
+  }, [session, status, router, pending]);
+
+  // If pending and status resolves, fire the action
+  useEffect(() => {
+    if (pending && status !== "loading") {
+      setPending(false);
+      if (session) {
+        router.push("/timeline");
+      } else {
+        signIn("google", { callbackUrl: "/timeline" });
+      }
+    }
+  }, [pending, status, session, router]);
+
+  return { trigger, pending: pending || status === "loading" };
 }
 
 function HeroSection() {
-  const handleGetStarted = useGetStarted();
+  const { trigger: handleGetStarted, pending: getStartedPending } = useGetStarted();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -128,11 +134,11 @@ function HeroSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
-          className="font-display font-bold leading-[0.95] tracking-tight mb-10 text-chrono-text"
-          style={{ fontSize: "clamp(2.8rem, 7vw, 5.5rem)" }}
+          className="font-display font-bold tracking-tight mb-10 text-chrono-text"
+          style={{ fontSize: "clamp(2.8rem, 7vw, 5.5rem)", lineHeight: 1.1 }}
         >
           <span className="block">Your life,</span>
-          <span className="block mt-2">
+          <span className="block">
             <AnimatedWord /> mapped
           </span>
         </motion.h1>
@@ -152,8 +158,8 @@ function HeroSection() {
           transition={{ delay: 1.1, duration: 1 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <ShimmerButton onClick={handleGetStarted}>
-            Get Started
+          <ShimmerButton onClick={handleGetStarted} disabled={getStartedPending}>
+            {getStartedPending ? "Loading..." : "Get Started"}
           </ShimmerButton>
           <Link href="/insights">
             <button className="px-6 py-3 md:px-10 md:py-4 text-chrono-text hover:text-foreground border border-[var(--line-strong)] hover:border-[var(--line-hover)] rounded-full transition-all duration-500 text-sm font-body font-light tracking-wide">
@@ -779,7 +785,7 @@ function TestimonialsSection() {
 }
 
 function CTASection() {
-  const handleGetStarted = useGetStarted();
+  const { trigger: handleGetStarted, pending: getStartedPending } = useGetStarted();
   return (
     <section className="relative py-[80px] md:py-[160px] px-6">
       <FadeUp className="relative max-w-3xl mx-auto text-center">
@@ -793,8 +799,8 @@ function CTASection() {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <ShimmerButton className="px-12 py-4 text-base" onClick={handleGetStarted}>
-            Get Started
+          <ShimmerButton className="px-12 py-4 text-base" onClick={handleGetStarted} disabled={getStartedPending}>
+            {getStartedPending ? "Loading..." : "Get Started"}
           </ShimmerButton>
           <Link href="/insights">
             <button className="px-6 py-3 md:px-10 md:py-4 text-chrono-text hover:text-foreground border border-[var(--line-strong)] hover:border-[var(--line-hover)] rounded-full transition-all duration-500 text-sm font-body font-light">
@@ -822,22 +828,8 @@ function CTASection() {
 }
 
 export default function Home() {
-  const { data: session } = useSession();
-  const [userEvents, setUserEvents] = useState<TimelineEvent[]>([]);
-  const [userStories, setUserStories] = useState<AIStory[]>([]);
-
-  useEffect(() => {
-    if (!session?.user) return;
-    Promise.all([
-      fetch("/api/events").then((r) => r.ok ? r.json() : { events: [] }),
-      fetch("/api/stories").then((r) => r.ok ? r.json() : { stories: [] }),
-    ])
-      .then(([eventsData, storiesData]) => {
-        setUserEvents(eventsData.events || []);
-        setUserStories(storiesData.stories || []);
-      })
-      .catch(() => {});
-  }, [session]);
+  const { events: userEvents } = useEvents();
+  const { stories: userStories } = useStories();
 
   return (
     <>

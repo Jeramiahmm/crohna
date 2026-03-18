@@ -8,12 +8,14 @@ datasource db {
 
 model User {
   id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
+  name          String?   @db.VarChar(200)
+  email         String    @unique @db.VarChar(320)
   emailVerified DateTime?
-  image         String?
+  image         String?   @db.VarChar(2048)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  preferences Json?
 
   accounts  Account[]
   sessions  Session[]
@@ -52,16 +54,17 @@ model Session {
 model Event {
   id          String    @id @default(cuid())
   userId      String
-  title       String
+  title       String    @db.VarChar(500)
   date        DateTime
   endDate     DateTime?
-  location    String?
+  location    String?   @db.VarChar(500)
   latitude    Float?
   longitude   Float?
-  imageUrl    String?
-  description String?
-  category    String?
-  source      String    @default("manual")
+  imageUrl    String?   @db.VarChar(2048)
+  description String?   @db.VarChar(5000)
+  category    String?   @db.VarChar(50)
+  source      String    @default("manual") @db.VarChar(50)
+  deletedAt   DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -70,15 +73,16 @@ model Event {
   @@index([userId, date])
   @@index([userId, category])
   @@index([userId, source])
+  @@index([userId, deletedAt])
 }
 
 model AIStory {
   id           String   @id @default(cuid())
   userId       String
-  title        String
-  period       String
+  title        String   @db.VarChar(500)
+  period       String   @db.VarChar(200)
   year         Int?
-  summary      String
+  summary      String   @db.VarChar(10000)
   highlights   String[]
   stats        Json?
   createdAt    DateTime @default(now())

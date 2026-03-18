@@ -2,47 +2,13 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { useSession, signIn } from "next-auth/react";
-import { TimelineEvent, demoEvents } from "@/data/demo";
+import { signIn } from "next-auth/react";
 import EventMap from "@/components/map/EventMap";
 import EmptyState from "@/components/ui/EmptyState";
+import { useEvents } from "@/hooks/useEvents";
 
 export default function MapPage() {
-  const { data: session, status } = useSession();
-  const [events, setEvents] = useState<TimelineEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isShowingDemo, setIsShowingDemo] = useState(false);
-
-  useEffect(() => {
-    if (status === "loading") return;
-    if (!session) {
-      setEvents(demoEvents);
-      setIsShowingDemo(true);
-      setLoading(false);
-      return;
-    }
-    fetch("/api/events")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch");
-        return res.json();
-      })
-      .then((data) => {
-        const real = data.events || [];
-        if (real.length === 0) {
-          setEvents(demoEvents);
-          setIsShowingDemo(true);
-        } else {
-          setEvents(real);
-          setIsShowingDemo(false);
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        setEvents(demoEvents);
-        setIsShowingDemo(true);
-        setLoading(false);
-      });
-  }, [session, status]);
+  const { events, isLoading, isShowingDemo } = useEvents();
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -55,7 +21,7 @@ export default function MapPage() {
     return () => window.removeEventListener("chrono:search", searchHandler);
   }, []);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen pt-24 pb-32 flex items-center justify-center">
         <div className="text-sm font-body font-light text-chrono-muted animate-pulse">Loading your map...</div>
@@ -113,6 +79,17 @@ export default function MapPage() {
           </p>
         </motion.div>
       </section>
+
+      {searchQuery && (
+        <div className="text-center mb-4">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-body font-light text-chrono-muted border border-[var(--line)] rounded-full">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            {displayEvents.length} result{displayEvents.length !== 1 ? "s" : ""} for &ldquo;{searchQuery}&rdquo;
+          </span>
+        </div>
+      )}
 
       {displayEvents.length === 0 && !isShowingDemo ? (
         <EmptyState

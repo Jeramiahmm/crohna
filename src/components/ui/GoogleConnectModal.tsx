@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 type ConnectState = "idle" | "loading" | "success" | "error";
 
@@ -23,9 +24,11 @@ export default function GoogleConnectModal({
   onDisconnect,
   isConnected,
 }: GoogleConnectModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<ConnectState>(isConnected ? "success" : "idle");
   const [importCount, setImportCount] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+  useFocusTrap(modalRef, isOpen);
 
   useEffect(() => {
     if (isOpen) {
@@ -100,6 +103,7 @@ export default function GoogleConnectModal({
             className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm"
           />
           <motion.div
+            ref={modalRef}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}

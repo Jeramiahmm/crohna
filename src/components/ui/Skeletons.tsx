@@ -18,7 +18,7 @@ function Shimmer({ className = "" }: { className?: string }) {
 export function TimelineCardSkeleton() {
   return (
     <div className="bg-[var(--card-bg)] overflow-hidden border border-[var(--line-strong)]">
-      <Shimmer className="h-48" />
+      <Shimmer className="h-40 sm:h-52 md:h-60" />
       <div className="p-6 space-y-3">
         <Shimmer className="h-3 w-24" />
         <Shimmer className="h-5 w-3/4" />
