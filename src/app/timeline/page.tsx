@@ -7,6 +7,7 @@ import { TimelineEvent, getEventsByYear, demoEvents } from "@/data/demo";
 import YearSection from "@/components/timeline/YearSection";
 import EventModal from "@/components/events/EventModal";
 import EmptyState from "@/components/ui/EmptyState";
+import { toast } from "sonner";
 
 const CATEGORIES = ["All", "Travel", "Achievement", "Education", "Life", "Career"];
 
@@ -153,34 +154,52 @@ export default function TimelinePage() {
   }, []);
 
   const handleCreateEvent = useCallback(async (eventData: Partial<TimelineEvent>) => {
-    const res = await fetch("/api/events", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(eventData),
-    });
-    if (res.ok) {
-      const { event } = await res.json();
-      setEvents((prev) => [event, ...prev]);
+    try {
+      const res = await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(eventData),
+      });
+      if (res.ok) {
+        const { event } = await res.json();
+        setEvents((prev) => [event, ...prev]);
+      } else {
+        toast.error("Failed to create event. Please try again.");
+      }
+    } catch {
+      toast.error("Failed to create event. Please try again.");
     }
   }, []);
 
   const handleEditEvent = useCallback(async (eventData: Partial<TimelineEvent>) => {
-    const res = await fetch(`/api/events/${eventData.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(eventData),
-    });
-    if (res.ok) {
-      const { event } = await res.json();
-      setEvents((prev) => prev.map((e) => (e.id === event.id ? event : e)));
+    try {
+      const res = await fetch(`/api/events/${eventData.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(eventData),
+      });
+      if (res.ok) {
+        const { event } = await res.json();
+        setEvents((prev) => prev.map((e) => (e.id === event.id ? event : e)));
+      } else {
+        toast.error("Failed to update event. Please try again.");
+      }
+    } catch {
+      toast.error("Failed to update event. Please try again.");
     }
     setEditingEvent(undefined);
   }, []);
 
   const handleDeleteEvent = useCallback(async (id: string) => {
-    const res = await fetch(`/api/events/${id}`, { method: "DELETE" });
-    if (res.ok) {
-      setEvents((prev) => prev.filter((e) => e.id !== id));
+    try {
+      const res = await fetch(`/api/events/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setEvents((prev) => prev.filter((e) => e.id !== id));
+      } else {
+        toast.error("Failed to delete event. Please try again.");
+      }
+    } catch {
+      toast.error("Failed to delete event. Please try again.");
     }
     setEditingEvent(undefined);
     setEventModalOpen(false);

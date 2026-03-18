@@ -87,6 +87,10 @@ export default function SettingsPage() {
         fetch("/api/events"),
         fetch("/api/stories"),
       ]);
+      if (!eventsRes.ok || !storiesRes.ok) {
+        toast.error("Failed to export data. Please try again.");
+        return;
+      }
       const eventsData = await eventsRes.json();
       const storiesData = await storiesRes.json();
       const exportData = {
