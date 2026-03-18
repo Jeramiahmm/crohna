@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { TimelineEvent } from "@/data/demo";
 
 const categories = [
@@ -29,24 +29,43 @@ interface EventModalProps {
   onDelete?: (id: string) => void;
 }
 
+const EMPTY_FORM = {
+  title: "",
+  date: "",
+  location: "",
+  description: "",
+  category: "",
+  imageUrl: "",
+  chapter: "",
+};
+
 export default function EventModal({ isOpen, onClose, onSave, event, onDelete }: EventModalProps) {
   const isEditing = !!event;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [form, setForm] = useState({
-    title: event?.title || "",
-    date: event?.date || "",
-    location: event?.location || "",
-    description: event?.description || "",
-    category: event?.category || "",
-    imageUrl: event?.imageUrl || "",
-    chapter: event?.chapter || "",
-  });
-
+  const [form, setForm] = useState(EMPTY_FORM);
   const [dragOver, setDragOver] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Reset form when modal opens or event changes
+  useEffect(() => {
+    if (isOpen) {
+      setForm({
+        title: event?.title || "",
+        date: event?.date || "",
+        location: event?.location || "",
+        description: event?.description || "",
+        category: event?.category || "",
+        imageUrl: event?.imageUrl || "",
+        chapter: event?.chapter || "",
+      });
+      setErrors({});
+      setShowSuccess(false);
+      setSaving(false);
+    }
+  }, [isOpen, event]);
 
   const validate = useCallback(() => {
     const errs: Record<string, string> = {};
@@ -63,8 +82,6 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
     }
     setErrors({});
     setSaving(true);
-
-    await new Promise((r) => setTimeout(r, 600));
 
     onSave({
       ...event,

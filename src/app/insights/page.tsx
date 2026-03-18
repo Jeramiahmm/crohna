@@ -49,15 +49,19 @@ export default function InsightsPage() {
 
   const handleRegenerate = useCallback(async (storyId: string) => {
     setGenerating(true);
-    await new Promise((r) => setTimeout(r, 2500));
-    setStories((prev) =>
-      prev.map((s) =>
-        s.id === storyId
-          ? { ...s, summary: s.summary + " [Regenerated with new insights and deeper reflection.]" }
-          : s
-      )
-    );
-    setGenerating(false);
+    try {
+      const res = await fetch(`/api/stories/${storyId}`, { method: "PUT" });
+      if (res.ok) {
+        const data = await res.json();
+        setStories((prev) =>
+          prev.map((s) => (s.id === storyId ? data.story : s))
+        );
+      }
+    } catch (err) {
+      console.error("Failed to regenerate story:", err);
+    } finally {
+      setGenerating(false);
+    }
   }, []);
 
   const handleShare = useCallback((story: AIStory) => {

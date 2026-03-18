@@ -2,7 +2,8 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Home, Clock, BarChart3, Map, Settings, Search, Sun, Moon, X } from "lucide-react";
 import { NavBar } from "./tubelight-navbar";
@@ -220,7 +221,7 @@ function UserMenu() {
         className="w-8 h-8 rounded-full overflow-hidden border border-[var(--line-strong)] hover:border-[var(--line-hover)] transition-colors"
       >
         {session.user.image ? (
-          <img src={session.user.image} alt="" className="w-full h-full object-cover" />
+          <Image src={session.user.image} alt="" width={32} height={32} className="w-full h-full object-cover" />
         ) : (
           <span className="w-full h-full flex items-center justify-center text-xs font-body text-chrono-muted">
             {session.user.name?.[0] || session.user.email?.[0]?.toUpperCase() || "U"}
@@ -259,7 +260,6 @@ function UserMenu() {
 
 export default function Navigation() {
   const pathname = usePathname();
-  const router = useRouter();
   const { data: session } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -365,7 +365,7 @@ export default function Navigation() {
                 <>
                   <div className="flex items-center gap-3 mb-2">
                     {session.user.image ? (
-                      <img src={session.user.image} alt="" className="w-10 h-10 rounded-full" />
+                      <Image src={session.user.image} alt="" width={40} height={40} className="w-10 h-10 rounded-full" />
                     ) : (
                       <div className="w-10 h-10 rounded-full border border-[var(--line-strong)] flex items-center justify-center text-chrono-muted">
                         {session.user.name?.[0] || "U"}

@@ -4,15 +4,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback } from "react";
 import { TimelineEvent, getEventsByYear } from "@/data/demo";
 import YearSection from "@/components/timeline/YearSection";
-import ChapterHeader from "@/components/timeline/ChapterHeader";
 import EventModal from "@/components/events/EventModal";
 import EmptyState from "@/components/ui/EmptyState";
 
 const CATEGORIES = ["All", "Travel", "Achievement", "Education", "Life", "Career"];
 
-function getChapterForYear(year: string) {
-  return null; // Chapters are for demo data only; users build their own story
-}
 
 function CategoryFilterBar({ selected, onToggle }: { selected: Set<string>; onToggle: (cat: string) => void }) {
   return (
@@ -71,7 +67,7 @@ export default function TimelinePage() {
   const [editingEvent, setEditingEvent] = useState<TimelineEvent | undefined>();
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
+  const fetchEvents = useCallback(() => {
     fetch("/api/events")
       .then((res) => res.json())
       .then((data) => {
@@ -80,6 +76,14 @@ export default function TimelinePage() {
       })
       .catch(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    fetchEvents();
+    // Listen for events created from the floating AddMemoryButton
+    const handler = () => fetchEvents();
+    window.addEventListener("chrono:event-created", handler);
+    return () => window.removeEventListener("chrono:event-created", handler);
+  }, [fetchEvents]);
 
   const handleToggleCategory = useCallback((cat: string) => {
     if (cat === "All") { setSelectedCategories(new Set()); return; }
@@ -209,15 +213,11 @@ export default function TimelinePage() {
         <section className="px-6">
           <div className="space-y-28">
             <AnimatePresence mode="sync">
-              {years.map((year, i) => {
-                const chapter = getChapterForYear(year);
-                return (
+              {years.map((year, i) => (
                   <motion.div key={year} data-year={year} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.4 }}>
-                    {chapter && <ChapterHeader title={chapter.title} subtitle={chapter.subtitle} />}
                     <YearSection year={year} events={eventsByYear[year]} yearIndex={i} onEditEvent={(event) => { setEditingEvent(event); setEventModalOpen(true); }} />
                   </motion.div>
-                );
-              })}
+              ))}
             </AnimatePresence>
           </div>
         </section>

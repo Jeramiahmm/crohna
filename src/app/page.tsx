@@ -3,11 +3,12 @@
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { demoEvents, demoStories, getEventsByYear, TimelineEvent, AIStory } from "@/data/demo";
 import TimelineCard from "@/components/timeline/TimelineCard";
 import AIStorySummary from "@/components/timeline/AIStorySummary";
 import OnboardingWizard from "@/components/onboarding/OnboardingWizard";
-import { useSession, signIn } from "next-auth/react";
 import ParticleField from "@/components/three/ParticleField";
 import MarqueeTicker from "@/components/ui/MarqueeTicker";
 import LoadingScreen from "@/components/ui/LoadingScreen";
@@ -173,12 +174,13 @@ function HeroSection() {
   );
 }
 
-function OnThisDayWidget() {
+function OnThisDayWidget({ events }: { events?: TimelineEvent[] }) {
   const today = new Date();
   const month = today.getMonth();
   const day = today.getDate();
 
-  const matches = demoEvents.filter((e) => {
+  const source = events && events.length > 0 ? events : demoEvents;
+  const matches = source.filter((e) => {
     const d = new Date(e.date);
     return d.getMonth() === month && d.getDate() === day && d.getFullYear() !== today.getFullYear();
   });
@@ -533,8 +535,9 @@ function FeaturesSection() {
   );
 }
 
-function TimelinePreview() {
-  const previewEvents = demoEvents.slice(0, 3);
+function TimelinePreview({ events }: { events?: TimelineEvent[] }) {
+  const source = events && events.length > 0 ? events : demoEvents;
+  const previewEvents = source.slice(0, 3);
 
   return (
     <section className="relative py-[80px] md:py-[160px] px-6">
@@ -684,7 +687,7 @@ function MapPreview() {
   );
 }
 
-function StoriesPreview() {
+function StoriesPreview({ stories }: { stories?: AIStory[] }) {
   return (
     <section className="relative py-[80px] md:py-[160px] px-6">
       <div className="max-w-4xl mx-auto">
@@ -700,7 +703,7 @@ function StoriesPreview() {
           </p>
         </FadeUp>
 
-        <AIStorySummary story={demoStories[0]} index={0} />
+        <AIStorySummary story={stories && stories.length > 0 ? stories[0] : demoStories[0]} index={0} />
 
         <FadeUp className="text-center mt-16">
           <Link href="/insights">
@@ -814,6 +817,7 @@ function CTASection() {
 
 export default function Home() {
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const completed = localStorage.getItem("chrono-onboarding-complete");
@@ -826,7 +830,30 @@ export default function Home() {
     localStorage.setItem("chrono-onboarding-complete", "true");
     localStorage.setItem("chrono-start-mode", choice);
     setShowOnboarding(false);
+
+    if (choice === "demo" || choice === "manual") {
+      router.push("/timeline");
+    } else if (choice === "import") {
+      router.push("/settings");
+    }
   };
+
+  const { data: session } = useSession();
+  const [userEvents, setUserEvents] = useState<TimelineEvent[]>([]);
+  const [userStories, setUserStories] = useState<AIStory[]>([]);
+
+  useEffect(() => {
+    if (!session?.user) return;
+    Promise.all([
+      fetch("/api/events").then((r) => r.json()),
+      fetch("/api/stories").then((r) => r.json()),
+    ])
+      .then(([eventsData, storiesData]) => {
+        setUserEvents(eventsData.events || []);
+        setUserStories(storiesData.stories || []);
+      })
+      .catch(() => {});
+  }, [session]);
 
   return (
     <>
@@ -839,16 +866,16 @@ export default function Home() {
       </AnimatePresence>
 
       <HeroSection />
-      <OnThisDayWidget />
+      <OnThisDayWidget events={userEvents} />
       <MarqueeTicker />
       <HowItWorksSection />
       <PlayYourStorySection />
       <MarqueeTicker />
       <FeaturesSection />
-      <TimelinePreview />
+      <TimelinePreview events={userEvents} />
       <MarqueeTicker />
       <MapPreview />
-      <StoriesPreview />
+      <StoriesPreview stories={userStories} />
       <TestimonialsSection />
       <CTASection />
     </>

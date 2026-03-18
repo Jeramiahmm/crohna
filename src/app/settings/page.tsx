@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import GoogleConnectModal from "@/components/ui/GoogleConnectModal";
@@ -9,6 +10,7 @@ export default function SettingsPage() {
   const { data: session } = useSession();
   const [notifications, setNotifications] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [connectModal, setConnectModal] = useState<"Google Photos" | "Google Calendar" | null>(null);
   const [connectedAccounts, setConnectedAccounts] = useState<Record<string, boolean>>({});
   const [displayName, setDisplayName] = useState("");
@@ -40,9 +42,26 @@ export default function SettingsPage() {
     localStorage.setItem("chrono-connected-accounts", JSON.stringify(updated));
   };
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/user", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: displayName }),
+      });
+      if (res.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to save changes.");
+      }
+    } catch {
+      alert("Failed to save changes. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleClearOnboarding = () => {
@@ -78,18 +97,19 @@ export default function SettingsPage() {
   const handleDeleteAllEvents = async () => {
     if (!deleteConfirm) {
       setDeleteConfirm(true);
+      setTimeout(() => setDeleteConfirm(false), 5000);
       return;
     }
     setDeleting(true);
     try {
-      const res = await fetch("/api/events");
-      const data = await res.json();
-      const events = data.events || [];
-      for (const event of events) {
-        await fetch(`/api/events/${event.id}`, { method: "DELETE" });
+      const res = await fetch("/api/events", { method: "DELETE" });
+      if (res.ok) {
+        const data = await res.json();
+        setDeleteConfirm(false);
+        alert(`Deleted ${data.deleted} events.`);
+      } else {
+        alert("Failed to delete events.");
       }
-      setDeleteConfirm(false);
-      alert("All events deleted.");
     } catch {
       alert("Failed to delete events. Please try again.");
     } finally {
@@ -126,7 +146,7 @@ export default function SettingsPage() {
             <h3 className="text-sm font-display font-light text-chrono-text mb-4">Profile</h3>
             <div className="flex items-center gap-4 mb-6">
               {session?.user?.image ? (
-                <img src={session.user.image} alt="" className="w-16 h-16 rounded-full border border-[var(--line-strong)]" />
+                <Image src={session.user.image} alt="" width={64} height={64} className="w-16 h-16 rounded-full border border-[var(--line-strong)]" />
               ) : (
                 <div className="w-16 h-16 border border-[var(--line-strong)] flex items-center justify-center text-chrono-accent text-xl font-display font-light rounded-full">
                   {userInitial}
@@ -145,6 +165,7 @@ export default function SettingsPage() {
                   type="text"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
+                  maxLength={200}
                   className="w-full bg-[var(--input-bg)] px-4 py-2.5 text-sm font-body font-light text-chrono-text border border-[var(--line-strong)] outline-none focus:border-[var(--line-hover)] transition-colors"
                 />
               </div>
@@ -272,9 +293,10 @@ export default function SettingsPage() {
             </button>
             <button
               onClick={handleSave}
-              className="px-8 py-3 text-sm font-body font-light bg-foreground text-background rounded-full hover:opacity-90 transition-colors duration-500"
+              disabled={saving}
+              className="px-8 py-3 text-sm font-body font-light bg-foreground text-background rounded-full hover:opacity-90 transition-colors duration-500 disabled:opacity-50"
             >
-              {saved ? "Saved" : "Save Changes"}
+              {saving ? "Saving..." : saved ? "Saved" : "Save Changes"}
             </button>
           </motion.div>
         </div>
