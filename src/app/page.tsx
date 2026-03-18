@@ -3,15 +3,13 @@
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useSession, signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { demoEvents, demoStories, getEventsByYear, TimelineEvent, AIStory } from "@/data/demo";
 import TimelineCard from "@/components/timeline/TimelineCard";
 import AIStorySummary from "@/components/timeline/AIStorySummary";
 import ParticleField from "@/components/three/ParticleField";
 import MarqueeTicker from "@/components/ui/MarqueeTicker";
 import LoadingScreen from "@/components/ui/LoadingScreen";
-import ShimmerButton from "@/components/ui/shimmer-button";
 import { useEvents } from "@/hooks/useEvents";
 import { useStories } from "@/hooks/useStories";
 
@@ -62,35 +60,43 @@ function AnimatedWord() {
   );
 }
 
-function useGetStarted() {
+
+function HeroButtons() {
   const { data: session, status } = useSession();
-  const router = useRouter();
 
-  const trigger = useCallback(() => {
-    if (status === "loading") {
-      // Session still resolving — default to sign in flow
-      signIn("google", { callbackUrl: "/timeline" });
-      return;
-    }
-    if (session) {
-      router.push("/timeline");
-    } else {
-      signIn("google", { callbackUrl: "/timeline" });
-    }
-  }, [session, status, router]);
+  // Determine the "Get Started" href:
+  // - Signed in → go straight to timeline
+  // - Signed out → trigger Google sign-in via NextAuth
+  const getStartedHref =
+    status !== "loading" && session
+      ? "/timeline"
+      : "/api/auth/signin/google?callbackUrl=%2Ftimeline";
 
-  return { trigger };
+  return (
+    <div className="relative z-50 flex flex-col sm:flex-row items-center justify-center gap-4 mt-16">
+      <a
+        href={getStartedHref}
+        className="group relative z-0 inline-flex cursor-pointer items-center justify-center overflow-hidden whitespace-nowrap rounded-full px-10 py-4 text-sm font-body font-light tracking-wide transition-all duration-300 bg-[var(--foreground)] text-[var(--background)] hover:scale-[1.02] active:scale-[0.98]"
+      >
+        Get Started
+      </a>
+      <a
+        href="/insights"
+        className="px-6 py-3 md:px-10 md:py-4 text-chrono-text hover:text-foreground border border-[var(--line-strong)] hover:border-[var(--line-hover)] rounded-full transition-all duration-500 text-sm font-body font-light tracking-wide inline-block cursor-pointer"
+      >
+        View Insights
+      </a>
+    </div>
+  );
 }
 
 function HeroSection() {
-  const { trigger: handleGetStarted } = useGetStarted();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
   });
   const y = useTransform(scrollYProgress, [0, 1], [0, 200]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.8], [1, 0.97]);
 
   return (
@@ -106,7 +112,7 @@ function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-b from-chrono-bg/40 via-transparent to-chrono-bg z-[2] pointer-events-none" />
 
       <motion.div
-        style={{ y, opacity, scale, pointerEvents: "auto" }}
+        style={{ y, scale }}
         className="relative z-10 text-center px-6 max-w-5xl mx-auto"
       >
         <motion.div
@@ -135,31 +141,18 @@ function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 1.2 }}
-          className="text-base md:text-lg font-body font-extralight max-w-lg mx-auto mb-16 leading-relaxed text-chrono-muted"
+          className="text-base md:text-lg font-body font-extralight max-w-lg mx-auto leading-relaxed text-chrono-muted"
         >
           A visual timeline of your memories, milestones, and places.
         </motion.p>
 
-        <div
-          className="relative z-20 flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up"
-          style={{ animationDelay: "1.1s", animationFillMode: "both" }}
-        >
-          <ShimmerButton onClick={handleGetStarted}>
-            Get Started
-          </ShimmerButton>
-          <Link
-            href="/insights"
-            className="px-6 py-3 md:px-10 md:py-4 text-chrono-text hover:text-foreground border border-[var(--line-strong)] hover:border-[var(--line-hover)] rounded-full transition-all duration-500 text-sm font-body font-light tracking-wide inline-block"
-          >
-            View Insights
-          </Link>
-        </div>
+        <HeroButtons />
 
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 2, duration: 1.5 }}
-          className="absolute bottom-16 left-1/2 -translate-x-1/2"
+          className="absolute bottom-16 left-1/2 -translate-x-1/2 pointer-events-none"
         >
           <motion.div
             animate={{ y: [0, 6, 0] }}
@@ -775,7 +768,12 @@ function TestimonialsSection() {
 }
 
 function CTASection() {
-  const { trigger: handleGetStarted } = useGetStarted();
+  const { data: session, status } = useSession();
+  const getStartedHref =
+    status !== "loading" && session
+      ? "/timeline"
+      : "/api/auth/signin/google?callbackUrl=%2Ftimeline";
+
   return (
     <section className="relative py-[80px] md:py-[160px] px-6">
       <FadeUp className="relative max-w-3xl mx-auto text-center">
@@ -788,16 +786,19 @@ function CTASection() {
           Transform your memories into a beautiful, interactive timeline.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <ShimmerButton className="px-12 py-4 text-base" onClick={handleGetStarted}>
+        <div className="relative z-50 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a
+            href={getStartedHref}
+            className="group relative inline-flex cursor-pointer items-center justify-center overflow-hidden whitespace-nowrap rounded-full px-12 py-4 text-base font-body font-light tracking-wide transition-all duration-300 bg-[var(--foreground)] text-[var(--background)] hover:scale-[1.02] active:scale-[0.98]"
+          >
             Get Started
-          </ShimmerButton>
-          <Link
+          </a>
+          <a
             href="/insights"
-            className="px-6 py-3 md:px-10 md:py-4 text-chrono-text hover:text-foreground border border-[var(--line-strong)] hover:border-[var(--line-hover)] rounded-full transition-all duration-500 text-sm font-body font-light inline-block"
+            className="px-6 py-3 md:px-10 md:py-4 text-chrono-text hover:text-foreground border border-[var(--line-strong)] hover:border-[var(--line-hover)] rounded-full transition-all duration-500 text-sm font-body font-light inline-block cursor-pointer"
           >
             See a Demo
-          </Link>
+          </a>
         </div>
 
         <motion.div
