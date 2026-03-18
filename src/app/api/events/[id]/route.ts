@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
+import { VALID_CATEGORIES } from "@/lib/constants";
 
 // PUT /api/events/[id] — update an event
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -58,6 +59,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       }
     }
 
+    const validatedCategory = category !== undefined
+      ? (category && VALID_CATEGORIES.includes(category.toLowerCase()) ? category.toLowerCase() : "life")
+      : undefined;
+
     const event = await prisma.event.update({
       where: { id },
       data: {
@@ -68,7 +73,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         ...(latitude !== undefined && { latitude: latitude ?? null }),
         ...(longitude !== undefined && { longitude: longitude ?? null }),
         ...(description !== undefined && { description: description?.trim() || null }),
-        ...(category !== undefined && { category: category ?? null }),
+        ...(validatedCategory !== undefined && { category: validatedCategory }),
         ...(imageUrl !== undefined && { imageUrl: imageUrl ?? null }),
       },
     });

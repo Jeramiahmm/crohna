@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import EventMap from "@/components/map/EventMap";
 import EmptyState from "@/components/ui/EmptyState";
 import { useEvents } from "@/hooks/useEvents";
@@ -10,16 +10,8 @@ import { useEvents } from "@/hooks/useEvents";
 export default function MapPage() {
   const { events, isLoading, isShowingDemo } = useEvents();
 
-  const [searchQuery, setSearchQuery] = useState("");
-
-  useEffect(() => {
-    const searchHandler = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      setSearchQuery(detail?.query || "");
-    };
-    window.addEventListener("chrono:search", searchHandler);
-    return () => window.removeEventListener("chrono:search", searchHandler);
-  }, []);
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("q") || "";
 
   if (isLoading) {
     return (

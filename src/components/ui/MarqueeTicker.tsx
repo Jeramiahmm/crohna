@@ -9,6 +9,10 @@ export default function MarqueeTicker() {
   const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Respect prefers-reduced-motion: skip animation entirely
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
     let raf: number;
     let x = 0;
     const speed = 0.3;

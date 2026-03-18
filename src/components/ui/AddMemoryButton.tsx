@@ -1,43 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import ShimmerButton from "./shimmer-button";
 import { CATEGORIES } from "@/lib/constants";
-import { useImageUpload } from "@/hooks/useImageUpload";
+import { useEventForm } from "@/hooks/useEventForm";
 
 export default function AddMemoryButton() {
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const [form, setForm] = useState({
-    title: "",
-    date: "",
-    location: "",
-    category: "",
-    description: "",
-  });
-
   const {
-    imagePreviewUrl,
-    dragOver,
-    fileInputRef,
-    handleDrop,
-    handleFileSelect,
-    setDragOver,
-    resetImage,
-    uploadImage,
-  } = useImageUpload();
-
-  const resetForm = () => {
-    setForm({ title: "", date: "", location: "", category: "", description: "" });
-    resetImage();
-    setErrors({});
-  };
+    form, setField, toggleField,
+    dragOver, setDragOver, saving, setSaving,
+    errors, setErrors, resetForm, validate,
+    uploadImageIfNeeded, handleDrop, handleFileSelect,
+  } = useEventForm();
 
   const handleClose = () => {
     setOpen(false);
@@ -45,9 +26,7 @@ export default function AddMemoryButton() {
   };
 
   const handleSave = async () => {
-    const errs: Record<string, string> = {};
-    if (!form.title.trim()) errs.title = "Title is required";
-    if (!form.date) errs.date = "Date is required";
+    const errs = validate();
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;
@@ -55,12 +34,9 @@ export default function AddMemoryButton() {
 
     setSaving(true);
     try {
-      let uploadedImageUrl: string | undefined;
-      try {
-        const url = await uploadImage();
-        uploadedImageUrl = url || undefined;
-      } catch (err) {
-        setErrors({ title: err instanceof Error ? err.message : "Image upload failed" });
+      const { url: uploadedImageUrl, error: uploadError } = await uploadImageIfNeeded();
+      if (uploadError) {
+        setErrors({ title: uploadError });
         setSaving(false);
         return;
       }
@@ -102,14 +78,12 @@ export default function AddMemoryButton() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   if (!session) return null;
 
   return (
     <>
-      {/* Floating Button */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -125,7 +99,6 @@ export default function AddMemoryButton() {
         </ShimmerButton>
       </motion.div>
 
-      {/* Modal */}
       <AnimatePresence>
         {open && (
           <>
@@ -170,7 +143,7 @@ export default function AddMemoryButton() {
                   <input
                     type="text"
                     value={form.title}
-                    onChange={(e) => { setForm((f) => ({ ...f, title: e.target.value })); setErrors((er) => ({ ...er, title: "" })); }}
+                    onChange={(e) => setField("title", e.target.value)}
                     placeholder="What happened?"
                     className={`w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted border transition-colors outline-none focus:border-[var(--line-hover)] ${
                       errors.title ? "border-red-500/40" : "border-[var(--line-strong)]"
@@ -187,7 +160,7 @@ export default function AddMemoryButton() {
                     <input
                       type="date"
                       value={form.date}
-                      onChange={(e) => { setForm((f) => ({ ...f, date: e.target.value })); setErrors((er) => ({ ...er, date: "" })); }}
+                      onChange={(e) => setField("date", e.target.value)}
                       className={`w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text border transition-colors outline-none focus:border-[var(--line-hover)] ${
                         errors.date ? "border-red-500/40" : "border-[var(--line-strong)]"
                       }`}
@@ -199,7 +172,7 @@ export default function AddMemoryButton() {
                     <input
                       type="text"
                       value={form.location}
-                      onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
+                      onChange={(e) => setField("location", e.target.value)}
                       placeholder="City, State"
                       className="w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted border border-[var(--line-strong)] transition-colors outline-none focus:border-[var(--line-hover)]"
                     />
@@ -212,7 +185,7 @@ export default function AddMemoryButton() {
                     {CATEGORIES.map((cat) => (
                       <button
                         key={cat.value}
-                        onClick={() => setForm((f) => ({ ...f, category: f.category === cat.value ? "" : cat.value }))}
+                        onClick={() => toggleField("category", cat.value)}
                         className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
                           form.category === cat.value
                             ? "bg-foreground text-background border-2 border-foreground"
@@ -229,7 +202,7 @@ export default function AddMemoryButton() {
                   <label className="text-xs text-chrono-muted uppercase tracking-wider block mb-2">Description</label>
                   <textarea
                     value={form.description}
-                    onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                    onChange={(e) => setField("description", e.target.value)}
                     placeholder="Tell the story behind this moment..."
                     rows={3}
                     className="w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted border border-[var(--line-strong)] transition-colors outline-none focus:border-[var(--line-hover)] resize-none"
@@ -246,15 +219,15 @@ export default function AddMemoryButton() {
                     className={`relative h-32 border-2 border-dashed transition-all cursor-pointer overflow-hidden rounded-lg ${
                       dragOver
                         ? "border-[var(--line-hover)] bg-[var(--muted)]"
-                        : imagePreviewUrl
+                        : form.imageUrl
                         ? "border-[var(--line)]"
                         : "border-[var(--line-strong)] hover:border-[var(--line-hover)] bg-[var(--card-bg)]"
                     }`}
                   >
-                    {imagePreviewUrl ? (
+                    {form.imageUrl ? (
                       <div className="relative w-full h-full group">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={imagePreviewUrl} alt="Preview" className="w-full h-full object-cover" />
+                        <img src={form.imageUrl} alt="Preview" className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <span className="text-sm text-white">Change photo</span>
                         </div>

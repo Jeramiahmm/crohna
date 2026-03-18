@@ -16,6 +16,9 @@ export default function ParticleField() {
   const animationRef = useRef<number>(0);
 
   useEffect(() => {
+    // Respect prefers-reduced-motion: render a static frame instead of animating
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -70,7 +73,12 @@ export default function ParticleField() {
       animationRef.current = requestAnimationFrame(draw);
     };
 
-    animationRef.current = requestAnimationFrame(draw);
+    if (prefersReducedMotion) {
+      // Draw a single static frame
+      draw(0);
+    } else {
+      animationRef.current = requestAnimationFrame(draw);
+    }
 
     return () => {
       cancelAnimationFrame(animationRef.current);

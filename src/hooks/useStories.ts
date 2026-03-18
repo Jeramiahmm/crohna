@@ -18,7 +18,7 @@ export function useStories() {
   });
 
   const stories = data?.stories || [];
-  const isShowingDemo = isReady && (!isAuthenticated || (!isLoading && stories.length === 0));
+  const isShowingDemo = isReady && !isAuthenticated;
   const displayStories = isShowingDemo ? demoStories : stories;
 
   return {

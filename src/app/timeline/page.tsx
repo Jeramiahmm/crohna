@@ -2,41 +2,120 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback } from "react";
-import { useSession, signIn } from "next-auth/react";
-import { TimelineEvent, getEventsByYear, demoEvents } from "@/data/demo";
+import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
+import { TimelineEvent, getEventsByYear } from "@/data/demo";
 import YearSection from "@/components/timeline/YearSection";
 import EventModal from "@/components/events/EventModal";
 import EmptyState from "@/components/ui/EmptyState";
 import { toast } from "sonner";
 import { CATEGORIES } from "@/lib/constants";
+import { useEvents } from "@/hooks/useEvents";
 
 const FILTER_OPTIONS = ["All", ...CATEGORIES.map((c) => c.label)];
 
+interface FilterBarProps {
+  selectedCategories: Set<string>;
+  onToggleCategory: (cat: string) => void;
+  dateFrom: string;
+  dateTo: string;
+  onDateFromChange: (val: string) => void;
+  onDateToChange: (val: string) => void;
+  hasDateFilter: boolean;
+  onClearDates: () => void;
+}
 
-function CategoryFilterBar({ selected, onToggle }: { selected: Set<string>; onToggle: (cat: string) => void }) {
+function FilterBar({
+  selectedCategories,
+  onToggleCategory,
+  dateFrom,
+  dateTo,
+  onDateFromChange,
+  onDateToChange,
+  hasDateFilter,
+  onClearDates,
+}: FilterBarProps) {
+  const [showDateFilter, setShowDateFilter] = useState(hasDateFilter);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2, duration: 0.6 }}
-      className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide justify-center flex-wrap"
+      className="space-y-3"
     >
-      {FILTER_OPTIONS.map((cat) => {
-        const isSelected = cat === "All" ? selected.size === 0 : selected.has(cat.toLowerCase());
-        return (
-          <button
-            key={cat}
-            onClick={() => onToggle(cat)}
-            className={`px-4 py-1.5 text-xs font-body font-light rounded-full transition-all duration-300 whitespace-nowrap border ${
-              isSelected
-                ? "bg-foreground text-background border-foreground"
-                : "bg-transparent text-chrono-muted border-[var(--line-strong)] hover:border-[var(--line-hover)]"
-            }`}
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide justify-center flex-wrap">
+        {FILTER_OPTIONS.map((cat) => {
+          const isSelected = cat === "All" ? selectedCategories.size === 0 : selectedCategories.has(cat.toLowerCase());
+          return (
+            <button
+              key={cat}
+              onClick={() => onToggleCategory(cat)}
+              className={`px-4 py-1.5 text-xs font-body font-light rounded-full transition-all duration-300 whitespace-nowrap border ${
+                isSelected
+                  ? "bg-foreground text-background border-foreground"
+                  : "bg-transparent text-chrono-muted border-[var(--line-strong)] hover:border-[var(--line-hover)]"
+              }`}
+            >
+              {cat}
+            </button>
+          );
+        })}
+        <button
+          onClick={() => setShowDateFilter((v) => !v)}
+          className={`px-4 py-1.5 text-xs font-body font-light rounded-full transition-all duration-300 whitespace-nowrap border flex items-center gap-1.5 ${
+            hasDateFilter
+              ? "bg-foreground text-background border-foreground"
+              : "bg-transparent text-chrono-muted border-[var(--line-strong)] hover:border-[var(--line-hover)]"
+          }`}
+        >
+          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+          </svg>
+          Date Range
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {showDateFilter && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
           >
-            {cat}
-          </button>
-        );
-      })}
+            <div className="flex items-center justify-center gap-3 flex-wrap">
+              <label className="flex items-center gap-2">
+                <span className="text-xs font-body font-light text-chrono-muted">From</span>
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => onDateFromChange(e.target.value)}
+                  className="px-3 py-1.5 text-xs font-body font-light bg-transparent text-chrono-text border border-[var(--line-strong)] rounded-full focus:border-[var(--line-hover)] focus:outline-none transition-colors"
+                />
+              </label>
+              <label className="flex items-center gap-2">
+                <span className="text-xs font-body font-light text-chrono-muted">To</span>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => onDateToChange(e.target.value)}
+                  className="px-3 py-1.5 text-xs font-body font-light bg-transparent text-chrono-text border border-[var(--line-strong)] rounded-full focus:border-[var(--line-hover)] focus:outline-none transition-colors"
+                />
+              </label>
+              {hasDateFilter && (
+                <button
+                  onClick={() => { onClearDates(); setShowDateFilter(false); }}
+                  className="px-3 py-1.5 text-xs font-body font-light text-chrono-muted hover:text-chrono-text border border-[var(--line-strong)] hover:border-[var(--line-hover)] rounded-full transition-all"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
@@ -63,77 +142,23 @@ function YearScrubber({ years, activeYear, onYearClick }: { years: string[]; act
 }
 
 export default function TimelinePage() {
-  const { data: session, status } = useSession();
-  const [events, setEvents] = useState<TimelineEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isShowingDemo, setIsShowingDemo] = useState(false);
+  const { events, isLoading, isShowingDemo, nextCursor, loadingMore, loadMore, mutate } = useEvents(50);
   const [activeYear, setActiveYear] = useState<string>("");
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<TimelineEvent | undefined>();
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
-  const [nextCursor, setNextCursor] = useState<string | undefined>();
-  const [loadingMore, setLoadingMore] = useState(false);
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("q") || "";
 
-  const fetchEvents = useCallback(() => {
-    if (status === "loading") return;
-    if (!session) {
-      setEvents(demoEvents);
-      setIsShowingDemo(true);
-      setLoading(false);
-      return;
-    }
-    fetch("/api/events?limit=50")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch");
-        return res.json();
-      })
-      .then((data) => {
-        const real = data.events || [];
-        // Authenticated users with zero events see the empty state, not demo data
-        setEvents(real);
-        setIsShowingDemo(false);
-        setNextCursor(data.nextCursor);
-        setLoading(false);
-      })
-      .catch(() => {
-        setEvents([]);
-        setIsShowingDemo(false);
-        setLoading(false);
-      });
-  }, [session, status]);
-
-  const loadMore = useCallback(() => {
-    if (!nextCursor || loadingMore || isShowingDemo) return;
-    setLoadingMore(true);
-    fetch(`/api/events?limit=50&cursor=${nextCursor}`)
-      .then((res) => res.ok ? res.json() : null)
-      .then((data) => {
-        if (data?.events) {
-          setEvents((prev) => [...prev, ...data.events]);
-          setNextCursor(data.nextCursor);
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoadingMore(false));
-  }, [nextCursor, loadingMore, isShowingDemo]);
-
-  const [searchQuery, setSearchQuery] = useState("");
-
+  // Re-fetch when events are created via AddMemoryButton
   useEffect(() => {
-    fetchEvents();
-    const handler = () => fetchEvents();
+    const handler = () => mutate();
     window.addEventListener("chrono:event-created", handler);
-    const searchHandler = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      setSearchQuery(detail?.query || "");
-    };
-    window.addEventListener("chrono:search", searchHandler);
-    return () => {
-      window.removeEventListener("chrono:event-created", handler);
-      window.removeEventListener("chrono:search", searchHandler);
-    };
-  }, [fetchEvents]);
+    return () => window.removeEventListener("chrono:event-created", handler);
+  }, [mutate]);
 
   const handleToggleCategory = useCallback((cat: string) => {
     if (cat === "All") { setSelectedCategories(new Set()); return; }
@@ -145,13 +170,22 @@ export default function TimelinePage() {
     });
   }, []);
 
+  const hasDateFilter = dateFrom !== "" || dateTo !== "";
   const categoryFiltered = selectedCategories.size === 0 ? events : events.filter((e) => e.category && selectedCategories.has(e.category));
-  const filteredEvents = searchQuery
+  const dateFiltered = hasDateFilter
     ? categoryFiltered.filter((e) => {
+        const eventDate = e.date.slice(0, 10);
+        if (dateFrom && eventDate < dateFrom) return false;
+        if (dateTo && eventDate > dateTo) return false;
+        return true;
+      })
+    : categoryFiltered;
+  const filteredEvents = searchQuery
+    ? dateFiltered.filter((e) => {
         const searchable = `${e.title} ${e.description || ""} ${e.location || ""} ${e.category || ""}`.toLowerCase();
         return searchable.includes(searchQuery.toLowerCase());
       })
-    : categoryFiltered;
+    : dateFiltered;
   const eventsByYear = getEventsByYear(filteredEvents);
   const allYears = Object.keys(getEventsByYear(events));
   const years = Object.keys(eventsByYear);
@@ -177,15 +211,14 @@ export default function TimelinePage() {
         body: JSON.stringify(eventData),
       });
       if (res.ok) {
-        const { event } = await res.json();
-        setEvents((prev) => [event, ...prev]);
+        mutate();
       } else {
         toast.error("Failed to create event. Please try again.");
       }
     } catch {
       toast.error("Failed to create event. Please try again.");
     }
-  }, []);
+  }, [mutate]);
 
   const handleEditEvent = useCallback(async (eventData: Partial<TimelineEvent>) => {
     try {
@@ -195,8 +228,7 @@ export default function TimelinePage() {
         body: JSON.stringify(eventData),
       });
       if (res.ok) {
-        const { event } = await res.json();
-        setEvents((prev) => prev.map((e) => (e.id === event.id ? event : e)));
+        mutate();
       } else {
         toast.error("Failed to update event. Please try again.");
       }
@@ -204,13 +236,13 @@ export default function TimelinePage() {
       toast.error("Failed to update event. Please try again.");
     }
     setEditingEvent(undefined);
-  }, []);
+  }, [mutate]);
 
   const handleDeleteEvent = useCallback(async (id: string) => {
     try {
       const res = await fetch(`/api/events/${id}`, { method: "DELETE" });
       if (res.ok) {
-        setEvents((prev) => prev.filter((e) => e.id !== id));
+        mutate();
       } else {
         toast.error("Failed to delete event. Please try again.");
       }
@@ -219,14 +251,14 @@ export default function TimelinePage() {
     }
     setEditingEvent(undefined);
     setEventModalOpen(false);
-  }, []);
+  }, [mutate]);
 
   const scrollToYear = (year: string) => {
     const el = document.querySelector(`[data-year="${year}"]`);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen pt-24 pb-32 flex items-center justify-center">
         <div className="text-sm font-body font-light text-chrono-muted animate-pulse">Loading your timeline...</div>
@@ -272,7 +304,16 @@ export default function TimelinePage() {
             </div>
           )}
 
-          <CategoryFilterBar selected={selectedCategories} onToggle={handleToggleCategory} />
+          <FilterBar
+            selectedCategories={selectedCategories}
+            onToggleCategory={handleToggleCategory}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            onDateFromChange={setDateFrom}
+            onDateToChange={setDateTo}
+            hasDateFilter={hasDateFilter}
+            onClearDates={() => { setDateFrom(""); setDateTo(""); }}
+          />
         </motion.div>
 
         {allYears.length > 0 && (
@@ -315,7 +356,7 @@ export default function TimelinePage() {
         </motion.div>
       )}
 
-      {filteredEvents.length === 0 && (searchQuery || selectedCategories.size > 0) ? (
+      {filteredEvents.length === 0 && (searchQuery || selectedCategories.size > 0 || hasDateFilter) ? (
         <div className="text-center py-32">
           <svg className="w-10 h-10 mx-auto mb-4 text-chrono-muted/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -323,9 +364,11 @@ export default function TimelinePage() {
           <p className="text-sm font-body font-extralight text-chrono-muted italic">
             {searchQuery
               ? `No memories matching "${searchQuery}"`
-              : "No memories in the selected categories."}
+              : hasDateFilter
+                ? "No memories in the selected date range."
+                : "No memories in the selected categories."}
           </p>
-          {searchQuery && (
+          {(searchQuery || hasDateFilter) && (
             <p className="text-xs font-body font-extralight text-chrono-muted mt-2">
               Try a different search term or clear your filters
             </p>

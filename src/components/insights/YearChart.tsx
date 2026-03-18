@@ -17,6 +17,8 @@ export default function YearChart({ data }: { data: YearData[] }) {
       viewport={{ once: true }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
       className="bg-[var(--card-bg)] p-4 sm:p-6 md:p-8 border border-[var(--line-strong)]"
+      role="img"
+      aria-label={`Events by year: ${data.map((d) => `${d.year} ${d.count}`).join(", ")}`}
     >
       <h3 className="text-lg font-display font-bold text-chrono-text mb-6">
         Events by Year

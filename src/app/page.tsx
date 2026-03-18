@@ -264,18 +264,21 @@ function HowItWorksSection() {
   );
 }
 
-function PlayYourStorySection() {
+function PlayYourStorySection({ events }: { events?: TimelineEvent[] }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentYearIndex, setCurrentYearIndex] = useState(-1);
   const [currentEventIndex, setCurrentEventIndex] = useState(-1);
   const [showEvent, setShowEvent] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const innerTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const eventsByYear = getEventsByYear(demoEvents);
+  const source = events && events.length > 0 ? events : demoEvents;
+  const eventsByYear = getEventsByYear(source);
   const years = Object.keys(eventsByYear);
 
   const cleanup = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
+    if (innerTimerRef.current) clearTimeout(innerTimerRef.current);
   }, []);
 
   const play = useCallback(() => {
@@ -314,24 +317,26 @@ function PlayYourStorySection() {
     if (currentEventIndex < yearEvents.length - 1) {
       const t = setTimeout(() => {
         setShowEvent(false);
-        setTimeout(() => {
+        const inner = setTimeout(() => {
           setCurrentEventIndex((prev) => prev + 1);
           setShowEvent(true);
         }, 200);
+        innerTimerRef.current = inner;
       }, 1200);
       timerRef.current = t;
-      return () => clearTimeout(t);
+      return () => { clearTimeout(t); if (innerTimerRef.current) clearTimeout(innerTimerRef.current); };
     }
 
     const t = setTimeout(() => {
       setShowEvent(false);
-      setTimeout(() => {
+      const inner = setTimeout(() => {
         setCurrentYearIndex((prev) => prev + 1);
         setCurrentEventIndex(-1);
       }, 300);
+      innerTimerRef.current = inner;
     }, 1200);
     timerRef.current = t;
-    return () => clearTimeout(t);
+    return () => { clearTimeout(t); if (innerTimerRef.current) clearTimeout(innerTimerRef.current); };
   }, [isPlaying, currentYearIndex, currentEventIndex, years, eventsByYear]);
 
   useEffect(() => cleanup, [cleanup]);
@@ -550,14 +555,54 @@ function TimelinePreview({ events }: { events?: TimelineEvent[] }) {
   );
 }
 
-function MapPreview() {
-  const locations = [
-    { name: "Boulder, CO", count: 7, x: 28, y: 38 },
-    { name: "San Francisco", count: 3, x: 15, y: 40 },
-    { name: "New York", count: 1, x: 78, y: 36 },
-    { name: "Seattle", count: 2, x: 16, y: 28 },
-    { name: "Denver", count: 1, x: 30, y: 40 },
+const FALLBACK_LOCATIONS = [
+  { name: "Boulder, CO", count: 7, x: 28, y: 38 },
+  { name: "San Francisco", count: 3, x: 15, y: 40 },
+  { name: "New York", count: 1, x: 78, y: 36 },
+  { name: "Seattle", count: 2, x: 16, y: 28 },
+  { name: "Denver", count: 1, x: 30, y: 40 },
+];
+
+function deriveMapLocations(events: TimelineEvent[]) {
+  const withLocation = events.filter((e) => e.location);
+  if (withLocation.length === 0) return null;
+
+  // Group by location name and count
+  const locationMap = new Map<string, number>();
+  for (const e of withLocation) {
+    const loc = e.location!;
+    locationMap.set(loc, (locationMap.get(loc) || 0) + 1);
+  }
+
+  // Take top 5 locations, distribute across the visual area
+  const sorted = Array.from(locationMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  // Simple deterministic positioning based on index
+  const positions = [
+    { x: 28, y: 38 }, { x: 15, y: 40 }, { x: 78, y: 36 },
+    { x: 16, y: 28 }, { x: 55, y: 45 },
   ];
+
+  return {
+    locations: sorted.map(([name, count], i) => ({
+      name,
+      count,
+      x: positions[i].x,
+      y: positions[i].y,
+    })),
+    totalCities: locationMap.size,
+    totalMemories: withLocation.length,
+  };
+}
+
+function MapPreview({ events }: { events?: TimelineEvent[] }) {
+  const source = events && events.length > 0 ? events : demoEvents;
+  const derived = deriveMapLocations(source);
+  const locations = derived?.locations || FALLBACK_LOCATIONS;
+  const totalCities = derived?.totalCities || 7;
+  const totalMemories = derived?.totalMemories || 16;
 
   return (
     <section className="relative py-[80px] md:py-[160px] px-6">
@@ -606,47 +651,33 @@ function MapPreview() {
                 ))}
 
                 <svg className="absolute inset-0 w-full h-full" style={{ zIndex: -1 }}>
-                  <motion.line
-                    x1="28%" y1="38%" x2="15%" y2="40%"
-                    stroke="var(--line)" strokeWidth="0.5"
-                    initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }}
-                    viewport={{ once: true }} transition={{ delay: 0.5, duration: 1.5 }}
-                  />
-                  <motion.line
-                    x1="28%" y1="38%" x2="78%" y2="36%"
-                    stroke="var(--line)" strokeWidth="0.5"
-                    initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }}
-                    viewport={{ once: true }} transition={{ delay: 0.7, duration: 1.5 }}
-                  />
-                  <motion.line
-                    x1="15%" y1="40%" x2="16%" y2="28%"
-                    stroke="var(--line)" strokeWidth="0.5"
-                    initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }}
-                    viewport={{ once: true }} transition={{ delay: 0.6, duration: 1.5 }}
-                  />
-                  <motion.line
-                    x1="28%" y1="38%" x2="30%" y2="40%"
-                    stroke="var(--line)" strokeWidth="0.5"
-                    initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }}
-                    viewport={{ once: true }} transition={{ delay: 0.8, duration: 1.5 }}
-                  />
+                  {locations.slice(1).map((loc, i) => (
+                    <motion.line
+                      key={loc.name}
+                      x1={`${locations[0].x}%`} y1={`${locations[0].y}%`}
+                      x2={`${loc.x}%`} y2={`${loc.y}%`}
+                      stroke="var(--line)" strokeWidth="0.5"
+                      initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }}
+                      viewport={{ once: true }} transition={{ delay: 0.5 + i * 0.15, duration: 1.5 }}
+                    />
+                  ))}
                 </svg>
               </div>
             </div>
 
             <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap mt-6 pt-6 border-t border-[var(--line)]">
               <div className="text-center">
-                <div className="text-lg font-display font-bold text-chrono-text">7</div>
+                <div className="text-lg font-display font-bold text-chrono-text">{totalCities}</div>
                 <div className="text-[10px] font-body font-extralight text-chrono-muted uppercase tracking-[0.15em]">Cities</div>
               </div>
               <div className="w-px h-8 bg-[var(--line)]" />
               <div className="text-center">
-                <div className="text-lg font-display font-bold text-chrono-text">6</div>
-                <div className="text-[10px] font-body font-extralight text-chrono-muted uppercase tracking-[0.15em]">States</div>
+                <div className="text-lg font-display font-bold text-chrono-text">{locations.length}</div>
+                <div className="text-[10px] font-body font-extralight text-chrono-muted uppercase tracking-[0.15em]">Top Locations</div>
               </div>
               <div className="w-px h-8 bg-[var(--line)]" />
               <div className="text-center">
-                <div className="text-lg font-display font-bold text-chrono-text">16</div>
+                <div className="text-lg font-display font-bold text-chrono-text">{totalMemories}</div>
                 <div className="text-[10px] font-body font-extralight text-chrono-muted uppercase tracking-[0.15em]">Memories</div>
               </div>
             </div>
@@ -701,15 +732,15 @@ function UseCasesSection() {
   const useCases = [
     {
       persona: "The Designer",
-      quote: "Turn three years of scattered photos and memories into a beautiful timeline. Relive your life story.",
+      scenario: "Turning three years of scattered photos and memories into a cohesive, visual timeline of creative milestones.",
     },
     {
       persona: "The Engineer",
-      quote: "See how much you accomplished when it's all laid out. Year-in-review that writes itself.",
+      scenario: "Mapping career growth, side projects, and conference talks into a year-in-review that reveals just how much was accomplished.",
     },
     {
       persona: "The Student",
-      quote: "Share your college timeline with family. The future of digital memories.",
+      scenario: "Building a college timeline to share with family — every semester, study abroad trip, and graduation milestone in one place.",
     },
   ];
 
@@ -724,18 +755,19 @@ function UseCasesSection() {
         </FadeUp>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-[1px] bg-[var(--line)]">
-          {useCases.map((t, i) => (
-            <FadeUp key={t.persona} delay={i * 0.12}>
+          {useCases.map((uc, i) => (
+            <FadeUp key={uc.persona} delay={i * 0.12}>
               <div className="bg-chrono-bg p-5 sm:p-8 md:p-10 h-full flex flex-col">
-                <p className="text-lg font-display font-bold italic leading-relaxed mb-8 flex-1 text-chrono-muted">
-                  &ldquo;{t.quote}&rdquo;
+                <p className="text-sm font-body font-extralight leading-relaxed mb-8 flex-1 text-chrono-muted">
+                  {uc.scenario}
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-body font-light border border-[var(--line-strong)] text-chrono-accent">
-                    {t.persona[4]}
+                    {uc.persona.split(" ")[1][0]}
                   </div>
                   <div>
-                    <div className="text-sm font-body font-light text-chrono-text">{t.persona}</div>
+                    <div className="text-sm font-body font-light text-chrono-text">{uc.persona}</div>
+                    <div className="text-[10px] font-body font-extralight text-chrono-muted/60 uppercase tracking-wider">Example scenario</div>
                   </div>
                 </div>
               </div>
@@ -811,12 +843,12 @@ export default function Home() {
       <OnThisDayWidget events={userEvents} />
       <MarqueeTicker />
       <HowItWorksSection />
-      <PlayYourStorySection />
+      <PlayYourStorySection events={userEvents} />
       <MarqueeTicker />
       <FeaturesSection />
       <TimelinePreview events={userEvents} />
       <MarqueeTicker />
-      <MapPreview />
+      <MapPreview events={userEvents} />
       <StoriesPreview stories={userStories} />
       <UseCasesSection />
       <CTASection />

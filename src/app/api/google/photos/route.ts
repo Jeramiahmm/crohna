@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!checkImportLimit(session.user.email).allowed) {
+    if (!(await checkImportLimit(session.user.email)).allowed) {
       return NextResponse.json(
         { error: "Too many import requests. Please wait a minute." },
         { status: 429 }
@@ -99,63 +99,60 @@ export async function POST(req: NextRequest) {
       nextPageToken = photosData.nextPageToken;
     } while (nextPageToken && mediaItems.length < MAX_PHOTOS);
 
-    // Deduplicate using sourceId (Google Photos mediaItem ID) instead of expiring baseUrl
-    const existingPhotoEvents = await prisma.event.findMany({
-      where: { userId: user.id, source: "photos" },
-      select: { sourceId: true },
-    });
-
-    const existingSourceIds = new Set(
-      existingPhotoEvents.map((e) => e.sourceId).filter(Boolean)
-    );
-
-    // Collect new events for batch insert
-    const newEvents: {
-      userId: string;
-      title: string;
-      date: Date;
-      imageUrl: string;
-      description: string | null;
-      category: string;
-      source: string;
-      sourceId: string;
-    }[] = [];
-
-    for (const item of mediaItems) {
-      if (!item.baseUrl || !item.mediaMetadata?.creationTime || !item.id) continue;
-
-      // Skip if we already imported this photo (by mediaItem ID)
-      if (existingSourceIds.has(item.id)) continue;
-
-      const creationTime = new Date(item.mediaMetadata.creationTime);
-      if (isNaN(creationTime.getTime())) continue;
-
-      const title = item.description?.trim() || `Photo from ${creationTime.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
-
-      // Note: baseUrl expires after ~1 hour. Store mediaItem ID as sourceId
-      // so we can re-fetch fresh URLs via the Google Photos API when needed.
-      const imageUrl = `${item.baseUrl}=w800-h600`;
-
-      newEvents.push({
-        userId: user.id,
-        title: title.substring(0, 500),
-        date: creationTime,
-        imageUrl,
-        description: item.description?.trim()?.substring(0, 5000) || null,
-        category: "life",
-        source: "photos",
-        sourceId: item.id,
+    // Deduplicate and insert within a transaction to prevent race conditions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const imported = await prisma.$transaction(async (tx: any) => {
+      const existingPhotoEvents = await tx.event.findMany({
+        where: { userId: user.id, source: "photos" },
+        select: { imageUrl: true },
       });
 
-      existingSourceIds.add(item.id);
-    }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const existingUrls = new Set(existingPhotoEvents.map((e: any) => e.imageUrl).filter(Boolean));
 
-    // Batch insert all new events at once
-    let imported = 0;
-    if (newEvents.length > 0) {
-      const result = await prisma.event.createMany({ data: newEvents });
-      imported = result.count;
-    }
+      const eventsToCreate: {
+        userId: string;
+        title: string;
+        date: Date;
+        imageUrl: string;
+        description: string | null;
+        category: string;
+        source: string;
+      }[] = [];
+
+      for (const item of mediaItems) {
+        if (!item.baseUrl || !item.mediaMetadata?.creationTime || !item.id) continue;
+
+        // Store the mediaItemId as a stable identifier instead of the temporary baseUrl.
+        // The baseUrl from Google Photos API expires after ~1 hour.
+        // We use a placeholder URL with the mediaItemId so we can re-fetch on demand
+        // via GET /api/google/photos/proxy?id=<mediaItemId>.
+        const imageUrl = `gphotos://${item.id}`;
+
+        if (existingUrls.has(imageUrl)) continue;
+
+        const creationTime = new Date(item.mediaMetadata.creationTime);
+        if (isNaN(creationTime.getTime())) continue;
+        const title = item.description?.trim() || `Photo from ${creationTime.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
+
+        eventsToCreate.push({
+          userId: user.id,
+          title: title.substring(0, 500),
+          date: creationTime,
+          imageUrl,
+          description: item.description?.trim()?.substring(0, 5000) || null,
+          category: "life",
+          source: "photos",
+        });
+
+        existingUrls.add(imageUrl);
+      }
+
+      if (eventsToCreate.length > 0) {
+        await tx.event.createMany({ data: eventsToCreate });
+      }
+      return eventsToCreate.length;
+    });
 
     return NextResponse.json({ success: true, imported, total: mediaItems.length });
   } catch (error) {

@@ -20,6 +20,17 @@ if (missingVars.length > 0 && process.env.NODE_ENV !== "production") {
   );
 }
 
+// Warn if Upstash is missing in production (rate limiting won't work across serverless instances)
+if (
+  process.env.NODE_ENV === "production" &&
+  (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN)
+) {
+  console.warn(
+    "[Crohna] Warning: UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN not set. " +
+    "Rate limiting will not work correctly in serverless production."
+  );
+}
+
 export const env = {
   DATABASE_URL: process.env.DATABASE_URL,
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,

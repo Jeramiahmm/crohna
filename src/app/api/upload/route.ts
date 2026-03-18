@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = session.user.email || "unknown";
-    if (!checkUploadLimit(userId).allowed) {
+    if (!(await checkUploadLimit(userId)).allowed) {
       return NextResponse.json(
         { error: "Too many uploads. Please wait a minute and try again." },
         { status: 429 }

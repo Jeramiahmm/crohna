@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { createRateLimiter } from "@/lib/rate-limit";
+import { generateStory } from "@/lib/story-generator";
 
 const checkStoryLimit = createRateLimiter("stories", 5, 60_000);
 
@@ -17,7 +19,7 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!checkStoryLimit(session.user.email).allowed) {
+    if (!(await checkStoryLimit(session.user.email)).allowed) {
       return NextResponse.json(
         { error: "Too many regeneration requests. Please wait a minute." },
         { status: 429 }
@@ -42,7 +44,7 @@ export async function PUT(
     }
 
     // Get user's events for the story's period
-    const whereClause: Record<string, unknown> = { userId: user.id, deletedAt: null };
+    const whereClause: Prisma.EventWhereInput = { userId: user.id, deletedAt: null };
     if (existing.year) {
       const start = new Date(`${existing.year}-01-01`);
       const end = new Date(`${existing.year + 1}-01-01`);
@@ -54,36 +56,31 @@ export async function PUT(
       orderBy: { date: "asc" },
     });
 
-    // Build regenerated content based on actual events
     const locations = Array.from(new Set(events.map((e) => e.location).filter(Boolean)));
-    const categories = Array.from(new Set(events.map((e) => e.category).filter(Boolean)));
     const photosCount = events.filter((e) => e.imageUrl).length;
 
     const period = existing.year
       ? `January – December ${existing.year}`
       : "Your Life So Far";
 
-    const summary = events.length > 0
-      ? `A chapter defined by ${events.length} meaningful moments${locations.length > 0 ? ` across ${locations.join(", ")}` : ""}. ${
-          categories.length > 0
-            ? `Your focus areas were ${categories.join(", ")}.`
-            : ""
-        } ${
-          photosCount > 0
-            ? `You captured ${photosCount} photo${photosCount > 1 ? "s" : ""} along the way.`
-            : ""
-        }`.trim()
-      : "No events found for this period yet. Add some memories to generate your story.";
+    // Generate story content using Claude API (or fallback)
+    const eventSummaries = events.map((e) => ({
+      title: e.title,
+      date: e.date.toISOString().split("T")[0],
+      location: e.location,
+      category: e.category,
+      description: e.description,
+      hasPhoto: !!e.imageUrl,
+    }));
 
-    const highlights = events.length > 0
-      ? events.slice(0, 5).map((e) => e.title)
-      : ["Add events to see your highlights here"];
+    const generated = await generateStory(eventSummaries, period, existing.title);
 
     const updated = await prisma.aIStory.update({
       where: { id },
       data: {
-        summary,
-        highlights,
+        title: generated.title,
+        summary: generated.summary,
+        highlights: generated.highlights,
         period,
         stats: {
           events: events.length,

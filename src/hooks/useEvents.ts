@@ -1,5 +1,6 @@
 import useSWR from "swr";
 import { useSession } from "next-auth/react";
+import { useCallback, useState } from "react";
 import { demoEvents, TimelineEvent } from "@/data/demo";
 
 const fetcher = (url: string) =>
@@ -18,18 +19,50 @@ export function useEvents(limit = 50) {
     dedupingInterval: 5000,
   });
 
-  const events = data?.events || [];
-  // Only show demo data for unauthenticated users. Authenticated users with zero events
-  // should see the empty state, not demo data (to avoid confusion).
+  const [extraEvents, setExtraEvents] = useState<TimelineEvent[]>([]);
+  const [extraCursor, setExtraCursor] = useState<string | undefined>();
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const events = [...(data?.events || []), ...extraEvents];
+  const nextCursor = extraCursor !== undefined ? extraCursor : data?.nextCursor;
   const isShowingDemo = isReady && !isAuthenticated;
   const displayEvents = isShowingDemo ? demoEvents : events;
 
+  const loadMore = useCallback(async () => {
+    if (!nextCursor || loadingMore || isShowingDemo) return;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(`/api/events?limit=${limit}&cursor=${nextCursor}`);
+      if (res.ok) {
+        const result = await res.json();
+        if (result?.events) {
+          setExtraEvents((prev) => [...prev, ...result.events]);
+          setExtraCursor(result.nextCursor || undefined);
+        }
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [nextCursor, loadingMore, isShowingDemo, limit]);
+
+  // Reset extra pages when base data changes
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const resetMutate = useCallback((...args: any[]) => {
+    setExtraEvents([]);
+    setExtraCursor(undefined);
+    return mutate(...(args as Parameters<typeof mutate>));
+  }, [mutate]);
+
   return {
     events: displayEvents,
-    nextCursor: data?.nextCursor,
+    nextCursor,
     isLoading: !isReady || (isAuthenticated && isLoading),
+    loadingMore,
     isShowingDemo,
     error,
-    mutate,
+    mutate: resetMutate,
+    loadMore,
   };
 }

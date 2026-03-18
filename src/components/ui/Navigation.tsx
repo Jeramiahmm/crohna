@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Home, Clock, BarChart3, Map, Settings, Search, Sun, Moon, X } from "lucide-react";
 import { NavBar } from "./tubelight-navbar";
@@ -66,10 +66,34 @@ function SearchButton() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const dispatchSearch = useCallback((q: string) => {
-    window.dispatchEvent(new CustomEvent("chrono:search", { detail: { query: q } }));
-  }, []);
+  // Sync local query state with URL on mount
+  useEffect(() => {
+    const urlQuery = searchParams.get("q") || "";
+    if (urlQuery) {
+      setQuery(urlQuery);
+      setOpen(true);
+    }
+  }, [searchParams]);
+
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  const updateSearchParam = useCallback((q: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (q) {
+        params.set("q", q);
+      } else {
+        params.delete("q");
+      }
+      const paramStr = params.toString();
+      router.replace(`${pathname}${paramStr ? `?${paramStr}` : ""}`, { scroll: false });
+    }, 300);
+  }, [router, pathname, searchParams]);
 
   useEffect(() => {
     if (open && inputRef.current) inputRef.current.focus();
@@ -82,14 +106,14 @@ function SearchButton() {
       if (!target.closest("[data-search-bar]")) {
         setOpen(false);
         setQuery("");
-        dispatchSearch("");
+        updateSearchParam("");
       }
     };
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setOpen(false);
         setQuery("");
-        dispatchSearch("");
+        updateSearchParam("");
       }
     };
     window.addEventListener("keydown", handleEsc);
@@ -98,7 +122,7 @@ function SearchButton() {
       window.removeEventListener("keydown", handleEsc);
       window.removeEventListener("click", handleClickOutside, { capture: true });
     };
-  }, [open, dispatchSearch]);
+  }, [open, updateSearchParam]);
 
   return (
     <>
@@ -130,7 +154,7 @@ function SearchButton() {
                   value={query}
                   onChange={(e) => {
                     setQuery(e.target.value);
-                    dispatchSearch(e.target.value);
+                    updateSearchParam(e.target.value);
                   }}
                   placeholder="Search memories..."
                   className="flex-1 bg-transparent text-sm text-chrono-text placeholder:text-chrono-muted outline-none font-body font-light"
@@ -139,7 +163,7 @@ function SearchButton() {
                   onClick={() => {
                     setOpen(false);
                     setQuery("");
-                    dispatchSearch("");
+                    updateSearchParam("");
                   }}
                   className="text-chrono-muted hover:text-chrono-text transition-colors"
                 >

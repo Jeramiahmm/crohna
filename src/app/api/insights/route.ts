@@ -19,63 +19,67 @@ export async function GET() {
       return NextResponse.json({ stats: null });
     }
 
-    const baseWhere = { userId: user.id, deletedAt: null };
-
-    // Use database aggregation instead of loading all events into memory
-    const [totalEvents, photosCount, categoryGroups, locationGroups] = await Promise.all([
-      prisma.event.count({ where: baseWhere }),
-      prisma.event.count({ where: { ...baseWhere, imageUrl: { not: null } } }),
-      prisma.event.groupBy({
-        by: ["category"],
-        where: baseWhere,
-        _count: { id: true },
-        orderBy: { _count: { id: "desc" } },
-      }),
-      prisma.event.groupBy({
-        by: ["location"],
-        where: { ...baseWhere, location: { not: null } },
-        _count: { id: true },
-        orderBy: { _count: { id: "desc" } },
-      }),
-    ]);
+    // Check if user has any events first (cheap count query)
+    const totalEvents = await prisma.event.count({
+      where: { userId: user.id, deletedAt: null },
+    });
 
     if (totalEvents === 0) {
       return NextResponse.json({ stats: null });
     }
 
-    // Fetch only dates for streak calculation and yearly aggregation (select minimal data)
-    const eventDates = await prisma.event.findMany({
-      where: baseWhere,
-      select: { date: true },
-      orderBy: { date: "desc" },
-    });
+    // Use groupBy to push aggregation to the database instead of loading all events into memory
+    const [categoryGroups, locationGroups, photosCount, datesList] = await Promise.all([
+      prisma.event.groupBy({
+        by: ["category"],
+        where: { userId: user.id, deletedAt: null },
+        _count: { id: true },
+      }),
+      prisma.event.groupBy({
+        by: ["location"],
+        where: { userId: user.id, deletedAt: null, location: { not: null } },
+        _count: { id: true },
+      }),
+      prisma.event.count({
+        where: { userId: user.id, deletedAt: null, imageUrl: { not: null } },
+      }),
+      // We still need dates for streak calculation and year grouping,
+      // but only select the date column (much lighter than full rows)
+      prisma.event.findMany({
+        where: { userId: user.id, deletedAt: null },
+        select: { date: true },
+        orderBy: { date: "desc" },
+      }),
+    ]);
 
-    // Build yearly aggregation from dates
+    // Build year map from lightweight date-only query
     const yearMap: Record<number, number> = {};
     const allDates: Date[] = [];
-    for (const e of eventDates) {
+    for (const e of datesList) {
       const year = e.date.getFullYear();
       yearMap[year] = (yearMap[year] || 0) + 1;
       allDates.push(e.date);
     }
 
-    const categories = categoryGroups.map((g) => {
-      const name = g.category || "uncategorized";
-      return {
-        name: name.charAt(0).toUpperCase() + name.slice(1),
+    type GroupByCategory = { category: string | null; _count: { id: number } };
+    type GroupByLocation = { location: string | null; _count: { id: number } };
+
+    const categories = (categoryGroups as GroupByCategory[])
+      .map((g) => ({
+        name: (g.category || "uncategorized").charAt(0).toUpperCase() + (g.category || "uncategorized").slice(1),
         count: g._count.id,
         color: "rgba(255,255,255,0.7)",
-      };
-    });
+      }))
+      .sort((a, b) => b.count - a.count);
 
     const yearlyEvents = Object.entries(yearMap)
       .map(([year, count]) => ({ year: Number(year), count }))
       .sort((a, b) => a.year - b.year);
 
-    const cityVisits = locationGroups.map((g) => ({
-      city: g.location!,
-      count: g._count.id,
-    }));
+    const cityVisits = (locationGroups as GroupByLocation[])
+      .filter((g) => g.location !== null)
+      .map((g) => ({ city: g.location!, count: g._count.id }))
+      .sort((a, b) => b.count - a.count);
 
     const mostActiveYear = yearlyEvents.reduce(
       (a, b) => (b.count > a.count ? b : a),
@@ -115,6 +119,7 @@ function calculateLongestStreak(dates: Date[]): string {
       (sorted[i].getTime() - sorted[i - 1].getTime()) / dayMs
     );
     if (diffDays <= 7) {
+      // Events within a week count as part of the same "active streak"
       currentStreak++;
     } else {
       maxStreak = Math.max(maxStreak, currentStreak);
