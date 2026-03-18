@@ -1,33 +1,41 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import ShimmerButton from "./shimmer-button";
 import { CATEGORIES } from "@/lib/constants";
+import { useImageUpload } from "@/hooks/useImageUpload";
 
 export default function AddMemoryButton() {
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [dragOver, setDragOver] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     title: "",
     date: "",
     location: "",
     category: "",
     description: "",
-    imageUrl: "",
   });
 
+  const {
+    imagePreviewUrl,
+    dragOver,
+    fileInputRef,
+    handleDrop,
+    handleFileSelect,
+    setDragOver,
+    resetImage,
+    uploadImage,
+  } = useImageUpload();
+
   const resetForm = () => {
-    setForm({ title: "", date: "", location: "", category: "", description: "", imageUrl: "" });
-    setImageFile(null);
+    setForm({ title: "", date: "", location: "", category: "", description: "" });
+    resetImage();
     setErrors({});
   };
 
@@ -47,20 +55,14 @@ export default function AddMemoryButton() {
 
     setSaving(true);
     try {
-      let uploadedImageUrl = form.imageUrl || undefined;
-
-      if (imageFile) {
-        const uploadForm = new FormData();
-        uploadForm.append("file", imageFile);
-        const uploadRes = await fetch("/api/upload", { method: "POST", body: uploadForm });
-        if (!uploadRes.ok) {
-          const data = await uploadRes.json();
-          setErrors({ title: data.error || "Image upload failed" });
-          setSaving(false);
-          return;
-        }
-        const { url } = await uploadRes.json();
-        uploadedImageUrl = url;
+      let uploadedImageUrl: string | undefined;
+      try {
+        const url = await uploadImage();
+        uploadedImageUrl = url || undefined;
+      } catch (err) {
+        setErrors({ title: err instanceof Error ? err.message : "Image upload failed" });
+        setSaving(false);
+        return;
       }
 
       const res = await fetch("/api/events", {
@@ -80,7 +82,6 @@ export default function AddMemoryButton() {
         setOpen(false);
         resetForm();
         router.refresh();
-        // If on timeline page, trigger a re-fetch by dispatching a custom event
         window.dispatchEvent(new CustomEvent("chrono:event-created"));
       } else {
         const data = await res.json();
@@ -93,53 +94,16 @@ export default function AddMemoryButton() {
     }
   };
 
-  // Revoke blob URLs on cleanup to prevent memory leaks
-  useEffect(() => {
-    return () => {
-      if (form.imageUrl && form.imageUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(form.imageUrl);
-      }
-    };
-  }, [form.imageUrl]);
-
   // Escape key to close modal
   useEffect(() => {
     if (!open) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setOpen(false);
-        resetForm();
-      }
+      if (e.key === "Escape") handleClose();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith("image/")) {
-      if (form.imageUrl && form.imageUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(form.imageUrl);
-      }
-      const url = URL.createObjectURL(file);
-      setForm((f) => ({ ...f, imageUrl: url }));
-      setImageFile(file);
-    }
-  }, [form.imageUrl]);
-
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type.startsWith("image/")) {
-      if (form.imageUrl && form.imageUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(form.imageUrl);
-      }
-      const url = URL.createObjectURL(file);
-      setForm((f) => ({ ...f, imageUrl: url }));
-      setImageFile(file);
-    }
-  }, [form.imageUrl]);
 
   if (!session) return null;
 
@@ -282,15 +246,15 @@ export default function AddMemoryButton() {
                     className={`relative h-32 border-2 border-dashed transition-all cursor-pointer overflow-hidden rounded-lg ${
                       dragOver
                         ? "border-[var(--line-hover)] bg-[var(--muted)]"
-                        : form.imageUrl
+                        : imagePreviewUrl
                         ? "border-[var(--line)]"
                         : "border-[var(--line-strong)] hover:border-[var(--line-hover)] bg-[var(--card-bg)]"
                     }`}
                   >
-                    {form.imageUrl ? (
+                    {imagePreviewUrl ? (
                       <div className="relative w-full h-full group">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={form.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                        <img src={imagePreviewUrl} alt="Preview" className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <span className="text-sm text-white">Change photo</span>
                         </div>

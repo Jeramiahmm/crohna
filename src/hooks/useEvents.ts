@@ -19,7 +19,9 @@ export function useEvents(limit = 50) {
   });
 
   const events = data?.events || [];
-  const isShowingDemo = isReady && (!isAuthenticated || (!isLoading && events.length === 0));
+  // Only show demo data for unauthenticated users. Authenticated users with zero events
+  // should see the empty state, not demo data (to avoid confusion).
+  const isShowingDemo = isReady && !isAuthenticated;
   const displayEvents = isShowingDemo ? demoEvents : events;
 
   return {

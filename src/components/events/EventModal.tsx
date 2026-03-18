@@ -1,10 +1,12 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { TimelineEvent } from "@/data/demo";
 import { CATEGORIES } from "@/lib/constants";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useImageUpload } from "@/hooks/useImageUpload";
+import { useRef } from "react";
 
 const chapters = [
   "College Years",
@@ -29,22 +31,30 @@ const EMPTY_FORM = {
   location: "",
   description: "",
   category: "",
-  imageUrl: "",
   chapter: "",
 };
 
 export default function EventModal({ isOpen, onClose, onSave, event, onDelete }: EventModalProps) {
   const isEditing = !!event;
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(modalRef, isOpen);
 
   const [form, setForm] = useState(EMPTY_FORM);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [dragOver, setDragOver] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const {
+    imagePreviewUrl,
+    dragOver,
+    fileInputRef,
+    handleDrop,
+    handleFileSelect,
+    setDragOver,
+    resetImage,
+    setImagePreviewUrl,
+    uploadImage,
+  } = useImageUpload();
 
   // Reset form when modal opens or event changes
   useEffect(() => {
@@ -55,14 +65,18 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
         location: event?.location || "",
         description: event?.description || "",
         category: event?.category || "",
-        imageUrl: event?.imageUrl || "",
         chapter: event?.chapter || "",
       });
+      if (event?.imageUrl) {
+        setImagePreviewUrl(event.imageUrl);
+      } else {
+        resetImage();
+      }
       setErrors({});
       setShowSuccess(false);
       setSaving(false);
-      setImageFile(null);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, event]);
 
   const validate = useCallback(() => {
@@ -81,26 +95,15 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
     setErrors({});
     setSaving(true);
 
-    let finalImageUrl = form.imageUrl;
+    let finalImageUrl = imagePreviewUrl;
 
-    if (imageFile) {
-      const uploadForm = new FormData();
-      uploadForm.append("file", imageFile);
-      try {
-        const uploadRes = await fetch("/api/upload", { method: "POST", body: uploadForm });
-        if (!uploadRes.ok) {
-          const data = await uploadRes.json();
-          setErrors({ title: data.error || "Image upload failed" });
-          setSaving(false);
-          return;
-        }
-        const { url } = await uploadRes.json();
-        finalImageUrl = url;
-      } catch {
-        setErrors({ title: "Image upload failed" });
-        setSaving(false);
-        return;
-      }
+    try {
+      const url = await uploadImage();
+      if (url) finalImageUrl = url;
+    } catch (err) {
+      setErrors({ title: err instanceof Error ? err.message : "Image upload failed" });
+      setSaving(false);
+      return;
     }
 
     onSave({
@@ -116,16 +119,7 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
       onClose();
     }, 1200);
     setSaving(false);
-  }, [form, event, validate, onSave, onClose, imageFile]);
-
-  // Revoke blob URLs on cleanup to prevent memory leaks
-  useEffect(() => {
-    return () => {
-      if (form.imageUrl && form.imageUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(form.imageUrl);
-      }
-    };
-  }, [form.imageUrl]);
+  }, [form, event, validate, onSave, onClose, imagePreviewUrl, uploadImage]);
 
   // Escape key to close modal
   useEffect(() => {
@@ -136,32 +130,6 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith("image/")) {
-      if (form.imageUrl && form.imageUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(form.imageUrl);
-      }
-      const url = URL.createObjectURL(file);
-      setForm((f) => ({ ...f, imageUrl: url }));
-      setImageFile(file);
-    }
-  }, [form.imageUrl]);
-
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type.startsWith("image/")) {
-      if (form.imageUrl && form.imageUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(form.imageUrl);
-      }
-      const url = URL.createObjectURL(file);
-      setForm((f) => ({ ...f, imageUrl: url }));
-      setImageFile(file);
-    }
-  }, [form.imageUrl]);
 
   return (
     <AnimatePresence>
@@ -239,15 +207,15 @@ export default function EventModal({ isOpen, onClose, onSave, event, onDelete }:
                   className={`relative h-40 border-2 border-dashed transition-all cursor-pointer overflow-hidden ${
                     dragOver
                       ? "border-[var(--line-hover)] bg-[var(--muted)]"
-                      : form.imageUrl
+                      : imagePreviewUrl
                       ? "border-[var(--line-strong)]"
                       : "border-[var(--line-strong)] hover:border-[var(--line-hover)] bg-[var(--card-bg)]"
                   }`}
                 >
-                  {form.imageUrl ? (
+                  {imagePreviewUrl ? (
                     <div className="relative w-full h-full group">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={form.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                      <img src={imagePreviewUrl} alt="Preview" className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <span className="text-sm text-white">Change photo</span>
                       </div>

@@ -3,8 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
 
-// GET /api/stories — returns all AI-generated stories for the authenticated user
-export async function GET() {
+// GET /api/stories — returns AI-generated stories for the authenticated user with cursor-based pagination
+export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -20,13 +20,23 @@ export async function GET() {
       return NextResponse.json({ stories: [], total: 0 });
     }
 
+    const { searchParams } = new URL(req.url);
+    const cursor = searchParams.get("cursor");
+    const limitParam = searchParams.get("limit");
+    const limit = Math.min(Math.max(parseInt(limitParam || "50", 10) || 50, 1), 100);
+
     const dbStories = await prisma.aIStory.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
-      take: 100,
+      take: limit + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
     });
 
-    const stories = dbStories.map((s) => ({
+    const hasMore = dbStories.length > limit;
+    const sliced = hasMore ? dbStories.slice(0, limit) : dbStories;
+    const nextCursor = hasMore ? sliced[sliced.length - 1].id : undefined;
+
+    const stories = sliced.map((s) => ({
       id: s.id,
       title: s.title,
       period: s.period,
@@ -36,7 +46,7 @@ export async function GET() {
       stats: (s.stats as Record<string, string | number>) ?? undefined,
     }));
 
-    return NextResponse.json({ stories, total: stories.length });
+    return NextResponse.json({ stories, total: stories.length, nextCursor });
   } catch (error) {
     console.error("GET /api/stories error:", error);
     return NextResponse.json({ error: "Failed to fetch stories" }, { status: 500 });

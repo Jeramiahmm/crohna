@@ -64,6 +64,7 @@ model Event {
   description String?   @db.VarChar(5000)
   category    String?   @db.VarChar(50)
   source      String    @default("manual") @db.VarChar(50)
+  sourceId    String?   @db.VarChar(500)
   deletedAt   DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -74,6 +75,7 @@ model Event {
   @@index([userId, category])
   @@index([userId, source])
   @@index([userId, deletedAt])
+  @@index([userId, sourceId])
 }
 
 model AIStory {
