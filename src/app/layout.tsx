@@ -8,6 +8,7 @@ import ScrollProgressBar from "@/components/ui/ScrollProgressBar";
 import ThemeProvider from "@/components/ui/ThemeProvider";
 import SessionProvider from "@/components/providers/SessionProvider";
 import AddMemoryButton from "@/components/ui/AddMemoryButton";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -47,6 +48,7 @@ export default function RootLayout({
             </ErrorBoundary>
           </ThemeProvider>
         </SessionProvider>
+        <Analytics />
       </body>
     </html>
   );
