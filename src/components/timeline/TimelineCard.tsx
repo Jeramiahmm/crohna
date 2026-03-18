@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { TimelineEvent } from "@/data/demo";
-import { formatDate, getSeason } from "@/lib/utils";
+import { formatDate, getSeason, resolveImageUrl } from "@/lib/utils";
 
 interface TimelineCardProps {
   event: TimelineEvent;
@@ -29,7 +29,7 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
         {event.imageUrl && (
           <div className="relative h-40 sm:h-52 md:h-60 overflow-hidden">
             <Image
-              src={event.imageUrl}
+              src={resolveImageUrl(event.imageUrl) || event.imageUrl}
               alt={event.title}
               fill
               className="object-cover archival-img transition-transform duration-700 group-hover:scale-105"

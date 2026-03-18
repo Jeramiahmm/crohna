@@ -55,6 +55,12 @@ export async function PUT(req: NextRequest) {
     if (preferences !== undefined && (typeof preferences !== "object" || preferences === null)) {
       return NextResponse.json({ error: "Invalid preferences format" }, { status: 400 });
     }
+    if (preferences !== undefined) {
+      const prefSize = JSON.stringify(preferences).length;
+      if (prefSize > 10_000) {
+        return NextResponse.json({ error: "Preferences too large (max 10KB)" }, { status: 400 });
+      }
+    }
 
     const user = await prisma.user.update({
       where: { email: session.user.email },

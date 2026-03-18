@@ -79,15 +79,20 @@ function SearchButton() {
     }
   }, [searchParams]);
 
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
   const updateSearchParam = useCallback((q: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (q) {
-      params.set("q", q);
-    } else {
-      params.delete("q");
-    }
-    const paramStr = params.toString();
-    router.replace(`${pathname}${paramStr ? `?${paramStr}` : ""}`, { scroll: false });
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (q) {
+        params.set("q", q);
+      } else {
+        params.delete("q");
+      }
+      const paramStr = params.toString();
+      router.replace(`${pathname}${paramStr ? `?${paramStr}` : ""}`, { scroll: false });
+    }, 300);
   }, [router, pathname, searchParams]);
 
   useEffect(() => {

@@ -38,6 +38,18 @@ export function getCategoryColor(category?: string): string {
   }
 }
 
+/**
+ * Resolve image URLs, converting gphotos:// placeholders to proxy URLs.
+ */
+export function resolveImageUrl(url?: string): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith("gphotos://")) {
+    const mediaItemId = url.slice("gphotos://".length);
+    return `/api/google/photos/proxy?id=${encodeURIComponent(mediaItemId)}`;
+  }
+  return url;
+}
+
 export function getSeason(dateStr: string): string {
   const month = new Date(dateStr).getMonth();
   if (month >= 2 && month <= 4) return "Spring";

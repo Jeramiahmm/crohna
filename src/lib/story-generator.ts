@@ -59,7 +59,7 @@ export async function generateStory(
   }
 
   try {
-    const client = new Anthropic();
+    const client = new Anthropic({ timeout: 15_000 });
     const context = buildEventsContext(events, period);
 
     const message = await client.messages.create({

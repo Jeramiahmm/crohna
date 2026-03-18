@@ -3,6 +3,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
 import { generateStory } from "@/lib/story-generator";
+import { createRateLimiter } from "@/lib/rate-limit";
+
+const checkStoryLimit = createRateLimiter("stories", 5, 60_000);
 
 // GET /api/stories — returns AI-generated stories with cursor-based pagination
 export async function GET(req: NextRequest) {
@@ -61,6 +64,13 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!(await checkStoryLimit(session.user.email)).allowed) {
+      return NextResponse.json(
+        { error: "Too many story requests. Please wait a minute." },
+        { status: 429 }
+      );
     }
 
     const prisma = getPrisma();

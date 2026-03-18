@@ -39,6 +39,12 @@ function createMemoryLimiter(namespace: string, maxRequests: number, windowMs: n
     const now = Date.now();
     const entry = store.get(userId);
     if (!entry || now > entry.resetAt) {
+      // Clean up expired entries periodically to prevent memory leak
+      if (store.size > 1000) {
+        for (const [key, val] of store) {
+          if (now > val.resetAt) store.delete(key);
+        }
+      }
       store.set(userId, { count: 1, resetAt: now + windowMs });
       return { allowed: true };
     }
@@ -53,6 +59,12 @@ function createMemoryLimiter(namespace: string, maxRequests: number, windowMs: n
 function createLimiter(namespace: string, maxRequests: number, windowMs: number) {
   if (hasUpstash) {
     return createUpstashLimiter(namespace, maxRequests, windowMs);
+  }
+  if (process.env.NODE_ENV === "production") {
+    console.warn(
+      `[Crohna] Warning: Rate limiter "${namespace}" using in-memory fallback in production. ` +
+      "This does not work across serverless instances. Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN."
+    );
   }
   // Wrap sync fallback to match async interface
   const syncCheck = createMemoryLimiter(namespace, maxRequests, windowMs);

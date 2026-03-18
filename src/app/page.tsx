@@ -270,6 +270,7 @@ function PlayYourStorySection({ events }: { events?: TimelineEvent[] }) {
   const [currentEventIndex, setCurrentEventIndex] = useState(-1);
   const [showEvent, setShowEvent] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const innerTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const source = events && events.length > 0 ? events : demoEvents;
   const eventsByYear = getEventsByYear(source);
@@ -277,6 +278,7 @@ function PlayYourStorySection({ events }: { events?: TimelineEvent[] }) {
 
   const cleanup = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
+    if (innerTimerRef.current) clearTimeout(innerTimerRef.current);
   }, []);
 
   const play = useCallback(() => {
@@ -315,24 +317,26 @@ function PlayYourStorySection({ events }: { events?: TimelineEvent[] }) {
     if (currentEventIndex < yearEvents.length - 1) {
       const t = setTimeout(() => {
         setShowEvent(false);
-        setTimeout(() => {
+        const inner = setTimeout(() => {
           setCurrentEventIndex((prev) => prev + 1);
           setShowEvent(true);
         }, 200);
+        innerTimerRef.current = inner;
       }, 1200);
       timerRef.current = t;
-      return () => clearTimeout(t);
+      return () => { clearTimeout(t); if (innerTimerRef.current) clearTimeout(innerTimerRef.current); };
     }
 
     const t = setTimeout(() => {
       setShowEvent(false);
-      setTimeout(() => {
+      const inner = setTimeout(() => {
         setCurrentYearIndex((prev) => prev + 1);
         setCurrentEventIndex(-1);
       }, 300);
+      innerTimerRef.current = inner;
     }, 1200);
     timerRef.current = t;
-    return () => clearTimeout(t);
+    return () => { clearTimeout(t); if (innerTimerRef.current) clearTimeout(innerTimerRef.current); };
   }, [isPlaying, currentYearIndex, currentEventIndex, years, eventsByYear]);
 
   useEffect(() => cleanup, [cleanup]);

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TimelineEvent } from "@/data/demo";
-import { formatDate } from "@/lib/utils";
+import { formatDate, resolveImageUrl, getCategoryColor } from "@/lib/utils";
 import Image from "next/image";
 
 function escapeHtml(str: string): string {
@@ -38,13 +38,18 @@ export default function EventMap({ events }: EventMapProps) {
     [events]
   );
 
-  // Derive legend from actual event categories
+  // Derive legend from actual event categories with distinct colors
   const legendCategories = useMemo(() => {
-    const cats = new Set<string>();
+    const catMap = new Map<string, string>();
     eventsWithCoords.forEach((e) => {
-      if (e.category) cats.add(e.category.charAt(0).toUpperCase() + e.category.slice(1));
+      if (e.category && !catMap.has(e.category)) {
+        catMap.set(e.category, getCategoryColor(e.category));
+      }
     });
-    return Array.from(cats);
+    return Array.from(catMap.entries()).map(([name, color]) => ({
+      label: name.charAt(0).toUpperCase() + name.slice(1),
+      color,
+    }));
   }, [eventsWithCoords]);
 
   // Effect 1: Load Leaflet scripts and initialize map (runs once)
@@ -249,7 +254,7 @@ export default function EventMap({ events }: EventMapProps) {
             {selectedEvent.imageUrl && (
               <div className="relative h-40">
                 <Image
-                  src={selectedEvent.imageUrl}
+                  src={resolveImageUrl(selectedEvent.imageUrl) || selectedEvent.imageUrl}
                   alt={selectedEvent.title}
                   fill
                   className="object-cover archival-img"
@@ -296,11 +301,11 @@ export default function EventMap({ events }: EventMapProps) {
         <div className="absolute bottom-4 left-4 glass px-4 py-3 z-20">
           <div className="section-label mb-2">Legend</div>
           <div className="flex flex-wrap gap-3">
-            {legendCategories.map((label) => (
-              <div key={label} className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-chrono-accent" />
+            {legendCategories.map((cat) => (
+              <div key={cat.label} className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }} />
                 <span className="text-[11px] font-body font-extralight text-chrono-muted">
-                  {label}
+                  {cat.label}
                 </span>
               </div>
             ))}

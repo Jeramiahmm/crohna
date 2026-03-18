@@ -2,14 +2,16 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export default function LoadingScreen() {
   const [visible, setVisible] = useState(true);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    const timer = setTimeout(() => setVisible(false), 800);
+    const timer = setTimeout(() => setVisible(false), reducedMotion ? 100 : 800);
     return () => clearTimeout(timer);
-  }, []);
+  }, [reducedMotion]);
 
   return (
     <AnimatePresence>
@@ -17,7 +19,7 @@ export default function LoadingScreen() {
         <motion.div
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
+          transition={{ duration: reducedMotion ? 0 : 0.5, ease: "easeInOut" }}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-chrono-bg"
         >
           <div className="flex flex-col items-center gap-4">
