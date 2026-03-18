@@ -41,9 +41,9 @@ function createMemoryLimiter(namespace: string, maxRequests: number, windowMs: n
     if (!entry || now > entry.resetAt) {
       // Clean up expired entries periodically to prevent memory leak
       if (store.size > 1000) {
-        for (const [key, val] of store) {
+        store.forEach((val, key) => {
           if (now > val.resetAt) store.delete(key);
-        }
+        });
       }
       store.set(userId, { count: 1, resetAt: now + windowMs });
       return { allowed: true };

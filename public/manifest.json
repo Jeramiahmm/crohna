@@ -1,16 +1,60 @@
 {
-  "name": "Crohna",
+  "name": "Crohna — Your Life, Beautifully Mapped",
   "short_name": "Crohna",
-  "description": "A digital life timeline — your memories, beautifully mapped",
-  "start_url": "/",
+  "description": "A digital life timeline — your memories, milestones, and places beautifully mapped.",
+  "start_url": "/timeline",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#050505",
   "theme_color": "#050505",
+  "categories": ["lifestyle", "productivity", "social"],
   "icons": [
     {
       "src": "/favicon.ico",
       "sizes": "48x48",
       "type": "image/x-icon"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Timeline",
+      "url": "/timeline",
+      "description": "View your life timeline"
+    },
+    {
+      "name": "Map",
+      "url": "/map",
+      "description": "See where your story happened"
+    },
+    {
+      "name": "Insights",
+      "url": "/insights",
+      "description": "Discover patterns in your life"
     }
   ]
 }

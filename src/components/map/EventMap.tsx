@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TimelineEvent } from "@/data/demo";
 import { formatDate, resolveImageUrl, getCategoryColor } from "@/lib/utils";
 import Image from "next/image";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 function escapeHtml(str: string): string {
   return str
@@ -21,17 +23,11 @@ interface EventMapProps {
 
 export default function EventMap({ events }: EventMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const leafletMap = useRef<any>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const markersRef = useRef<any[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const polylinesRef = useRef<any[]>([]);
-  const linkRef = useRef<HTMLLinkElement | null>(null);
-  const scriptRef = useRef<HTMLScriptElement | null>(null);
+  const leafletMap = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.Marker[]>([]);
+  const polylinesRef = useRef<L.Polyline[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [loadError, setLoadError] = useState(false);
 
   const eventsWithCoords = useMemo(
     () => events.filter((e) => e.latitude !== undefined && e.longitude !== undefined),
@@ -52,75 +48,38 @@ export default function EventMap({ events }: EventMapProps) {
     }));
   }, [eventsWithCoords]);
 
-  // Effect 1: Load Leaflet scripts and initialize map (runs once)
+  // Initialize map (runs once)
   useEffect(() => {
     if (!mapRef.current || leafletMap.current) return;
 
-    // Check if Leaflet is already loaded
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((window as any).L) {
-      initMap();
-      return;
-    }
+    const map = L.map(mapRef.current, {
+      center: [39.5, -98.0],
+      zoom: 4,
+      zoomControl: false,
+      attributionControl: false,
+    });
 
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-    document.head.appendChild(link);
-    linkRef.current = link;
+    L.control.zoom({ position: "bottomright" }).addTo(map);
 
-    const script = document.createElement("script");
-    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-    script.onload = () => initMap();
-    script.onerror = () => setLoadError(true);
-    document.head.appendChild(script);
-    scriptRef.current = script;
+    L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+      { maxZoom: 19, subdomains: "abcd" }
+    ).addTo(map);
 
-    function initMap() {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const L = (window as any).L;
-      if (!L || !mapRef.current) return;
-
-      const map = L.map(mapRef.current, {
-        center: [39.5, -98.0],
-        zoom: 4,
-        zoomControl: false,
-        attributionControl: false,
-      });
-
-      L.control.zoom({ position: "bottomright" }).addTo(map);
-
-      L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-        { maxZoom: 19, subdomains: "abcd" }
-      ).addTo(map);
-
-      leafletMap.current = map;
-      setMapLoaded(true);
-    }
+    leafletMap.current = map;
+    setMapLoaded(true);
 
     return () => {
       if (leafletMap.current) {
         leafletMap.current.remove();
         leafletMap.current = null;
       }
-      if (linkRef.current) {
-        linkRef.current.remove();
-        linkRef.current = null;
-      }
-      if (scriptRef.current) {
-        scriptRef.current.remove();
-        scriptRef.current = null;
-      }
     };
   }, []);
 
-  // Effect 2: Manage markers when events change (runs whenever events or mapLoaded changes)
+  // Manage markers when events change
   useEffect(() => {
     if (!mapLoaded || !leafletMap.current) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const L = (window as any).L;
-    if (!L) return;
     const map = leafletMap.current;
 
     // Clear existing markers and polylines
@@ -190,7 +149,7 @@ export default function EventMap({ events }: EventMapProps) {
 
     // Add polylines connecting markers
     if (eventsWithCoords.length > 1) {
-      const latlngs = eventsWithCoords.map((e) => [e.latitude!, e.longitude!]);
+      const latlngs: L.LatLngExpression[] = eventsWithCoords.map((e) => [e.latitude!, e.longitude!]);
       const polyline = L.polyline(latlngs, {
         color: "rgba(255,255,255,0.1)",
         weight: 1,
@@ -201,7 +160,7 @@ export default function EventMap({ events }: EventMapProps) {
 
     // Auto-fit map to event bounds
     if (eventsWithCoords.length > 0) {
-      const latlngs = eventsWithCoords.map((e) => [e.latitude!, e.longitude!]);
+      const latlngs: L.LatLngExpression[] = eventsWithCoords.map((e) => [e.latitude!, e.longitude!]);
       const bounds = L.latLngBounds(latlngs);
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
     }
@@ -210,20 +169,6 @@ export default function EventMap({ events }: EventMapProps) {
   return (
     <div className="relative w-full h-full min-h-[360px] md:min-h-[700px] bg-chrono-surface overflow-hidden border border-[var(--line-strong)]">
       <div ref={mapRef} className="absolute inset-0 z-0" />
-
-      {loadError && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-chrono-surface">
-          <div className="text-center px-6">
-            <svg className="w-10 h-10 mx-auto mb-4 text-chrono-muted/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
-            </svg>
-            <p className="text-sm font-body font-light text-chrono-muted mb-2">Failed to load map</p>
-            <p className="text-xs font-body font-extralight text-chrono-muted/60">
-              Please check your connection and refresh the page
-            </p>
-          </div>
-        </div>
-      )}
 
       {mapLoaded && eventsWithCoords.length === 0 && (
         <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
@@ -234,7 +179,7 @@ export default function EventMap({ events }: EventMapProps) {
         </div>
       )}
 
-      {!mapLoaded && !loadError && (
+      {!mapLoaded && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-chrono-surface">
           <div className="text-sm font-body font-extralight text-chrono-muted animate-pulse">
             Loading map...

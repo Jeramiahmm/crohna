@@ -61,7 +61,10 @@ export async function GET() {
       allDates.push(e.date);
     }
 
-    const categories = categoryGroups
+    type GroupByCategory = { category: string | null; _count: { id: number } };
+    type GroupByLocation = { location: string | null; _count: { id: number } };
+
+    const categories = (categoryGroups as GroupByCategory[])
       .map((g) => ({
         name: (g.category || "uncategorized").charAt(0).toUpperCase() + (g.category || "uncategorized").slice(1),
         count: g._count.id,
@@ -73,7 +76,7 @@ export async function GET() {
       .map(([year, count]) => ({ year: Number(year), count }))
       .sort((a, b) => a.year - b.year);
 
-    const cityVisits = locationGroups
+    const cityVisits = (locationGroups as GroupByLocation[])
       .filter((g) => g.location !== null)
       .map((g) => ({ city: g.location!, count: g._count.id }))
       .sort((a, b) => b.count - a.count);

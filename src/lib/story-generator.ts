@@ -29,8 +29,8 @@ function buildEventsContext(events: EventSummary[], period: string): string {
     return parts.join(" ");
   });
 
-  const locations = [...new Set(events.map((e) => e.location).filter(Boolean))];
-  const categories = [...new Set(events.map((e) => e.category).filter(Boolean))];
+  const locations = Array.from(new Set(events.map((e) => e.location).filter(Boolean)));
+  const categories = Array.from(new Set(events.map((e) => e.category).filter(Boolean)));
   const photosCount = events.filter((e) => e.hasPhoto).length;
 
   return [
@@ -119,8 +119,8 @@ function generateTemplateFallback(
   period: string,
   existingTitle?: string
 ): GeneratedStory {
-  const locations = [...new Set(events.map((e) => e.location).filter(Boolean))];
-  const categories = [...new Set(events.map((e) => e.category).filter(Boolean))];
+  const locations = Array.from(new Set(events.map((e) => e.location).filter(Boolean)));
+  const categories = Array.from(new Set(events.map((e) => e.category).filter(Boolean)));
   const photosCount = events.filter((e) => e.hasPhoto).length;
 
   const title = existingTitle || `Your ${period}`;

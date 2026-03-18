@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
     const defaultTitle = year ? `Your ${year}` : `Your ${period || "Life Story"}`;
     const generated = await generateStory(eventSummaries, storyPeriod, defaultTitle);
 
-    const locations = [...new Set(events.map((e) => e.location).filter(Boolean))];
+    const locations = Array.from(new Set(events.map((e) => e.location).filter(Boolean)));
     const photosCount = events.filter((e) => e.imageUrl).length;
 
     const story = await prisma.aIStory.create({

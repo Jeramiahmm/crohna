@@ -126,31 +126,68 @@ export default function SettingsPage() {
     toast.success("Onboarding reset");
   };
 
-  const handleExportData = async () => {
+  const fetchExportData = async () => {
+    const [eventsRes, storiesRes] = await Promise.all([
+      fetch("/api/events"),
+      fetch("/api/stories"),
+    ]);
+    if (!eventsRes.ok || !storiesRes.ok) {
+      throw new Error("Failed to fetch data");
+    }
+    const eventsData = await eventsRes.json();
+    const storiesData = await storiesRes.json();
+    return {
+      events: eventsData.events || [],
+      stories: storiesData.stories || [],
+    };
+  };
+
+  const downloadFile = (content: string, filename: string, type: string) => {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportJSON = async () => {
     try {
-      const [eventsRes, storiesRes] = await Promise.all([
-        fetch("/api/events"),
-        fetch("/api/stories"),
-      ]);
-      if (!eventsRes.ok || !storiesRes.ok) {
-        toast.error("Failed to export data. Please try again.");
-        return;
-      }
-      const eventsData = await eventsRes.json();
-      const storiesData = await storiesRes.json();
-      const exportData = {
-        exportedAt: new Date().toISOString(),
-        events: eventsData.events || [],
-        stories: storiesData.stories || [],
-      };
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `crohna-export-${new Date().toISOString().split("T")[0]}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast.success("Data exported successfully");
+      const data = await fetchExportData();
+      const exportData = { exportedAt: new Date().toISOString(), ...data };
+      downloadFile(
+        JSON.stringify(exportData, null, 2),
+        `crohna-export-${new Date().toISOString().split("T")[0]}.json`,
+        "application/json"
+      );
+      toast.success("Data exported as JSON");
+    } catch {
+      toast.error("Failed to export data. Please try again.");
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const data = await fetchExportData();
+      const headers = ["id", "title", "date", "endDate", "location", "latitude", "longitude", "category", "source", "description"];
+      const rows = data.events.map((e: Record<string, unknown>) =>
+        headers.map((h) => {
+          const val = e[h];
+          if (val === undefined || val === null) return "";
+          const str = String(val);
+          return str.includes(",") || str.includes('"') || str.includes("\n")
+            ? `"${str.replace(/"/g, '""')}"`
+            : str;
+        }).join(",")
+      );
+      const csv = [headers.join(","), ...rows].join("\n");
+      downloadFile(
+        csv,
+        `crohna-events-${new Date().toISOString().split("T")[0]}.csv`,
+        "text/csv"
+      );
+      toast.success("Events exported as CSV");
     } catch {
       toast.error("Failed to export data. Please try again.");
     }
@@ -419,13 +456,21 @@ export default function SettingsPage() {
           >
             <h3 className="text-sm font-display font-light text-chrono-text mb-4">Data</h3>
             <div className="space-y-3">
-              <button
-                onClick={handleExportData}
-                className="text-sm font-body font-light text-chrono-muted hover:text-chrono-text transition-colors"
-              >
-                Export all data
-              </button>
-              <br />
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={handleExportJSON}
+                  className="text-sm font-body font-light text-chrono-muted hover:text-chrono-text transition-colors"
+                >
+                  Export as JSON
+                </button>
+                <span className="text-chrono-muted/30 text-xs">|</span>
+                <button
+                  onClick={handleExportCSV}
+                  className="text-sm font-body font-light text-chrono-muted hover:text-chrono-text transition-colors"
+                >
+                  Export as CSV
+                </button>
+              </div>
               <button
                 onClick={handleClearOnboarding}
                 className="text-sm font-body font-light text-chrono-muted hover:text-chrono-text transition-colors"
