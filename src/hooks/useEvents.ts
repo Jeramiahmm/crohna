@@ -48,11 +48,10 @@ export function useEvents(limit = 50) {
   }, [nextCursor, loadingMore, isShowingDemo, limit]);
 
   // Reset extra pages when base data changes
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const resetMutate = useCallback((...args: any[]) => {
+  const resetMutate = useCallback((...args: Parameters<typeof mutate>) => {
     setExtraEvents([]);
     setExtraCursor(undefined);
-    return mutate(...(args as Parameters<typeof mutate>));
+    return mutate(...args);
   }, [mutate]);
 
   return {

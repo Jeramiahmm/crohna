@@ -61,8 +61,12 @@ export async function POST(req: NextRequest) {
     };
 
     // Paginate through photos (cap at 500)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mediaItems: any[] = [];
+    const mediaItems: Array<{
+      id?: string;
+      baseUrl?: string;
+      description?: string;
+      mediaMetadata?: { creationTime?: string };
+    }> = [];
     let nextPageToken: string | undefined;
     const MAX_PHOTOS = 500;
 
@@ -103,16 +107,18 @@ export async function POST(req: NextRequest) {
       nextPageToken = photosData.nextPageToken;
     } while (nextPageToken && mediaItems.length < MAX_PHOTOS);
 
+    const capped = mediaItems.length >= MAX_PHOTOS;
+
     // Deduplicate and insert within a transaction to prevent race conditions
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const imported = await prisma.$transaction(async (tx: any) => {
+    const imported = await prisma.$transaction(async (tx) => {
       const existingPhotoEvents = await tx.event.findMany({
         where: { userId: user.id, source: "photos" },
         select: { imageUrl: true },
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const existingUrls = new Set(existingPhotoEvents.map((e: any) => e.imageUrl).filter(Boolean));
+      const existingUrls = new Set(
+        existingPhotoEvents.map((e: { imageUrl: string | null }) => e.imageUrl).filter(Boolean)
+      );
 
       const eventsToCreate: {
         userId: string;
@@ -158,7 +164,12 @@ export async function POST(req: NextRequest) {
       return eventsToCreate.length;
     });
 
-    return NextResponse.json({ success: true, imported, total: mediaItems.length });
+    return NextResponse.json({
+      success: true,
+      imported,
+      total: mediaItems.length,
+      ...(capped && { warning: `Import capped at ${MAX_PHOTOS} photos. Some older photos may not have been imported.` }),
+    });
   } catch (error) {
     console.error("POST /api/google/photos error:", error);
     return NextResponse.json({ error: "Failed to import photos" }, { status: 500 });

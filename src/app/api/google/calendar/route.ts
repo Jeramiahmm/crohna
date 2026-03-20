@@ -48,8 +48,14 @@ export async function POST(req: NextRequest) {
     const timeMax = new Date();
 
     // Paginate through all calendar events (cap at 500)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const items: any[] = [];
+    const items: Array<{
+      id?: string;
+      summary?: string;
+      description?: string;
+      location?: string;
+      start?: { dateTime?: string; date?: string };
+      end?: { dateTime?: string; date?: string };
+    }> = [];
     let pageToken: string | undefined;
     const MAX_ITEMS = 500;
 
@@ -83,9 +89,10 @@ export async function POST(req: NextRequest) {
       pageToken = calData.nextPageToken;
     } while (pageToken && items.length < MAX_ITEMS);
 
+    const capped = items.length >= MAX_ITEMS;
+
     // Deduplicate and insert within a transaction to prevent race conditions
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const imported = await prisma.$transaction(async (tx: any) => {
+    const imported = await prisma.$transaction(async (tx) => {
       const existingCalendarEvents = await tx.event.findMany({
         where: { userId: user.id, source: "calendar" },
         select: { sourceId: true },
@@ -146,7 +153,11 @@ export async function POST(req: NextRequest) {
       return eventsToCreate.length;
     });
 
-    return NextResponse.json({ success: true, imported });
+    return NextResponse.json({
+      success: true,
+      imported,
+      ...(capped && { warning: `Import capped at ${MAX_ITEMS} events. Some older events may not have been imported.` }),
+    });
   } catch (error) {
     console.error("POST /api/google/calendar error:", error);
     return NextResponse.json({ error: "Failed to import calendar events" }, { status: 500 });

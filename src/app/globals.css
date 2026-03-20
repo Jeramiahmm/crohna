@@ -11,12 +11,6 @@
   --chrono-text: #F0EBE1;
   --chrono-muted: rgba(240,235,225,0.45);
 
-  --background: #080808;
-  --foreground: #F0EBE1;
-  --primary: rgba(255,255,255,0.8);
-  --border: rgba(255,255,255,0.12);
-  --muted: rgba(255,255,255,0.06);
-
   /* Theme-aware accent for borders, dividers, subtle elements */
   --line: rgba(255,255,255,0.08);
   --line-strong: rgba(255,255,255,0.12);
@@ -34,12 +28,6 @@ html.light {
   --chrono-glow: rgba(0,0,0,0.15);
   --chrono-text: #1A1814;
   --chrono-muted: rgba(26,24,20,0.5);
-
-  --background: #F5F0E8;
-  --foreground: #1A1814;
-  --primary: rgba(0,0,0,0.8);
-  --border: rgba(0,0,0,0.12);
-  --muted: rgba(0,0,0,0.06);
 
   --line: rgba(0,0,0,0.08);
   --line-strong: rgba(0,0,0,0.12);

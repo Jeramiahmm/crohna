@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { TimelineEvent } from "@/data/demo";
@@ -12,7 +13,7 @@ interface TimelineCardProps {
   onEdit?: () => void;
 }
 
-export default function TimelineCard({ event, index, isLeft = false, onEdit }: TimelineCardProps) {
+export default memo(function TimelineCard({ event, index, isLeft = false, onEdit }: TimelineCardProps) {
   return (
     <motion.article
       aria-label={`${event.title} — ${event.date}`}
@@ -115,4 +116,4 @@ export default function TimelineCard({ event, index, isLeft = false, onEdit }: T
       </div>
     </motion.article>
   );
-}
+});

@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { motion } from "framer-motion";
 import { TimelineEvent } from "@/data/demo";
 import TimelineCard from "./TimelineCard";
@@ -10,7 +11,7 @@ interface YearSectionProps {
   onEditEvent?: (event: TimelineEvent) => void;
 }
 
-export default function YearSection({ year, events, onEditEvent }: YearSectionProps) {
+export default memo(function YearSection({ year, events, onEditEvent }: YearSectionProps) {
   return (
     <div className="relative">
       {/* Ghost watermark year */}
@@ -107,4 +108,4 @@ export default function YearSection({ year, events, onEditEvent }: YearSectionPr
       </div>
     </div>
   );
-}
+});
