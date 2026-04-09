@@ -226,7 +226,11 @@ export default function SettingsPage() {
     }
     setAccountDeleting(true);
     try {
-      const res = await fetch("/api/user", { method: "DELETE" });
+      const res = await fetch("/api/user", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: "DELETE_MY_ACCOUNT" }),
+      });
       if (res.ok) {
         toast.success("Account deleted. Goodbye.");
         signOut({ callbackUrl: "/" });

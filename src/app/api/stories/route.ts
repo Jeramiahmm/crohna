@@ -5,6 +5,7 @@ import { getPrisma } from "@/lib/prisma";
 import { generateStory } from "@/lib/story-generator";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { validateCsrf } from "@/lib/csrf";
+import { createStorySchema, parseBody } from "@/lib/validation";
 
 const checkStoryLimit = createRateLimiter("stories", 5, 60_000);
 
@@ -86,26 +87,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    let body;
-    try {
-      body = await req.json();
-    } catch {
-      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-    }
+    const { data: body, error: validationError } = await parseBody(req, createStorySchema);
+    if (validationError) return validationError;
+
     const { year, period } = body;
-
-    if (year !== undefined && year !== null) {
-      const yearNum = Number(year);
-      if (isNaN(yearNum) || yearNum < 1900 || yearNum > 2100) {
-        return NextResponse.json({ error: "Invalid year" }, { status: 400 });
-      }
-    }
-
-    if (period !== undefined && period !== null) {
-      if (typeof period !== "string" || period.length > 200) {
-        return NextResponse.json({ error: "Period must be a string under 200 characters" }, { status: 400 });
-      }
-    }
 
     // Fetch user's events for the period to generate content
     const storyPeriod = period || (year ? `January – December ${year}` : "All Time");

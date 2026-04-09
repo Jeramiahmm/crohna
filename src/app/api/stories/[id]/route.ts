@@ -58,6 +58,7 @@ export async function PUT(
     const events = await prisma.event.findMany({
       where: whereClause,
       orderBy: { date: "asc" },
+      take: 10_000,
     });
 
     const locations = Array.from(new Set(events.map((e) => e.location).filter(Boolean)));

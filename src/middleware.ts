@@ -2,16 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 // Public API routes that don't require authentication
-const PUBLIC_API_ROUTES = new Set([
-  "/api/health",
-  "/api/auth",
-]);
+const PUBLIC_API_ROUTES = ["/api/health", "/api/auth"];
 
 function isPublicApiRoute(pathname: string): boolean {
-  for (const route of PUBLIC_API_ROUTES) {
-    if (pathname === route || pathname.startsWith(route + "/")) return true;
-  }
-  return false;
+  return PUBLIC_API_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route + "/")
+  );
 }
 
 /**
@@ -67,8 +63,9 @@ export async function middleware(req: NextRequest) {
   if (csrfError) return csrfError;
 
   // Auth check: all non-public API routes require a valid session
+  // Enforced on ALL methods (GET included) as defense-in-depth
   const method = req.method.toUpperCase();
-  if (method !== "GET" && method !== "HEAD" && method !== "OPTIONS") {
+  if (method !== "OPTIONS") {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     if (!token?.sub) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
 import { validateCsrf } from "@/lib/csrf";
+import { updateUserSchema, deleteAccountSchema, parseBody } from "@/lib/validation";
 
 // GET /api/user — get user profile and preferences
 export async function GET() {
@@ -47,30 +48,12 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const prisma = getPrisma();
-    let body;
-    try {
-      body = await req.json();
-    } catch {
-      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-    }
+    const { data: body, error: validationError } = await parseBody(req, updateUserSchema);
+    if (validationError) return validationError;
+
     const { name, preferences } = body;
 
-    if (name !== undefined && typeof name === "string" && name.length > 200) {
-      return NextResponse.json({ error: "Name must be under 200 characters" }, { status: 400 });
-    }
-
-    // Validate preferences if provided
-    if (preferences !== undefined && (typeof preferences !== "object" || preferences === null)) {
-      return NextResponse.json({ error: "Invalid preferences format" }, { status: 400 });
-    }
-    if (preferences !== undefined) {
-      const prefSize = JSON.stringify(preferences).length;
-      if (prefSize > 10_000) {
-        return NextResponse.json({ error: "Preferences too large (max 10KB)" }, { status: 400 });
-      }
-    }
-
+    const prisma = getPrisma();
     const user = await prisma.user.update({
       where: { email: session.user.email },
       data: {
@@ -106,18 +89,8 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Require explicit confirmation to prevent accidental deletion
-    let body;
-    try {
-      body = await req.json();
-    } catch {
-      return NextResponse.json({ error: "Request body with confirmation required" }, { status: 400 });
-    }
-    if (body?.confirm !== "DELETE_MY_ACCOUNT") {
-      return NextResponse.json(
-        { error: "Confirmation required. Send { \"confirm\": \"DELETE_MY_ACCOUNT\" } to proceed." },
-        { status: 400 }
-      );
-    }
+    const { error: validationError } = await parseBody(req, deleteAccountSchema);
+    if (validationError) return validationError;
 
     const prisma = getPrisma();
     const user = await prisma.user.findUnique({

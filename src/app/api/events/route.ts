@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
-import { VALID_CATEGORIES } from "@/lib/constants";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { validateCsrf } from "@/lib/csrf";
 import { validateImageUrl } from "@/lib/url-validation";
+import { createEventSchema, parseBody } from "@/lib/validation";
 
 const checkEventLimit = createRateLimiter("events", 30, 60_000);
 
@@ -117,39 +117,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    let body;
-    try {
-      body = await req.json();
-    } catch {
-      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-    }
-    const { title, date, endDate, location, latitude, longitude, description, category, imageUrl } = body;
+    const { data: body, error: validationError } = await parseBody(req, createEventSchema);
+    if (validationError) return validationError;
 
-    // Validation
-    if (!title || typeof title !== "string" || title.trim().length === 0) {
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
-    }
-    if (title.length > 500) {
-      return NextResponse.json({ error: "Title must be under 500 characters" }, { status: 400 });
-    }
-    if (!date || isNaN(new Date(date).getTime())) {
-      return NextResponse.json({ error: "Valid date is required" }, { status: 400 });
-    }
-    if (endDate && isNaN(new Date(endDate).getTime())) {
-      return NextResponse.json({ error: "Invalid end date" }, { status: 400 });
-    }
-    if (date && endDate && new Date(endDate) < new Date(date)) {
-      return NextResponse.json({ error: "End date must be after start date" }, { status: 400 });
-    }
-    if (latitude !== undefined && latitude !== null && (typeof latitude !== "number" || latitude < -90 || latitude > 90)) {
-      return NextResponse.json({ error: "Latitude must be between -90 and 90" }, { status: 400 });
-    }
-    if (longitude !== undefined && longitude !== null && (typeof longitude !== "number" || longitude < -180 || longitude > 180)) {
-      return NextResponse.json({ error: "Longitude must be between -180 and 180" }, { status: 400 });
-    }
-    if (description && typeof description === "string" && description.length > 5000) {
-      return NextResponse.json({ error: "Description must be under 5000 characters" }, { status: 400 });
-    }
+    const { title, date, endDate, location, latitude, longitude, description, category: cat, imageUrl } = body;
 
     if (imageUrl && typeof imageUrl === "string") {
       const urlError = validateImageUrl(imageUrl);
@@ -157,11 +128,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: urlError }, { status: 400 });
       }
     }
-    if (location && typeof location === "string" && location.length > 500) {
-      return NextResponse.json({ error: "Location must be under 500 characters" }, { status: 400 });
-    }
-
-    const cat = category && VALID_CATEGORIES.includes(category.toLowerCase()) ? category.toLowerCase() : "life";
 
     const event = await prisma.event.create({
       data: {

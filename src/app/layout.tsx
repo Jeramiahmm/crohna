@@ -58,11 +58,8 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Crohna" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("chrono-theme");if(t==="light")document.documentElement.classList.add("light")}catch(e){}})()`,
-          }}
-        />
+        {/* eslint-disable-next-line @next/next/no-sync-scripts -- Must run before paint to prevent theme flash */}
+        <script src="/theme-init.js" />
       </head>
       <body className="font-body antialiased bg-chrono-bg text-chrono-text">
         <SessionProvider>

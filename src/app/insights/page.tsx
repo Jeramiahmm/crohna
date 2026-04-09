@@ -36,6 +36,7 @@ function InsightsPage() {
   const [shareStory, setShareStory] = useState<AIStory | null>(null);
   const [storyFilter, setStoryFilter] = useState<"all" | "year" | "chapter">("all");
   const [sharingEnabled, setSharingEnabled] = useState(true);
+  const [deletingStoryId, setDeletingStoryId] = useState<string | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("chrono-privacy");
@@ -78,6 +79,27 @@ function InsightsPage() {
     setShareStory(story);
     setShareOpen(true);
   }, []);
+
+  const handleDeleteStory = useCallback(async (storyId: string) => {
+    if (deletingStoryId !== storyId) {
+      setDeletingStoryId(storyId);
+      setTimeout(() => setDeletingStoryId(null), 5000);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/stories/${storyId}`, { method: "DELETE" });
+      if (res.ok) {
+        mutateStories();
+        toast.success("Story deleted");
+      } else {
+        toast.error("Failed to delete story");
+      }
+    } catch {
+      toast.error("Failed to delete story");
+    } finally {
+      setDeletingStoryId(null);
+    }
+  }, [deletingStoryId, mutateStories]);
 
   const handleGenerateStory = useCallback(async (year?: number) => {
     setGenerating(true);
@@ -389,6 +411,15 @@ function InsightsPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
                         </svg>
                         Copy
+                      </button>
+                      <button
+                        onClick={() => handleDeleteStory(story.id)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-body font-light text-red-400/60 hover:text-red-400 border border-[var(--line-strong)] hover:border-red-400/30 transition-all"
+                      >
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                        </svg>
+                        {deletingStoryId === story.id ? "Click to confirm" : "Delete"}
                       </button>
                     </motion.div>
                   )}
