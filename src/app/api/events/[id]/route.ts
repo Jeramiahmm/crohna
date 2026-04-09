@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
 import { validateCsrf } from "@/lib/csrf";
 import { validateImageUrl } from "@/lib/url-validation";
 import { updateEventSchema, parseBody } from "@/lib/validation";
+import { apiSuccess, apiError } from "@/lib/api-response";
 
 // GET /api/events/[id] — get a single event
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -12,7 +13,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     const prisma = getPrisma();
@@ -20,17 +21,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       where: { email: session.user.email },
     });
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
     const event = await prisma.event.findFirst({
       where: { id, userId: user.id, deletedAt: null },
     });
     if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+      return apiError("Event not found", 404);
     }
 
-    return NextResponse.json({
+    return apiSuccess({
       event: {
         id: event.id,
         title: event.title,
@@ -47,7 +48,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     });
   } catch (error) {
     console.error("GET /api/events/[id] error:", error);
-    return NextResponse.json({ error: "Failed to fetch event" }, { status: 500 });
+    return apiError("Failed to fetch event", 500);
   }
 }
 
@@ -60,7 +61,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     const prisma = getPrisma();
@@ -68,14 +69,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       where: { email: session.user.email },
     });
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
     const existing = await prisma.event.findFirst({
       where: { id, userId: user.id, deletedAt: null },
     });
     if (!existing) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+      return apiError("Event not found", 404);
     }
 
     const { data: body, error: validationError } = await parseBody(req, updateEventSchema);
@@ -86,7 +87,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (imageUrl && typeof imageUrl === "string") {
       const urlError = validateImageUrl(imageUrl);
       if (urlError) {
-        return NextResponse.json({ error: urlError }, { status: 400 });
+        return apiError(urlError, 400);
       }
     }
 
@@ -105,7 +106,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       },
     });
 
-    return NextResponse.json({
+    return apiSuccess({
       event: {
         id: event.id,
         title: event.title,
@@ -122,7 +123,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     });
   } catch (error) {
     console.error("PUT /api/events/[id] error:", error);
-    return NextResponse.json({ error: "Failed to update event" }, { status: 500 });
+    return apiError("Failed to update event", 500);
   }
 }
 
@@ -135,7 +136,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     const prisma = getPrisma();
@@ -143,21 +144,21 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       where: { email: session.user.email },
     });
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
     const existing = await prisma.event.findFirst({
       where: { id, userId: user.id, deletedAt: null },
     });
     if (!existing) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+      return apiError("Event not found", 404);
     }
 
     await prisma.event.update({ where: { id }, data: { deletedAt: new Date() } });
 
-    return NextResponse.json({ success: true });
+    return apiSuccess({});
   } catch (error) {
     console.error("DELETE /api/events/[id] error:", error);
-    return NextResponse.json({ error: "Failed to delete event" }, { status: 500 });
+    return apiError("Failed to delete event", 500);
   }
 }

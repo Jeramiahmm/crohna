@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getSupabase } from "@/lib/supabase";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { validateCsrf } from "@/lib/csrf";
 import { getExtensionFromMime } from "@/lib/url-validation";
+import { apiSuccess, apiError } from "@/lib/api-response";
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
@@ -17,15 +18,12 @@ export async function POST(req: NextRequest) {
 
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     const userId = session.user.email || "unknown";
     if (!(await checkUploadLimit(userId)).allowed) {
-      return NextResponse.json(
-        { error: "Too many uploads. Please wait a minute and try again." },
-        { status: 429 }
-      );
+      return apiError("Too many uploads. Please wait a minute and try again.", 429);
     }
 
     const supabase = getSupabase();
@@ -34,21 +32,15 @@ export async function POST(req: NextRequest) {
     const file = formData.get("file") as File | null;
 
     if (!file) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+      return apiError("No file provided", 400);
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json(
-        { error: "Invalid file type. Allowed: JPEG, PNG, GIF, WebP" },
-        { status: 400 }
-      );
+      return apiError("Invalid file type. Allowed: JPEG, PNG, GIF, WebP", 400);
     }
 
     if (file.size > MAX_SIZE) {
-      return NextResponse.json(
-        { error: "File too large. Maximum size is 5MB" },
-        { status: 400 }
-      );
+      return apiError("File too large. Maximum size is 5MB", 400);
     }
 
     // Derive extension from validated MIME type, not user-supplied filename
@@ -67,21 +59,15 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error("Supabase upload error:", error.message);
-      return NextResponse.json(
-        { error: "Upload failed. Please try again." },
-        { status: 500 }
-      );
+      return apiError("Upload failed. Please try again.", 500);
     }
 
     const { data: urlData } = supabase.storage
       .from("images")
       .getPublicUrl(filename);
 
-    return NextResponse.json({ url: urlData.publicUrl });
+    return apiSuccess({ url: urlData.publicUrl });
   } catch {
-    return NextResponse.json(
-      { error: "Upload failed" },
-      { status: 500 }
-    );
+    return apiError("Upload failed", 500);
   }
 }

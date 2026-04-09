@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
@@ -6,6 +6,7 @@ import { createRateLimiter } from "@/lib/rate-limit";
 import { validateCsrf } from "@/lib/csrf";
 import { validateImageUrl } from "@/lib/url-validation";
 import { createEventSchema, parseBody } from "@/lib/validation";
+import { apiSuccess, apiError, apiPaginated } from "@/lib/api-response";
 
 const checkEventLimit = createRateLimiter("events", 30, 60_000);
 
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     const prisma = getPrisma();
@@ -51,7 +52,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
     const { searchParams } = new URL(req.url);
@@ -61,10 +62,10 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(Math.max(parseInt(limitParam || "50", 10) || 50, 1), 100);
 
     const where: Record<string, unknown> = { userId: user.id, deletedAt: null };
-    if (year) {
+    if (year && year.trim() !== "") {
       const yearNum = parseInt(year, 10);
       if (isNaN(yearNum) || yearNum < 1900 || yearNum > 2100) {
-        return NextResponse.json({ error: "Invalid year parameter" }, { status: 400 });
+        return apiError("Invalid year parameter", 400);
       }
       const start = new Date(`${yearNum}-01-01T00:00:00Z`);
       const end = new Date(`${yearNum + 1}-01-01T00:00:00Z`);
@@ -83,10 +84,10 @@ export async function GET(req: NextRequest) {
     const events = sliced.map(formatEvent);
     const nextCursor = hasMore ? sliced[sliced.length - 1].id : undefined;
 
-    return NextResponse.json({ events, total: events.length, nextCursor });
+    return apiPaginated(events, "events", nextCursor);
   } catch (error) {
     console.error("GET /api/events error:", error);
-    return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
+    return apiError("Failed to fetch events", 500);
   }
 }
 
@@ -98,14 +99,11 @@ export async function POST(req: NextRequest) {
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     if (!(await checkEventLimit(session.user.email)).allowed) {
-      return NextResponse.json(
-        { error: "Too many events created. Please wait a minute." },
-        { status: 429 }
-      );
+      return apiError("Too many events created. Please wait a minute.", 429);
     }
 
     const prisma = getPrisma();
@@ -114,7 +112,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
     const { data: body, error: validationError } = await parseBody(req, createEventSchema);
@@ -125,7 +123,7 @@ export async function POST(req: NextRequest) {
     if (imageUrl && typeof imageUrl === "string") {
       const urlError = validateImageUrl(imageUrl);
       if (urlError) {
-        return NextResponse.json({ error: urlError }, { status: 400 });
+        return apiError(urlError, 400);
       }
     }
 
@@ -145,10 +143,10 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ event: formatEvent(event) }, { status: 201 });
+    return apiSuccess({ event: formatEvent(event) }, 201);
   } catch (error) {
     console.error("POST /api/events error:", error);
-    return NextResponse.json({ error: "Failed to create event" }, { status: 500 });
+    return apiError("Failed to create event", 500);
   }
 }
 
@@ -160,7 +158,7 @@ export async function DELETE(req: NextRequest) {
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     const prisma = getPrisma();
@@ -169,7 +167,7 @@ export async function DELETE(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
     const result = await prisma.event.updateMany({
@@ -177,9 +175,9 @@ export async function DELETE(req: NextRequest) {
       data: { deletedAt: new Date() },
     });
 
-    return NextResponse.json({ success: true, deleted: result.count });
+    return apiSuccess({ deleted: result.count });
   } catch (error) {
     console.error("DELETE /api/events error:", error);
-    return NextResponse.json({ error: "Failed to delete events" }, { status: 500 });
+    return apiError("Failed to delete events", 500);
   }
 }

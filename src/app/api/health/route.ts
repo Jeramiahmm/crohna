@@ -16,7 +16,6 @@ export async function GET(req: NextRequest) {
     }
 
     const prisma = getPrisma();
-    // Quick DB connectivity check
     await prisma.$queryRaw`SELECT 1`;
 
     return NextResponse.json({

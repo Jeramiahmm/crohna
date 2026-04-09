@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { getToken } from "next-auth/jwt";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
-import { NextRequest } from "next/server";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { validateCsrf } from "@/lib/csrf";
+import { apiSuccess, apiError } from "@/lib/api-response";
 
 const checkImportLimit = createRateLimiter("google-import", 5, 60_000);
 
@@ -16,22 +16,16 @@ export async function POST(req: NextRequest) {
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     if (!(await checkImportLimit(session.user.email)).allowed) {
-      return NextResponse.json(
-        { error: "Too many import requests. Please wait a minute." },
-        { status: 429 }
-      );
+      return apiError("Too many import requests. Please wait a minute.", 429);
     }
 
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     if (!token?.accessToken) {
-      return NextResponse.json(
-        { error: "No Google access token. Please sign out and sign in again to grant calendar access." },
-        { status: 401 }
-      );
+      return apiError("No Google access token. Please sign out and sign in again to grant calendar access.", 401);
     }
 
     const prisma = getPrisma();
@@ -39,7 +33,7 @@ export async function POST(req: NextRequest) {
       where: { email: session.user.email },
     });
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
     // Fetch calendar events from the last 2 years
@@ -75,13 +69,10 @@ export async function POST(req: NextRequest) {
       if (!calRes.ok) {
         const errData = await calRes.json().catch(() => ({}));
         if (calRes.status === 401 || calRes.status === 403) {
-          return NextResponse.json(
-            { error: "Google access expired. Please sign out and sign in again." },
-            { status: 401 }
-          );
+          return apiError("Google access expired. Please sign out and sign in again.", 401);
         }
         console.error("Google Calendar API error:", errData);
-        return NextResponse.json({ error: "Failed to fetch calendar events" }, { status: 500 });
+        return apiError("Failed to fetch calendar events", 500);
       }
 
       const calData = await calRes.json();
@@ -91,7 +82,7 @@ export async function POST(req: NextRequest) {
 
     const capped = items.length >= MAX_ITEMS;
 
-    // Deduplicate and insert within a transaction to prevent race conditions
+    // Deduplicate using Google event ID and insert within a transaction
     const imported = await prisma.$transaction(async (tx) => {
       const existingCalendarEvents = await tx.event.findMany({
         where: { userId: user.id, source: "calendar" },
@@ -130,11 +121,11 @@ export async function POST(req: NextRequest) {
         const eventId = item.id as string | undefined;
         if (eventId && existingSet.has(eventId)) continue;
 
-        const location = item.location || null;
+        const location = item.location?.substring(0, 200) || null;
 
         eventsToCreate.push({
           userId: user.id,
-          title: item.summary.trim(),
+          title: item.summary.trim().substring(0, 500),
           date: parsedDate,
           endDate: endDate ? new Date(endDate) : null,
           location,
@@ -153,13 +144,12 @@ export async function POST(req: NextRequest) {
       return eventsToCreate.length;
     });
 
-    return NextResponse.json({
-      success: true,
+    return apiSuccess({
       imported,
       ...(capped && { warning: `Import capped at ${MAX_ITEMS} events. Some older events may not have been imported.` }),
     });
   } catch (error) {
     console.error("POST /api/google/calendar error:", error);
-    return NextResponse.json({ error: "Failed to import calendar events" }, { status: 500 });
+    return apiError("Failed to import calendar events", 500);
   }
 }

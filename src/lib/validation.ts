@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { VALID_CATEGORIES } from "@/lib/constants";
+import { apiError } from "@/lib/api-response";
 
 // --- Shared field schemas ---
 
@@ -25,7 +26,7 @@ export const createEventSchema = z
     title: z.string().min(1, "Title is required").max(500, "Title must be under 500 characters"),
     date: dateString,
     endDate: dateString.nullable().optional(),
-    location: z.string().max(500, "Location must be under 500 characters").nullable().optional(),
+    location: z.string().max(200, "Location must be under 200 characters").nullable().optional(),
     latitude,
     longitude,
     description: z.string().max(5000, "Description must be under 5000 characters").nullable().optional(),
@@ -47,7 +48,7 @@ export const updateEventSchema = z
     title: z.string().min(1, "Title cannot be empty").max(500, "Title must be under 500 characters").optional(),
     date: dateString.optional(),
     endDate: dateString.nullable().optional(),
-    location: z.string().max(500, "Location must be under 500 characters").nullable().optional(),
+    location: z.string().max(200, "Location must be under 200 characters").nullable().optional(),
     latitude,
     longitude,
     description: z.string().max(5000, "Description must be under 5000 characters").nullable().optional(),
@@ -104,15 +105,12 @@ export const deleteAccountSchema = z.object({
 export async function parseBody<T>(
   req: NextRequest,
   schema: z.ZodType<T>
-): Promise<{ data: T; error: null } | { data: null; error: NextResponse }> {
+): Promise<{ data: T; error: null } | { data: null; error: ReturnType<typeof apiError> }> {
   let raw: unknown;
   try {
     raw = await req.json();
   } catch {
-    return {
-      data: null,
-      error: NextResponse.json({ error: "Invalid JSON body" }, { status: 400 }),
-    };
+    return { data: null, error: apiError("Invalid JSON body", 400) };
   }
 
   const result = schema.safeParse(raw);
@@ -120,10 +118,7 @@ export async function parseBody<T>(
     const firstIssue = result.error.issues[0];
     return {
       data: null,
-      error: NextResponse.json(
-        { error: firstIssue?.message || "Validation failed" },
-        { status: 400 }
-      ),
+      error: apiError(firstIssue?.message || "Validation failed", 400),
     };
   }
 

@@ -60,7 +60,7 @@ model Event {
   title       String    @db.VarChar(500)
   date        DateTime
   endDate     DateTime?
-  location    String?   @db.VarChar(500)
+  location    String?   @db.VarChar(200)
   latitude    Float?
   longitude   Float?
   imageUrl    String?   @db.VarChar(2048)
