@@ -23,9 +23,17 @@ function write(level: LogLevel, message: string, meta?: Record<string, unknown>)
     // Structured JSON for Vercel log ingestion
     const output = JSON.stringify(entry);
     if (level === "error") {
-      process.stderr?.write?.(output + "\n") ?? console.error(output);
+      if (process.stderr?.write) {
+        process.stderr.write(output + "\n");
+      } else {
+        console.error(output);
+      }
     } else {
-      process.stdout?.write?.(output + "\n") ?? console.log(output);
+      if (process.stdout?.write) {
+        process.stdout.write(output + "\n");
+      } else {
+        console.log(output);
+      }
     }
   } else {
     // Human-readable in development
