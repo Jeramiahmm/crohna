@@ -1,3 +1,5 @@
+import { logger } from "@/lib/logger";
+
 // Validates required environment variables at import time
 const requiredVars = [
   "DATABASE_URL",
@@ -15,9 +17,7 @@ if (missingVars.length > 0 && process.env.NODE_ENV === "production") {
 }
 
 if (missingVars.length > 0 && process.env.NODE_ENV !== "production") {
-  console.warn(
-    `[Crohna] Warning: Missing environment variables: ${missingVars.join(", ")}`
-  );
+  logger.warn("Missing environment variables", { vars: missingVars });
 }
 
 // Warn if Upstash is missing in production (rate limiting won't work across serverless instances)
@@ -25,10 +25,7 @@ if (
   process.env.NODE_ENV === "production" &&
   (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN)
 ) {
-  console.warn(
-    "[Crohna] Warning: UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN not set. " +
-    "Rate limiting will not work correctly in serverless production."
-  );
+  logger.warn("Upstash Redis not configured — rate limiting will not work across serverless instances");
 }
 
 export const env = {

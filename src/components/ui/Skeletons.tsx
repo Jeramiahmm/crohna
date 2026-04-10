@@ -72,6 +72,16 @@ export function StatCardSkeleton() {
   );
 }
 
+export function MapSkeleton() {
+  return (
+    <div className="relative w-full min-h-[360px] md:min-h-[700px] bg-chrono-surface border border-[var(--line-strong)] flex items-center justify-center">
+      <div className="text-sm font-body font-extralight text-chrono-muted animate-pulse">
+        Loading map...
+      </div>
+    </div>
+  );
+}
+
 export function AIStoryLoadingSkeleton() {
   return (
     <div className="relative bg-[var(--card-bg)] p-8 md:p-10 border border-[var(--line-strong)] overflow-hidden">

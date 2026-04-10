@@ -1,12 +1,18 @@
 "use client";
 
 import { Suspense } from "react";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import EventMap from "@/components/map/EventMap";
 import EmptyState from "@/components/ui/EmptyState";
+import { MapSkeleton } from "@/components/ui/Skeletons";
 import { useEvents } from "@/hooks/useEvents";
+
+const EventMap = dynamic(() => import("@/components/map/EventMap"), {
+  ssr: false,
+  loading: () => <MapSkeleton />,
+});
 
 export default function MapPageWrapper() {
   return (

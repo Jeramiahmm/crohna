@@ -34,8 +34,10 @@ export default memo(function TimelineCard({ event, index, isLeft = false, onEdit
               src={resolveImageUrl(event.imageUrl) || event.imageUrl}
               alt={event.title}
               fill
+              quality={75}
               className="object-cover archival-img transition-transform duration-700 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, 50vw"
+              {...(index === 0 ? { priority: true } : { loading: "lazy" })}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
 

@@ -8,6 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { TimelineEvent, getEventsByYear } from "@/data/demo";
 import YearSection from "@/components/timeline/YearSection";
 import EventModal from "@/components/events/EventModal";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import EmptyState from "@/components/ui/EmptyState";
 import { toast } from "sonner";
 import { CATEGORIES } from "@/lib/constants";
@@ -45,12 +46,14 @@ function FilterBar({
       transition={{ delay: 0.2, duration: 0.6 }}
       className="space-y-3"
     >
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide justify-center flex-wrap">
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide justify-center flex-wrap" role="radiogroup" aria-label="Filter by category">
         {FILTER_OPTIONS.map((cat) => {
           const isSelected = cat === "All" ? selectedCategories.size === 0 : selectedCategories.has(cat.toLowerCase());
           return (
             <button
               key={cat}
+              role="radio"
+              aria-checked={isSelected}
               onClick={() => onToggleCategory(cat)}
               className={`px-4 py-1.5 text-xs font-body font-light rounded-full transition-all duration-300 whitespace-nowrap border ${
                 isSelected
@@ -158,6 +161,7 @@ function TimelinePage() {
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
@@ -222,6 +226,7 @@ function TimelinePage() {
       });
       if (res.ok) {
         mutate();
+        toast.success("Event created");
       } else {
         toast.error("Failed to create event. Please try again.");
       }
@@ -248,20 +253,64 @@ function TimelinePage() {
     setEditingEvent(undefined);
   }, [mutate]);
 
-  const handleDeleteEvent = useCallback(async (id: string) => {
+  const handleRequestDelete = useCallback((id: string) => {
+    setDeleteConfirmId(id);
+  }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!deleteConfirmId) return;
+    const deletedId = deleteConfirmId;
+    setDeleteConfirmId(null);
+    setEditingEvent(undefined);
+    setEventModalOpen(false);
     try {
-      const res = await fetch(`/api/events/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/events/${deletedId}`, { method: "DELETE" });
       if (res.ok) {
         mutate();
+        toast("Event deleted", {
+          duration: 30000,
+          action: {
+            label: "Undo",
+            onClick: async () => {
+              try {
+                const restoreRes = await fetch(`/api/events/${deletedId}/restore`, { method: "POST" });
+                if (restoreRes.ok) {
+                  mutate();
+                  toast.success("Event restored");
+                } else {
+                  toast.error("Failed to restore event");
+                }
+              } catch {
+                toast.error("Failed to restore event");
+              }
+            },
+          },
+        });
       } else {
         toast.error("Failed to delete event. Please try again.");
       }
     } catch {
       toast.error("Failed to delete event. Please try again.");
     }
-    setEditingEvent(undefined);
-    setEventModalOpen(false);
-  }, [mutate]);
+  }, [deleteConfirmId, mutate]);
+
+  const handleGenerateStory = useCallback(async (year: number) => {
+    try {
+      const res = await fetch("/api/stories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ year }),
+      });
+      if (res.ok) {
+        toast.success(`${year} story generated! View it on the Insights page.`);
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to generate story");
+      }
+    } catch {
+      toast.error("Failed to generate story");
+    }
+  }, []);
 
   const scrollToYear = (year: string) => {
     const el = document.querySelector(`[data-year="${year}"]`);
@@ -392,7 +441,7 @@ function TimelinePage() {
             <AnimatePresence mode="sync">
               {years.map((year) => (
                   <motion.div key={year} data-year={year} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.4 }}>
-                    <YearSection year={year} events={eventsByYear[year]} onEditEvent={isShowingDemo ? undefined : (event) => { setEditingEvent(event); setEventModalOpen(true); }} />
+                    <YearSection year={year} events={eventsByYear[year]} onEditEvent={isShowingDemo ? undefined : (event) => { setEditingEvent(event); setEventModalOpen(true); }} onGenerateStory={isShowingDemo ? undefined : handleGenerateStory} />
                   </motion.div>
               ))}
             </AnimatePresence>
@@ -439,7 +488,16 @@ function TimelinePage() {
         </motion.div>
       )}
 
-      <EventModal isOpen={eventModalOpen} onClose={() => { setEventModalOpen(false); setEditingEvent(undefined); }} onSave={editingEvent ? handleEditEvent : handleCreateEvent} event={editingEvent} onDelete={handleDeleteEvent} />
+      <EventModal isOpen={eventModalOpen} onClose={() => { setEventModalOpen(false); setEditingEvent(undefined); }} onSave={editingEvent ? handleEditEvent : handleCreateEvent} event={editingEvent} onDelete={handleRequestDelete} />
+      <ConfirmDialog
+        isOpen={!!deleteConfirmId}
+        onClose={() => setDeleteConfirmId(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete event?"
+        description="This event will be removed from your timeline. You'll have 30 seconds to undo."
+        confirmLabel="Delete"
+        destructive
+      />
     </div>
   );
 }

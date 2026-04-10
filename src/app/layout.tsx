@@ -10,6 +10,7 @@ import ThemeProvider from "@/components/ui/ThemeProvider";
 import SessionProvider from "@/components/providers/SessionProvider";
 import AddMemoryButton from "@/components/ui/AddMemoryButton";
 import { ToasterProvider } from "@/components/providers/ToasterProvider";
+import SWRProvider from "@/components/providers/SWRProvider";
 import SessionErrorBanner from "@/components/ui/SessionErrorBanner";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -53,19 +54,17 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#050505" />
+        <meta name="theme-color" content="#080808" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Crohna" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("chrono-theme");if(t==="light")document.documentElement.classList.add("light")}catch(e){}})()`,
-          }}
-        />
+        {/* eslint-disable-next-line @next/next/no-sync-scripts -- Must run before paint to prevent theme flash */}
+        <script src="/theme-init.js" />
       </head>
       <body className="font-body antialiased bg-chrono-bg text-chrono-text">
         <SessionProvider>
+          <SWRProvider>
           <ThemeProvider>
             <ErrorBoundary>
               <ScrollProgressBar />
@@ -79,6 +78,7 @@ export default function RootLayout({
             </ErrorBoundary>
             <ToasterProvider />
           </ThemeProvider>
+          </SWRProvider>
         </SessionProvider>
         <Analytics />
         <SpeedInsights />

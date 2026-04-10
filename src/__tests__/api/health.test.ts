@@ -22,7 +22,7 @@ describe("GET /api/health", () => {
 
     expect(res.status).toBe(200);
     expect(data.status).toBe("healthy");
-    expect(data.database).toBe("connected");
+    expect(data.services.database).toBe("connected");
     expect(data.timestamp).toBeDefined();
   });
 
@@ -34,6 +34,6 @@ describe("GET /api/health", () => {
 
     expect(res.status).toBe(503);
     expect(data.status).toBe("unhealthy");
-    expect(data.database).toBe("disconnected");
+    expect(data.services.database).toBe("disconnected");
   });
 });

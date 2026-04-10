@@ -155,6 +155,7 @@ function SearchButton() {
                     updateSearchParam(e.target.value);
                   }}
                   placeholder="Search memories..."
+                  maxLength={200}
                   className="flex-1 bg-transparent text-sm text-chrono-text placeholder:text-chrono-muted outline-none font-body font-light"
                 />
                 <button

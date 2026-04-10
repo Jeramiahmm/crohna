@@ -1,11 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { getToken } from "next-auth/jwt";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
-import { NextRequest } from "next/server";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { validateCsrf } from "@/lib/csrf";
+import { apiSuccess, apiError } from "@/lib/api-response";
+import { logger } from "@/lib/logger";
 
 const checkImportLimit = createRateLimiter("google-import", 5, 60_000);
 
@@ -16,22 +17,16 @@ export async function POST(req: NextRequest) {
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     if (!(await checkImportLimit(session.user.email)).allowed) {
-      return NextResponse.json(
-        { error: "Too many import requests. Please wait a minute." },
-        { status: 429 }
-      );
+      return apiError("Too many import requests. Please wait a minute.", 429);
     }
 
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     if (!token?.accessToken) {
-      return NextResponse.json(
-        { error: "No Google access token. Please sign out and sign in again to grant photos access." },
-        { status: 401 }
-      );
+      return apiError("No Google access token. Please sign out and sign in again to grant photos access.", 401);
     }
 
     const prisma = getPrisma();
@@ -39,7 +34,7 @@ export async function POST(req: NextRequest) {
       where: { email: session.user.email },
     });
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
     // Fetch recent photos (last 2 years)
@@ -93,13 +88,10 @@ export async function POST(req: NextRequest) {
       if (!photosRes.ok) {
         const errData = await photosRes.json().catch(() => ({}));
         if (photosRes.status === 401 || photosRes.status === 403) {
-          return NextResponse.json(
-            { error: "Google access expired. Please sign out and sign in again." },
-            { status: 401 }
-          );
+          return apiError("Google access expired. Please sign out and sign in again.", 401);
         }
-        console.error("Google Photos API error:", errData);
-        return NextResponse.json({ error: "Failed to fetch photos" }, { status: 500 });
+        logger.error("Google Photos API error", { response: errData });
+        return apiError("Failed to fetch photos", 500);
       }
 
       const photosData = await photosRes.json();
@@ -109,12 +101,21 @@ export async function POST(req: NextRequest) {
 
     const capped = mediaItems.length >= MAX_PHOTOS;
 
-    // Deduplicate and insert within a transaction to prevent race conditions
+    // Build candidate URLs for dedup before entering transaction
+    const candidateUrls: string[] = [];
+    for (const item of mediaItems) {
+      if (item.id) candidateUrls.push(`gphotos://${item.id}`);
+    }
+
+    // Deduplicate using batched WHERE IN query instead of loading all existing records
     const imported = await prisma.$transaction(async (tx) => {
-      const existingPhotoEvents = await tx.event.findMany({
-        where: { userId: user.id, source: "photos" },
-        select: { imageUrl: true },
-      });
+      // Only query for URLs that appear in the current import batch
+      const existingPhotoEvents = candidateUrls.length > 0
+        ? await tx.event.findMany({
+            where: { userId: user.id, source: "photos", imageUrl: { in: candidateUrls } },
+            select: { imageUrl: true },
+          })
+        : [];
 
       const existingUrls = new Set(
         existingPhotoEvents.map((e: { imageUrl: string | null }) => e.imageUrl).filter(Boolean)
@@ -164,14 +165,13 @@ export async function POST(req: NextRequest) {
       return eventsToCreate.length;
     });
 
-    return NextResponse.json({
-      success: true,
+    return apiSuccess({
       imported,
       total: mediaItems.length,
       ...(capped && { warning: `Import capped at ${MAX_PHOTOS} photos. Some older photos may not have been imported.` }),
     });
   } catch (error) {
-    console.error("POST /api/google/photos error:", error);
-    return NextResponse.json({ error: "Failed to import photos" }, { status: 500 });
+    logger.error("POST /api/google/photos error", { error: String(error) });
+    return apiError("Failed to import photos", 500);
   }
 }

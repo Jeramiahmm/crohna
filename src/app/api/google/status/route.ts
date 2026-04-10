@@ -1,14 +1,15 @@
-import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
+import { apiSuccess, apiError } from "@/lib/api-response";
+import { logger } from "@/lib/logger";
 
 // GET /api/google/status — check which Google services have imported data
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     const prisma = getPrisma();
@@ -17,7 +18,7 @@ export async function GET() {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
     const [calendarCount, photosCount] = await Promise.all([
@@ -25,12 +26,12 @@ export async function GET() {
       prisma.event.count({ where: { userId: user.id, source: "photos" } }),
     ]);
 
-    return NextResponse.json({
+    return apiSuccess({
       calendar: calendarCount > 0,
       photos: photosCount > 0,
     });
   } catch (error) {
-    console.error("GET /api/google/status error:", error);
-    return NextResponse.json({ error: "Failed to check status" }, { status: 500 });
+    logger.error("GET /api/google/status error", { error: String(error) });
+    return apiError("Failed to check status", 500);
   }
 }

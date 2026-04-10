@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { memo, useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -8,7 +8,7 @@ import ShimmerButton from "./shimmer-button";
 import { CATEGORIES } from "@/lib/constants";
 import { useEventForm } from "@/hooks/useEventForm";
 
-export default function AddMemoryButton() {
+export default memo(function AddMemoryButton() {
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -177,6 +177,7 @@ export default function AddMemoryButton() {
                       value={form.location}
                       onChange={(e) => setField("location", e.target.value)}
                       placeholder="City, State"
+                      maxLength={200}
                       className="w-full bg-[var(--input-bg)] px-4 py-3 text-sm text-chrono-text placeholder:text-chrono-muted border border-[var(--line-strong)] transition-colors outline-none focus:border-[var(--line-hover)]"
                     />
                   </div>
@@ -269,4 +270,4 @@ export default function AddMemoryButton() {
       </AnimatePresence>
     </>
   );
-}
+});

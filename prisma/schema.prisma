@@ -3,7 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -60,7 +62,7 @@ model Event {
   title       String    @db.VarChar(500)
   date        DateTime
   endDate     DateTime?
-  location    String?   @db.VarChar(500)
+  location    String?   @db.VarChar(200)
   latitude    Float?
   longitude   Float?
   imageUrl    String?   @db.VarChar(2048)
@@ -72,13 +74,13 @@ model Event {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
+  @@unique([userId, sourceId])
   @@index([userId, date])
   @@index([userId, category])
   @@index([userId, source])
   @@index([userId, deletedAt])
-  @@index([userId, sourceId])
 }
 
 model AIStory {
@@ -93,7 +95,7 @@ model AIStory {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([userId])
   @@index([userId, year])

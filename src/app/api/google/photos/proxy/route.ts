@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { getToken } from "next-auth/jwt";
 import { authOptions } from "@/lib/auth";
+import { apiError } from "@/lib/api-response";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/google/photos/proxy?id=<mediaItemId>
  *
- * Resolves a Google Photos mediaItemId to a fresh baseUrl and redirects.
+ * Resolves a Google Photos mediaItemId to a fresh baseUrl and streams the image.
  * Google Photos baseUrls expire after ~1 hour, so we stored gphotos://<id>
  * as a placeholder during import. This endpoint fetches the current URL on demand.
  */
@@ -14,20 +16,17 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     const mediaItemId = req.nextUrl.searchParams.get("id");
     if (!mediaItemId) {
-      return NextResponse.json({ error: "Missing id parameter" }, { status: 400 });
+      return apiError("Missing id parameter", 400);
     }
 
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     if (!token?.accessToken) {
-      return NextResponse.json(
-        { error: "No Google access token. Please sign out and sign in again." },
-        { status: 401 }
-      );
+      return apiError("No Google access token. Please sign out and sign in again.", 401);
     }
 
     const photosRes = await fetch(
@@ -39,24 +38,21 @@ export async function GET(req: NextRequest) {
 
     if (!photosRes.ok) {
       if (photosRes.status === 401 || photosRes.status === 403) {
-        return NextResponse.json(
-          { error: "Google access expired. Please sign out and sign in again." },
-          { status: 401 }
-        );
+        return apiError("Google access expired. Please sign out and sign in again.", 401);
       }
-      return NextResponse.json({ error: "Failed to fetch photo" }, { status: 500 });
+      return apiError("Failed to fetch photo", 500);
     }
 
     const data = await photosRes.json();
     if (!data.baseUrl) {
-      return NextResponse.json({ error: "Photo not found" }, { status: 404 });
+      return apiError("Photo not found", 404);
     }
 
     // Fetch the image and stream it back instead of redirecting
     const imageUrl = `${data.baseUrl}=w1200-h800`;
     const imageRes = await fetch(imageUrl);
     if (!imageRes.ok) {
-      return NextResponse.json({ error: "Failed to fetch photo" }, { status: 500 });
+      return apiError("Failed to fetch photo", 500);
     }
     const contentType = imageRes.headers.get("content-type") || "image/jpeg";
     const imageBuffer = await imageRes.arrayBuffer();
@@ -67,7 +63,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("GET /api/google/photos/proxy error:", error);
-    return NextResponse.json({ error: "Failed to proxy photo" }, { status: 500 });
+    logger.error("GET /api/google/photos/proxy error", { error: String(error) });
+    return apiError("Failed to proxy photo", 500);
   }
 }

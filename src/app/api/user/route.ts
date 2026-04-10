@@ -1,15 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
 import { validateCsrf } from "@/lib/csrf";
+import { updateUserSchema, deleteAccountSchema, parseBody } from "@/lib/validation";
+import { apiSuccess, apiError } from "@/lib/api-response";
+import { logger } from "@/lib/logger";
 
 // GET /api/user — get user profile and preferences
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     const prisma = getPrisma();
@@ -18,10 +21,10 @@ export async function GET() {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
-    return NextResponse.json({
+    return apiSuccess({
       user: {
         id: user.id,
         name: user.name,
@@ -31,8 +34,8 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("GET /api/user error:", error);
-    return NextResponse.json({ error: "Failed to fetch user" }, { status: 500 });
+    logger.error("GET /api/user error", { error: String(error) });
+    return apiError("Failed to fetch user", 500);
   }
 }
 
@@ -44,33 +47,15 @@ export async function PUT(req: NextRequest) {
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
-    const prisma = getPrisma();
-    let body;
-    try {
-      body = await req.json();
-    } catch {
-      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-    }
+    const { data: body, error: validationError } = await parseBody(req, updateUserSchema);
+    if (validationError) return validationError;
+
     const { name, preferences } = body;
 
-    if (name !== undefined && typeof name === "string" && name.length > 200) {
-      return NextResponse.json({ error: "Name must be under 200 characters" }, { status: 400 });
-    }
-
-    // Validate preferences if provided
-    if (preferences !== undefined && (typeof preferences !== "object" || preferences === null)) {
-      return NextResponse.json({ error: "Invalid preferences format" }, { status: 400 });
-    }
-    if (preferences !== undefined) {
-      const prefSize = JSON.stringify(preferences).length;
-      if (prefSize > 10_000) {
-        return NextResponse.json({ error: "Preferences too large (max 10KB)" }, { status: 400 });
-      }
-    }
-
+    const prisma = getPrisma();
     const user = await prisma.user.update({
       where: { email: session.user.email },
       data: {
@@ -79,7 +64,7 @@ export async function PUT(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({
+    return apiSuccess({
       user: {
         id: user.id,
         name: user.name,
@@ -89,8 +74,8 @@ export async function PUT(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("PUT /api/user error:", error);
-    return NextResponse.json({ error: "Failed to update profile" }, { status: 500 });
+    logger.error("PUT /api/user error", { error: String(error) });
+    return apiError("Failed to update profile", 500);
   }
 }
 
@@ -102,22 +87,12 @@ export async function DELETE(req: NextRequest) {
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     // Require explicit confirmation to prevent accidental deletion
-    let body;
-    try {
-      body = await req.json();
-    } catch {
-      return NextResponse.json({ error: "Request body with confirmation required" }, { status: 400 });
-    }
-    if (body?.confirm !== "DELETE_MY_ACCOUNT") {
-      return NextResponse.json(
-        { error: "Confirmation required. Send { \"confirm\": \"DELETE_MY_ACCOUNT\" } to proceed." },
-        { status: 400 }
-      );
-    }
+    const { error: validationError } = await parseBody(req, deleteAccountSchema);
+    if (validationError) return validationError;
 
     const prisma = getPrisma();
     const user = await prisma.user.findUnique({
@@ -125,7 +100,7 @@ export async function DELETE(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
     // Delete all user data in order (cascade should handle this, but be explicit)
@@ -137,9 +112,9 @@ export async function DELETE(req: NextRequest) {
       prisma.user.delete({ where: { id: user.id } }),
     ]);
 
-    return NextResponse.json({ success: true });
+    return apiSuccess({});
   } catch (error) {
-    console.error("DELETE /api/user error:", error);
-    return NextResponse.json({ error: "Failed to delete account" }, { status: 500 });
+    logger.error("DELETE /api/user error", { error: String(error) });
+    return apiError("Failed to delete account", 500);
   }
 }

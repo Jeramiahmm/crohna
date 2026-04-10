@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { logger } from "@/lib/logger";
 
 const hasApiKey = !!process.env.ANTHROPIC_API_KEY;
 
@@ -108,7 +109,7 @@ Rules:
       highlights: parsed.highlights.slice(0, 8).map((h) => String(h).slice(0, 500)),
     };
   } catch (error) {
-    console.error("Claude API story generation failed, using fallback:", error);
+    logger.error("Claude API story generation failed, using fallback", { error: String(error) });
     return generateTemplateFallback(events, period, existingTitle);
   }
 }

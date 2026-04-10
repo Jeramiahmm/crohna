@@ -1,10 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
 import { generateStory } from "@/lib/story-generator";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { validateCsrf } from "@/lib/csrf";
+import { createStorySchema, parseBody } from "@/lib/validation";
+import { apiSuccess, apiError, apiPaginated } from "@/lib/api-response";
+import { logger } from "@/lib/logger";
 
 const checkStoryLimit = createRateLimiter("stories", 5, 60_000);
 
@@ -13,7 +16,7 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     const prisma = getPrisma();
@@ -22,7 +25,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
     const { searchParams } = new URL(req.url);
@@ -52,10 +55,10 @@ export async function GET(req: NextRequest) {
       stats: (s.stats as Record<string, string | number>) ?? undefined,
     }));
 
-    return NextResponse.json({ stories, total: stories.length, nextCursor });
+    return apiPaginated(stories, "stories", nextCursor);
   } catch (error) {
-    console.error("GET /api/stories error:", error);
-    return NextResponse.json({ error: "Failed to fetch stories" }, { status: 500 });
+    logger.error("GET /api/stories error", { error: String(error) });
+    return apiError("Failed to fetch stories", 500);
   }
 }
 
@@ -67,14 +70,11 @@ export async function POST(req: NextRequest) {
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     if (!(await checkStoryLimit(session.user.email)).allowed) {
-      return NextResponse.json(
-        { error: "Too many story requests. Please wait a minute." },
-        { status: 429 }
-      );
+      return apiError("Too many story requests. Please wait a minute.", 429);
     }
 
     const prisma = getPrisma();
@@ -83,29 +83,13 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
-    let body;
-    try {
-      body = await req.json();
-    } catch {
-      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-    }
+    const { data: body, error: validationError } = await parseBody(req, createStorySchema);
+    if (validationError) return validationError;
+
     const { year, period } = body;
-
-    if (year !== undefined && year !== null) {
-      const yearNum = Number(year);
-      if (isNaN(yearNum) || yearNum < 1900 || yearNum > 2100) {
-        return NextResponse.json({ error: "Invalid year" }, { status: 400 });
-      }
-    }
-
-    if (period !== undefined && period !== null) {
-      if (typeof period !== "string" || period.length > 200) {
-        return NextResponse.json({ error: "Period must be a string under 200 characters" }, { status: 400 });
-      }
-    }
 
     // Fetch user's events for the period to generate content
     const storyPeriod = period || (year ? `January – December ${year}` : "All Time");
@@ -155,7 +139,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({
+    return apiSuccess({
       story: {
         id: story.id,
         title: story.title,
@@ -165,9 +149,9 @@ export async function POST(req: NextRequest) {
         highlights: story.highlights,
         stats: (story.stats as Record<string, string | number>) ?? undefined,
       },
-    }, { status: 201 });
+    }, 201);
   } catch (error) {
-    console.error("POST /api/stories error:", error);
-    return NextResponse.json({ error: "Failed to create story" }, { status: 500 });
+    logger.error("POST /api/stories error", { error: String(error) });
+    return apiError("Failed to create story", 500);
   }
 }

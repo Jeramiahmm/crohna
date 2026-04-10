@@ -2,9 +2,6 @@ import useSWR from "swr";
 import { useSession } from "next-auth/react";
 import { insightStats as demoInsightStats } from "@/data/demo";
 
-const fetcher = (url: string) =>
-  fetch(url).then((r) => (r.ok ? r.json() : Promise.reject(r)));
-
 interface InsightStats {
   totalEvents: number;
   totalPhotos: number;
@@ -25,8 +22,7 @@ export function useInsights() {
 
   const { data, error, isLoading } = useSWR<{
     stats: InsightStats | null;
-  }>(isReady && isAuthenticated ? "/api/insights" : null, fetcher, {
-    revalidateOnFocus: true,
+  }>(isReady && isAuthenticated ? "/api/insights" : null, {
     dedupingInterval: 10000,
   });
 

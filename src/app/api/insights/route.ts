@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
 import { createRateLimiter } from "@/lib/rate-limit";
+import { apiSuccess, apiError } from "@/lib/api-response";
+import { logger } from "@/lib/logger";
 
 const checkInsightsLimit = createRateLimiter("insights", 20, 60_000);
 
@@ -10,14 +11,11 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     if (!(await checkInsightsLimit(session.user.email)).allowed) {
-      return NextResponse.json(
-        { error: "Too many requests. Please wait a minute." },
-        { status: 429 }
-      );
+      return apiError("Too many requests. Please wait a minute.", 429);
     }
 
     const prisma = getPrisma();
@@ -26,7 +24,7 @@ export async function GET() {
     });
 
     if (!user) {
-      return NextResponse.json({ stats: null });
+      return apiError("User not found", 404);
     }
 
     // Check if user has any events first (cheap count query)
@@ -35,7 +33,7 @@ export async function GET() {
     });
 
     if (totalEvents === 0) {
-      return NextResponse.json({ stats: null });
+      return apiSuccess({ stats: null });
     }
 
     // Use groupBy to push aggregation to the database instead of loading all events into memory
@@ -53,7 +51,6 @@ export async function GET() {
       prisma.event.count({
         where: { userId: user.id, deletedAt: null, imageUrl: { not: null } },
       }),
-      // Only select dates, and cap at 10k to prevent unbounded memory usage
       prisma.event.findMany({
         where: { userId: user.id, deletedAt: null },
         select: { date: true },
@@ -96,7 +93,7 @@ export async function GET() {
       yearlyEvents[0]
     )?.year || new Date().getFullYear();
 
-    return NextResponse.json({
+    return apiSuccess({
       stats: {
         totalEvents,
         totalPhotos: photosCount,
@@ -111,8 +108,8 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("GET /api/insights error:", error);
-    return NextResponse.json({ error: "Failed to fetch insights" }, { status: 500 });
+    logger.error("GET /api/insights error", { error: String(error) });
+    return apiError("Failed to fetch insights", 500);
   }
 }
 

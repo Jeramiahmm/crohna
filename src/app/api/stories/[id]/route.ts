@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
@@ -6,6 +6,8 @@ import { Prisma } from "@prisma/client";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { generateStory } from "@/lib/story-generator";
 import { validateCsrf } from "@/lib/csrf";
+import { apiSuccess, apiError } from "@/lib/api-response";
+import { logger } from "@/lib/logger";
 
 const checkStoryLimit = createRateLimiter("stories", 5, 60_000);
 
@@ -20,14 +22,11 @@ export async function PUT(
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     if (!(await checkStoryLimit(session.user.email)).allowed) {
-      return NextResponse.json(
-        { error: "Too many regeneration requests. Please wait a minute." },
-        { status: 429 }
-      );
+      return apiError("Too many regeneration requests. Please wait a minute.", 429);
     }
 
     const prisma = getPrisma();
@@ -35,7 +34,7 @@ export async function PUT(
       where: { email: session.user.email },
     });
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
     const { id } = await params;
@@ -44,7 +43,7 @@ export async function PUT(
       where: { id, userId: user.id },
     });
     if (!existing) {
-      return NextResponse.json({ error: "Story not found" }, { status: 404 });
+      return apiError("Story not found", 404);
     }
 
     // Get user's events for the story's period
@@ -58,6 +57,7 @@ export async function PUT(
     const events = await prisma.event.findMany({
       where: whereClause,
       orderBy: { date: "asc" },
+      take: 10_000,
     });
 
     const locations = Array.from(new Set(events.map((e) => e.location).filter(Boolean)));
@@ -105,10 +105,10 @@ export async function PUT(
     });
 
     if (!updated) {
-      return NextResponse.json({ error: "Story not found" }, { status: 404 });
+      return apiError("Story not found", 404);
     }
 
-    return NextResponse.json({
+    return apiSuccess({
       story: {
         id: updated.id,
         title: updated.title,
@@ -120,8 +120,8 @@ export async function PUT(
       },
     });
   } catch (error) {
-    console.error("PUT /api/stories/[id] error:", error);
-    return NextResponse.json({ error: "Failed to regenerate story" }, { status: 500 });
+    logger.error("PUT /api/stories/[id] error", { error: String(error) });
+    return apiError("Failed to regenerate story", 500);
   }
 }
 
@@ -136,7 +136,7 @@ export async function DELETE(
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     const prisma = getPrisma();
@@ -144,7 +144,7 @@ export async function DELETE(
       where: { email: session.user.email },
     });
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
     const { id } = await params;
@@ -153,14 +153,14 @@ export async function DELETE(
       where: { id, userId: user.id },
     });
     if (!existing) {
-      return NextResponse.json({ error: "Story not found" }, { status: 404 });
+      return apiError("Story not found", 404);
     }
 
     await prisma.aIStory.delete({ where: { id } });
 
-    return NextResponse.json({ success: true });
+    return apiSuccess({});
   } catch (error) {
-    console.error("DELETE /api/stories/[id] error:", error);
-    return NextResponse.json({ error: "Failed to delete story" }, { status: 500 });
+    logger.error("DELETE /api/stories/[id] error", { error: String(error) });
+    return apiError("Failed to delete story", 500);
   }
 }

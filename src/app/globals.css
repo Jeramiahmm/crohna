@@ -15,7 +15,6 @@
   --line: rgba(255,255,255,0.08);
   --line-strong: rgba(255,255,255,0.12);
   --line-hover: rgba(255,255,255,0.25);
-  --subtle-text: rgba(240,235,225,0.65);
   --card-bg: rgba(20,20,20,0.4);
   --input-bg: rgba(20,20,20,0.4);
 }
@@ -32,7 +31,6 @@ html.light {
   --line: rgba(0,0,0,0.08);
   --line-strong: rgba(0,0,0,0.12);
   --line-hover: rgba(0,0,0,0.25);
-  --subtle-text: rgba(26,24,20,0.6);
   --card-bg: rgba(228,221,208,0.4);
   --input-bg: rgba(228,221,208,0.5);
 }
@@ -102,10 +100,6 @@ html.light ::-webkit-scrollbar-thumb:hover {
 
 /* Custom utility classes */
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-
   .glass {
     background: rgba(8, 8, 8, 0.7);
     backdrop-filter: blur(20px);
@@ -120,21 +114,8 @@ html.light ::-webkit-scrollbar-thumb:hover {
     border: 1px solid var(--line-strong);
   }
 
-  .glow-accent {
-    box-shadow: 0 0 40px rgba(255,255,255,0.04),
-                0 0 80px rgba(255,255,255,0.02);
-  }
-
-  .glow-text {
-    text-shadow: 0 0 40px rgba(255,255,255,0.1);
-  }
-
   .gradient-text {
     color: var(--chrono-text);
-  }
-
-  .gradient-text-subtle {
-    color: var(--subtle-text);
   }
 
   .section-label {
@@ -148,19 +129,6 @@ html.light ::-webkit-scrollbar-thumb:hover {
 
   .archival-img {
     filter: brightness(0.85) saturate(0.5);
-  }
-
-  .noise-bg {
-    position: relative;
-  }
-
-  .noise-bg::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 1;
   }
 
   .timeline-line {
@@ -186,16 +154,6 @@ html.light ::-webkit-scrollbar-thumb:hover {
     border-color: var(--line-hover);
   }
 
-  .mask-gradient-b {
-    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-  }
-
-  .mask-gradient-t {
-    mask-image: linear-gradient(to top, black 70%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to top, black 70%, transparent 100%);
-  }
-
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -215,15 +173,6 @@ html.light ::-webkit-scrollbar-thumb:hover {
     user-select: none;
     line-height: 1;
   }
-}
-
-/* Lenis smooth scroll */
-html.lenis {
-  height: auto;
-}
-
-.lenis.lenis-smooth {
-  scroll-behavior: auto;
 }
 
 /* Selection color */
@@ -265,15 +214,6 @@ html.light .glass {
 html.light .glass-strong {
   background: rgba(245,240,232,0.94);
   border-color: rgba(0,0,0,0.12);
-}
-
-html.light .glow-accent {
-  box-shadow: 0 0 40px rgba(0,0,0,0.04),
-              0 0 80px rgba(0,0,0,0.02);
-}
-
-html.light .glow-text {
-  text-shadow: 0 0 40px rgba(0,0,0,0.1);
 }
 
 /* Accessibility: reduce all animations and transitions for users who prefer reduced motion */

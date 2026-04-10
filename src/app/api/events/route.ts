@@ -1,11 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
-import { VALID_CATEGORIES } from "@/lib/constants";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { validateCsrf } from "@/lib/csrf";
 import { validateImageUrl } from "@/lib/url-validation";
+import { createEventSchema, parseBody } from "@/lib/validation";
+import { apiSuccess, apiError, apiPaginated } from "@/lib/api-response";
+import { logger } from "@/lib/logger";
 
 const checkEventLimit = createRateLimiter("events", 30, 60_000);
 
@@ -42,7 +44,7 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     const prisma = getPrisma();
@@ -51,7 +53,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
     const { searchParams } = new URL(req.url);
@@ -61,10 +63,10 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(Math.max(parseInt(limitParam || "50", 10) || 50, 1), 100);
 
     const where: Record<string, unknown> = { userId: user.id, deletedAt: null };
-    if (year) {
+    if (year && year.trim() !== "") {
       const yearNum = parseInt(year, 10);
       if (isNaN(yearNum) || yearNum < 1900 || yearNum > 2100) {
-        return NextResponse.json({ error: "Invalid year parameter" }, { status: 400 });
+        return apiError("Invalid year parameter", 400);
       }
       const start = new Date(`${yearNum}-01-01T00:00:00Z`);
       const end = new Date(`${yearNum + 1}-01-01T00:00:00Z`);
@@ -83,10 +85,10 @@ export async function GET(req: NextRequest) {
     const events = sliced.map(formatEvent);
     const nextCursor = hasMore ? sliced[sliced.length - 1].id : undefined;
 
-    return NextResponse.json({ events, total: events.length, nextCursor });
+    return apiPaginated(events, "events", nextCursor);
   } catch (error) {
-    console.error("GET /api/events error:", error);
-    return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
+    logger.error("GET /api/events error", { error: String(error) });
+    return apiError("Failed to fetch events", 500);
   }
 }
 
@@ -98,14 +100,11 @@ export async function POST(req: NextRequest) {
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     if (!(await checkEventLimit(session.user.email)).allowed) {
-      return NextResponse.json(
-        { error: "Too many events created. Please wait a minute." },
-        { status: 429 }
-      );
+      return apiError("Too many events created. Please wait a minute.", 429);
     }
 
     const prisma = getPrisma();
@@ -114,54 +113,20 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
-    let body;
-    try {
-      body = await req.json();
-    } catch {
-      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-    }
-    const { title, date, endDate, location, latitude, longitude, description, category, imageUrl } = body;
+    const { data: body, error: validationError } = await parseBody(req, createEventSchema);
+    if (validationError) return validationError;
 
-    // Validation
-    if (!title || typeof title !== "string" || title.trim().length === 0) {
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
-    }
-    if (title.length > 500) {
-      return NextResponse.json({ error: "Title must be under 500 characters" }, { status: 400 });
-    }
-    if (!date || isNaN(new Date(date).getTime())) {
-      return NextResponse.json({ error: "Valid date is required" }, { status: 400 });
-    }
-    if (endDate && isNaN(new Date(endDate).getTime())) {
-      return NextResponse.json({ error: "Invalid end date" }, { status: 400 });
-    }
-    if (date && endDate && new Date(endDate) < new Date(date)) {
-      return NextResponse.json({ error: "End date must be after start date" }, { status: 400 });
-    }
-    if (latitude !== undefined && latitude !== null && (typeof latitude !== "number" || latitude < -90 || latitude > 90)) {
-      return NextResponse.json({ error: "Latitude must be between -90 and 90" }, { status: 400 });
-    }
-    if (longitude !== undefined && longitude !== null && (typeof longitude !== "number" || longitude < -180 || longitude > 180)) {
-      return NextResponse.json({ error: "Longitude must be between -180 and 180" }, { status: 400 });
-    }
-    if (description && typeof description === "string" && description.length > 5000) {
-      return NextResponse.json({ error: "Description must be under 5000 characters" }, { status: 400 });
-    }
+    const { title, date, endDate, location, latitude, longitude, description, category: cat, imageUrl } = body;
 
     if (imageUrl && typeof imageUrl === "string") {
       const urlError = validateImageUrl(imageUrl);
       if (urlError) {
-        return NextResponse.json({ error: urlError }, { status: 400 });
+        return apiError(urlError, 400);
       }
     }
-    if (location && typeof location === "string" && location.length > 500) {
-      return NextResponse.json({ error: "Location must be under 500 characters" }, { status: 400 });
-    }
-
-    const cat = category && VALID_CATEGORIES.includes(category.toLowerCase()) ? category.toLowerCase() : "life";
 
     const event = await prisma.event.create({
       data: {
@@ -179,10 +144,10 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ event: formatEvent(event) }, { status: 201 });
+    return apiSuccess({ event: formatEvent(event) }, 201);
   } catch (error) {
-    console.error("POST /api/events error:", error);
-    return NextResponse.json({ error: "Failed to create event" }, { status: 500 });
+    logger.error("POST /api/events error", { error: String(error) });
+    return apiError("Failed to create event", 500);
   }
 }
 
@@ -194,7 +159,7 @@ export async function DELETE(req: NextRequest) {
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("Unauthorized", 401);
     }
 
     const prisma = getPrisma();
@@ -203,7 +168,7 @@ export async function DELETE(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return apiError("User not found", 404);
     }
 
     const result = await prisma.event.updateMany({
@@ -211,9 +176,9 @@ export async function DELETE(req: NextRequest) {
       data: { deletedAt: new Date() },
     });
 
-    return NextResponse.json({ success: true, deleted: result.count });
+    return apiSuccess({ deleted: result.count });
   } catch (error) {
-    console.error("DELETE /api/events error:", error);
-    return NextResponse.json({ error: "Failed to delete events" }, { status: 500 });
+    logger.error("DELETE /api/events error", { error: String(error) });
+    return apiError("Failed to delete events", 500);
   }
 }

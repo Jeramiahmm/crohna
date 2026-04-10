@@ -3,9 +3,6 @@ import { useSession } from "next-auth/react";
 import { useCallback, useState } from "react";
 import { demoEvents, TimelineEvent } from "@/data/demo";
 
-const fetcher = (url: string) =>
-  fetch(url).then((r) => (r.ok ? r.json() : Promise.reject(r)));
-
 export function useEvents(limit = 50) {
   const { data: session, status } = useSession();
   const isReady = status !== "loading";
@@ -14,10 +11,7 @@ export function useEvents(limit = 50) {
   const { data, error, isLoading, mutate } = useSWR<{
     events: TimelineEvent[];
     nextCursor?: string;
-  }>(isReady && isAuthenticated ? `/api/events?limit=${limit}` : null, fetcher, {
-    revalidateOnFocus: true,
-    dedupingInterval: 5000,
-  });
+  }>(isReady && isAuthenticated ? `/api/events?limit=${limit}` : null);
 
   const [extraEvents, setExtraEvents] = useState<TimelineEvent[]>([]);
   const [extraCursor, setExtraCursor] = useState<string | undefined>();

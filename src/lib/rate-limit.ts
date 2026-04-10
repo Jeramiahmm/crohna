@@ -1,5 +1,6 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { logger } from "@/lib/logger";
 
 // Use Upstash Redis for distributed rate limiting that works across
 // serverless instances (e.g. Vercel). Falls back to in-memory if
@@ -61,10 +62,7 @@ function createLimiter(namespace: string, maxRequests: number, windowMs: number)
     return createUpstashLimiter(namespace, maxRequests, windowMs);
   }
   if (process.env.NODE_ENV === "production") {
-    console.warn(
-      `[Crohna] Warning: Rate limiter "${namespace}" using in-memory fallback in production. ` +
-      "This does not work across serverless instances. Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN."
-    );
+    logger.warn("Rate limiter using in-memory fallback in production", { namespace });
   }
   // Wrap sync fallback to match async interface
   const syncCheck = createMemoryLimiter(namespace, maxRequests, windowMs);

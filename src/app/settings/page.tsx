@@ -7,6 +7,7 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import { toast } from "sonner";
 import { useTheme } from "@/components/ui/ThemeProvider";
 import GoogleConnectModal from "@/components/ui/GoogleConnectModal";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 export default function SettingsPage() {
   const { data: session, status } = useSession();
@@ -17,9 +18,9 @@ export default function SettingsPage() {
   const [connectedAccounts, setConnectedAccounts] = useState<Record<string, boolean>>({});
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
-  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [accountDeleteConfirm, setAccountDeleteConfirm] = useState(false);
+  const [accountDialogOpen, setAccountDialogOpen] = useState(false);
   const [accountDeleting, setAccountDeleting] = useState(false);
 
   // Privacy preferences (server-backed with localStorage cache)
@@ -196,17 +197,11 @@ export default function SettingsPage() {
   };
 
   const handleDeleteAllEvents = async () => {
-    if (!deleteConfirm) {
-      setDeleteConfirm(true);
-      setTimeout(() => setDeleteConfirm(false), 5000);
-      return;
-    }
     setDeleting(true);
     try {
       const res = await fetch("/api/events", { method: "DELETE" });
       if (res.ok) {
         const data = await res.json();
-        setDeleteConfirm(false);
         toast.success(`Deleted ${data.deleted} events.`);
       } else {
         toast.error("Failed to delete events.");
@@ -215,18 +210,18 @@ export default function SettingsPage() {
       toast.error("Failed to delete events. Please try again.");
     } finally {
       setDeleting(false);
+      setDeleteDialogOpen(false);
     }
   };
 
   const handleDeleteAccount = async () => {
-    if (!accountDeleteConfirm) {
-      setAccountDeleteConfirm(true);
-      setTimeout(() => setAccountDeleteConfirm(false), 5000);
-      return;
-    }
     setAccountDeleting(true);
     try {
-      const res = await fetch("/api/user", { method: "DELETE" });
+      const res = await fetch("/api/user", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: "DELETE_MY_ACCOUNT" }),
+      });
       if (res.ok) {
         toast.success("Account deleted. Goodbye.");
         signOut({ callbackUrl: "/" });
@@ -237,6 +232,7 @@ export default function SettingsPage() {
       toast.error("Failed to delete account. Please try again.");
     } finally {
       setAccountDeleting(false);
+      setAccountDialogOpen(false);
     }
   };
 
@@ -503,18 +499,16 @@ export default function SettingsPage() {
               </button>
               <br />
               <button
-                onClick={handleDeleteAllEvents}
-                disabled={deleting}
-                className="text-sm font-body font-light text-red-400/70 hover:text-red-400 transition-colors disabled:opacity-50"
+                onClick={() => setDeleteDialogOpen(true)}
+                className="text-sm font-body font-light text-red-400/70 hover:text-red-400 transition-colors"
               >
-                {deleting ? "Deleting..." : deleteConfirm ? "Click again to confirm deletion" : "Delete all events"}
+                Delete all events
               </button>
               <button
-                onClick={handleDeleteAccount}
-                disabled={accountDeleting}
-                className="text-sm font-body font-light text-red-400/70 hover:text-red-400 transition-colors disabled:opacity-50"
+                onClick={() => setAccountDialogOpen(true)}
+                className="text-sm font-body font-light text-red-400/70 hover:text-red-400 transition-colors"
               >
-                {accountDeleting ? "Deleting account..." : accountDeleteConfirm ? "Click again to permanently delete your account" : "Delete account"}
+                Delete account
               </button>
             </div>
           </motion.div>
@@ -553,6 +547,28 @@ export default function SettingsPage() {
           isConnected={!!connectedAccounts[connectModal]}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDeleteAllEvents}
+        title="Delete all events?"
+        description="This will permanently remove all events from your timeline. This action cannot be undone."
+        confirmLabel="Delete All"
+        destructive
+        loading={deleting}
+      />
+
+      <ConfirmDialog
+        isOpen={accountDialogOpen}
+        onClose={() => setAccountDialogOpen(false)}
+        onConfirm={handleDeleteAccount}
+        title="Delete your account?"
+        description="This will permanently delete your account and all associated data including events, stories, and preferences. This action cannot be undone."
+        confirmLabel="Delete Account"
+        destructive
+        loading={accountDeleting}
+      />
     </div>
   );
 }
