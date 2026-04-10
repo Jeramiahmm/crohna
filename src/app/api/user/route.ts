@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { validateCsrf } from "@/lib/csrf";
 import { updateUserSchema, deleteAccountSchema, parseBody } from "@/lib/validation";
 import { apiSuccess, apiError } from "@/lib/api-response";
@@ -60,7 +61,7 @@ export async function PUT(req: NextRequest) {
       where: { email: session.user.email },
       data: {
         ...(name !== undefined && { name: name?.trim() || null }),
-        ...(preferences !== undefined && { preferences }),
+        ...(preferences !== undefined && { preferences: preferences as Prisma.InputJsonValue }),
       },
     });
 
