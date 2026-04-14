@@ -16,10 +16,10 @@ import { useStories } from "@/hooks/useStories";
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ delay, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ delay, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       className={className}
     >
       {children}
@@ -74,16 +74,16 @@ function HeroButtons() {
   };
 
   return (
-    <div className="absolute left-0 right-0 z-50 flex flex-col sm:flex-row items-center justify-center gap-4" style={{ bottom: "18vh" }}>
+    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12">
       <button
         onClick={handleGetStarted}
-        className="inline-flex cursor-pointer items-center justify-center rounded-full px-10 py-4 text-sm font-body font-light tracking-wide transition-all duration-300 bg-[var(--foreground)] text-[var(--background)] hover:scale-[1.02] active:scale-[0.98]"
+        className="inline-flex cursor-pointer items-center justify-center rounded-xl px-8 py-3.5 text-sm font-body font-medium tracking-wide transition-all duration-300 bg-chrono-accent text-white hover:opacity-90 active:scale-[0.98] shadow-[0_2px_12px_rgba(74,107,82,0.25)]"
       >
         Get Started
       </button>
       <Link
         href="/insights"
-        className="px-6 py-3 md:px-10 md:py-4 text-chrono-text hover:text-foreground border border-[var(--line-strong)] hover:border-[var(--line-hover)] rounded-full transition-all duration-500 text-sm font-body font-light tracking-wide inline-block cursor-pointer"
+        className="px-8 py-3.5 text-chrono-muted hover:text-chrono-text border border-[var(--line-strong)] hover:border-[var(--line-hover)] rounded-xl transition-all duration-300 text-sm font-body font-medium inline-block cursor-pointer"
       >
         View Insights
       </Link>
@@ -107,30 +107,29 @@ function HeroSection() {
       <div
         className="absolute inset-0 z-[1] pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse 60% 50% at 50% 40%, var(--chrono-glow) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse 50% 40% at 50% 45%, var(--chrono-glow) 0%, transparent 60%)",
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-chrono-bg/40 via-transparent to-chrono-bg z-[2] pointer-events-none" />
 
       <motion.div
         style={{ y, scale }}
-        className="relative z-10 text-center px-6 max-w-5xl mx-auto"
+        className="relative z-10 text-center px-6 max-w-4xl mx-auto"
       >
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2, duration: 1.5 }}
-          className="section-label mb-8"
+          className="section-label mb-6"
         >
-          A Digital Life Archive
+          Your Digital Life Story
         </motion.div>
 
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
-          className="font-display font-bold tracking-tight mb-10 text-chrono-text"
-          style={{ fontSize: "clamp(2.8rem, 7vw, 5.5rem)", lineHeight: 1.15 }}
+          className="font-display font-semibold tracking-tight mb-8 text-chrono-text"
+          style={{ fontSize: "clamp(2.6rem, 6vw, 4.8rem)", lineHeight: 1.15 }}
         >
           <span className="block">Your life,</span>
           <span className="block pb-1">
@@ -142,15 +141,12 @@ function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 1.2 }}
-          className="text-base md:text-lg font-body font-extralight max-w-lg mx-auto leading-relaxed text-chrono-muted"
+          className="text-base md:text-lg font-body font-normal max-w-lg mx-auto leading-relaxed text-chrono-muted"
         >
           A visual timeline of your memories, milestones, and places.
         </motion.p>
+        <HeroButtons />
       </motion.div>
-
-      {/* Buttons placed OUTSIDE the motion.div to avoid transform stacking context trapping pointer events */}
-      <HeroButtons />
-
     </section>
   );
 }
@@ -167,9 +163,9 @@ function OnThisDayWidget({ events }: { events?: TimelineEvent[] }) {
   });
 
   return (
-    <section className="relative py-10 px-6">
+    <section className="relative py-12 px-6">
       <div className="max-w-5xl mx-auto">
-        <div className="border-t border-b border-[var(--line)] py-8">
+        <div className="border-t border-b border-[var(--line)] py-10">
           <FadeUp>
             <span className="section-label mb-6 block text-center">On This Day</span>
           </FadeUp>
@@ -182,17 +178,17 @@ function OnThisDayWidget({ events }: { events?: TimelineEvent[] }) {
                   return (
                     <div
                       key={event.id}
-                      className="flex-shrink-0 w-48 sm:w-60 px-5 py-4 border border-[var(--line)] bg-[var(--card-bg)] hover:border-[var(--line-hover)] transition-all"
+                      className="flex-shrink-0 w-48 sm:w-60 px-5 py-4 border border-[var(--line)] bg-[var(--card-bg)] hover:border-[var(--line-hover)] rounded-xl transition-all shadow-[0_2px_8px_rgba(0,0,0,0.03)]"
                     >
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-lg font-display font-bold text-chrono-text">{year}</span>
+                        <span className="text-lg font-display font-semibold text-chrono-text">{year}</span>
                         {event.category && (
-                          <span className="px-2 py-0.5 text-[10px] font-body font-extralight border border-[var(--line)] rounded-full text-chrono-muted uppercase tracking-wider">
+                          <span className="px-2 py-0.5 text-[10px] font-body font-medium border border-[var(--line)] rounded-lg text-chrono-muted uppercase tracking-wider">
                             {event.category}
                           </span>
                         )}
                       </div>
-                      <p className="text-sm font-body font-light text-chrono-text leading-snug line-clamp-2">
+                      <p className="text-sm font-body font-normal text-chrono-text leading-snug line-clamp-2">
                         {event.title}
                       </p>
                     </div>
@@ -202,7 +198,7 @@ function OnThisDayWidget({ events }: { events?: TimelineEvent[] }) {
             </FadeUp>
           ) : (
             <FadeUp delay={0.1}>
-              <p className="text-center text-sm font-body font-extralight italic text-chrono-muted">
+              <p className="text-center text-sm font-body font-normal italic text-chrono-muted">
                 Nothing yet — but today could be the start of something worth remembering.
               </p>
             </FadeUp>
@@ -237,7 +233,7 @@ function HowItWorksSection() {
       <div className="max-w-5xl mx-auto">
         <FadeUp className="text-center mb-28">
           <span className="section-label mb-5 block">How It Works</span>
-          <h2 className="text-4xl md:text-5xl font-display font-bold tracking-tight text-chrono-text">
+          <h2 className="text-3xl md:text-5xl font-display font-semibold tracking-tight text-chrono-text">
             Three steps to your
             <br />
             <em>life story</em>
@@ -251,13 +247,13 @@ function HowItWorksSection() {
                 <div className="hidden md:block absolute top-4 left-[60%] right-[-40%] h-px bg-[var(--line)]" />
               )}
 
-              <div className="text-[11px] font-body font-extralight mb-4 text-chrono-accent tracking-[0.3em]">
+              <div className="w-10 h-10 rounded-xl bg-chrono-accent/10 flex items-center justify-center mb-5 mx-auto text-sm font-body font-semibold text-chrono-accent">
                 {step.number}
               </div>
-              <h3 className="text-lg font-display font-bold text-chrono-text mb-3">
+              <h3 className="text-lg font-display font-semibold text-chrono-text mb-3">
                 {step.title}
               </h3>
-              <p className="text-sm font-body font-extralight leading-relaxed max-w-xs mx-auto text-chrono-muted">
+              <p className="text-sm font-body font-normal leading-relaxed max-w-xs mx-auto text-chrono-muted">
                 {step.description}
               </p>
             </FadeUp>
@@ -355,12 +351,12 @@ function PlayYourStorySection({ events }: { events?: TimelineEvent[] }) {
       <div className="max-w-4xl mx-auto">
         <FadeUp className="text-center mb-20">
           <span className="section-label mb-5 block">Experience</span>
-          <h2 className="text-4xl md:text-5xl font-display font-bold tracking-tight mb-5 text-chrono-text">
+          <h2 className="text-3xl md:text-5xl font-display font-semibold tracking-tight mb-5 text-chrono-text">
             Play your
             <br />
             <em>story</em>
           </h2>
-          <p className="font-body font-extralight max-w-md mx-auto text-sm leading-relaxed text-chrono-muted">
+          <p className="font-body font-normal max-w-md mx-auto text-sm leading-relaxed text-chrono-muted">
             Watch your life unfold year by year in a cinematic sequence
           </p>
         </FadeUp>
@@ -372,16 +368,16 @@ function PlayYourStorySection({ events }: { events?: TimelineEvent[] }) {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               onClick={play}
-              className="group flex items-center gap-4 px-6 py-3 sm:px-10 sm:py-5 bg-[var(--card-bg)] border border-[var(--line)] rounded-full card-hover"
+              className="group flex items-center gap-4 px-6 py-3 sm:px-10 sm:py-5 bg-[var(--card-bg)] border border-[var(--line)] rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] transition-all duration-500"
             >
-              <div className="w-12 h-12 rounded-full border border-[var(--line-strong)] flex items-center justify-center group-hover:border-[var(--line-hover)] transition-colors duration-500">
-                <svg className="w-5 h-5 text-chrono-muted ml-0.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <div className="w-12 h-12 rounded-xl bg-chrono-accent/10 flex items-center justify-center group-hover:bg-chrono-accent/20 transition-colors duration-500">
+                <svg className="w-5 h-5 text-chrono-accent ml-0.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M8 5v14l11-7z" />
                 </svg>
               </div>
               <div className="text-left">
-                <div className="text-base font-display font-bold text-chrono-text">Play Your Story</div>
-                <div className="text-xs font-body font-extralight text-chrono-muted">{years[0]} — {years[years.length - 1]}</div>
+                <div className="text-base font-display font-semibold text-chrono-text">Play Your Story</div>
+                <div className="text-xs font-body font-normal text-chrono-muted">{years[0]} — {years[years.length - 1]}</div>
               </div>
             </motion.button>
           )}
@@ -397,7 +393,7 @@ function PlayYourStorySection({ events }: { events?: TimelineEvent[] }) {
                   transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                   className="text-center mb-10"
                 >
-                  <div className="text-5xl sm:text-7xl md:text-[8rem] font-display font-bold text-chrono-text leading-none">
+                  <div className="text-5xl sm:text-7xl md:text-[8rem] font-display font-semibold text-chrono-text leading-none">
                     {currentYear}
                   </div>
                 </motion.div>
@@ -414,11 +410,11 @@ function PlayYourStorySection({ events }: { events?: TimelineEvent[] }) {
                       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                       className="absolute text-center"
                     >
-                      <div className="text-lg md:text-xl font-display font-bold text-chrono-text mb-1">
+                      <div className="text-lg md:text-xl font-display font-semibold text-chrono-text mb-1">
                         {currentEvent.title}
                       </div>
                       {currentEvent.location && (
-                        <div className="text-xs font-body font-extralight text-chrono-muted">
+                        <div className="text-xs font-body font-normal text-chrono-muted">
                           {currentEvent.location}
                         </div>
                       )}
@@ -453,12 +449,12 @@ function PlayYourStorySection({ events }: { events?: TimelineEvent[] }) {
               transition={{ duration: 1 }}
               className="text-center"
             >
-              <div className="text-3xl md:text-4xl font-display font-bold text-chrono-text mb-4">
+              <div className="text-3xl md:text-4xl font-display font-semibold text-chrono-text mb-4">
                 Your story continues
               </div>
               <button
                 onClick={play}
-                className="mt-4 px-6 py-2.5 text-sm font-body font-light text-chrono-muted border border-[var(--line-strong)] hover:border-[var(--line-hover)] hover:text-chrono-text rounded-full transition-all duration-500"
+                className="mt-4 px-6 py-2.5 text-sm font-body font-medium text-chrono-muted border border-[var(--line-strong)] hover:border-[var(--line-hover)] hover:text-chrono-text rounded-xl transition-all duration-300"
               >
                 Replay
               </button>
@@ -495,21 +491,21 @@ function FeaturesSection() {
       <div className="max-w-5xl mx-auto">
         <FadeUp className="text-center mb-28">
           <span className="section-label mb-5 block">Features</span>
-          <h2 className="text-4xl md:text-5xl font-display font-bold tracking-tight text-chrono-text">
+          <h2 className="text-3xl md:text-5xl font-display font-semibold tracking-tight text-chrono-text">
             Everything you need to
             <br />
             <em>relive your story</em>
           </h2>
         </FadeUp>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-[var(--line)]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {features.map((feature, i) => (
             <FadeUp key={feature.title} delay={i * 0.1}>
-              <div className="group bg-chrono-bg p-5 sm:p-8 md:p-10 card-hover h-full">
-                <h3 className="text-lg font-display font-bold mb-3 text-chrono-text tracking-tight">
+              <div className="group bg-[var(--card-bg)] p-6 sm:p-8 md:p-10 rounded-2xl border border-[var(--line)] shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.06)] transition-all duration-500 h-full">
+                <h3 className="text-lg font-display font-semibold mb-3 text-chrono-text tracking-tight">
                   {feature.title}
                 </h3>
-                <p className="text-sm font-body font-extralight leading-relaxed text-chrono-muted">
+                <p className="text-sm font-body font-normal leading-relaxed text-chrono-muted">
                   {feature.description}
                 </p>
               </div>
@@ -532,10 +528,10 @@ function TimelinePreview({ events }: { events?: TimelineEvent[] }) {
 
         <FadeUp className="text-center mb-24">
           <span className="section-label mb-5 block">Chapters of Your Life</span>
-          <h2 className="text-4xl md:text-5xl font-display font-bold tracking-tight mb-5 text-chrono-text">
+          <h2 className="text-3xl md:text-5xl font-display font-semibold tracking-tight mb-5 text-chrono-text">
             Your life <em>in motion</em>
           </h2>
-          <p className="font-body font-extralight max-w-md mx-auto text-sm leading-relaxed text-chrono-muted">
+          <p className="font-body font-normal max-w-md mx-auto text-sm leading-relaxed text-chrono-muted">
             Every event becomes a card on your personal timeline
           </p>
         </FadeUp>
@@ -549,7 +545,7 @@ function TimelinePreview({ events }: { events?: TimelineEvent[] }) {
         <FadeUp className="text-center">
           <Link
             href="/timeline"
-            className="px-6 py-3 md:px-10 md:py-4 text-sm font-body font-light text-chrono-text border border-[var(--line-strong)] hover:border-[var(--line-hover)] hover:text-foreground rounded-full transition-all duration-500 inline-block"
+            className="px-6 py-3 md:px-10 md:py-4 text-sm font-body font-medium text-chrono-text border border-[var(--line-strong)] hover:border-[var(--line-hover)] hover:text-foreground rounded-full transition-all duration-500 inline-block"
           >
             Explore Full Timeline
           </Link>
@@ -613,18 +609,18 @@ function MapPreview({ events }: { events?: TimelineEvent[] }) {
       <div className="max-w-5xl mx-auto">
         <FadeUp className="text-center mb-24">
           <span className="section-label mb-5 block">A Record of Where You&apos;ve Been</span>
-          <h2 className="text-4xl md:text-5xl font-display font-bold tracking-tight mb-5 text-chrono-text">
+          <h2 className="text-3xl md:text-5xl font-display font-semibold tracking-tight mb-5 text-chrono-text">
             See where your
             <br />
             <em>story happened</em>
           </h2>
-          <p className="font-body font-extralight max-w-md mx-auto text-sm leading-relaxed text-chrono-muted">
+          <p className="font-body font-normal max-w-md mx-auto text-sm leading-relaxed text-chrono-muted">
             Every memory pinned to the places that matter most
           </p>
         </FadeUp>
 
         <FadeUp>
-          <div className="relative bg-[var(--card-bg)] p-5 sm:p-8 md:p-10 border border-[var(--line-strong)] overflow-hidden">
+          <div className="relative bg-[var(--card-bg)] p-5 sm:p-8 md:p-10 border border-[var(--line)] rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden">
             <div className="relative h-64 md:h-80 flex items-center justify-center">
               <div className="relative w-full h-full">
                 {locations.map((loc, i) => (
@@ -647,9 +643,9 @@ function MapPreview({ events }: { events?: TimelineEvent[] }) {
                         }}
                       />
                     </div>
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-1.5 bg-chrono-surface border border-[var(--line-strong)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-                      <p className="text-[10px] font-body font-extralight text-chrono-text">{loc.name}</p>
-                      <p className="text-[9px] font-body font-extralight text-chrono-muted">{loc.count} events</p>
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-1.5 bg-[var(--card-bg)] border border-[var(--line)] rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.06)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                      <p className="text-[11px] font-body font-medium text-chrono-text">{loc.name}</p>
+                      <p className="text-[10px] font-body font-normal text-chrono-muted">{loc.count} events</p>
                     </div>
                   </motion.div>
                 ))}
@@ -671,18 +667,18 @@ function MapPreview({ events }: { events?: TimelineEvent[] }) {
 
             <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap mt-6 pt-6 border-t border-[var(--line)]">
               <div className="text-center">
-                <div className="text-lg font-display font-bold text-chrono-text">{totalCities}</div>
-                <div className="text-[10px] font-body font-extralight text-chrono-muted uppercase tracking-[0.15em]">Cities</div>
+                <div className="text-xl font-display font-semibold text-chrono-text">{totalCities}</div>
+                <div className="text-[11px] font-body font-medium text-chrono-muted uppercase tracking-[0.12em]">Cities</div>
               </div>
               <div className="w-px h-8 bg-[var(--line)]" />
               <div className="text-center">
-                <div className="text-lg font-display font-bold text-chrono-text">{locations.length}</div>
-                <div className="text-[10px] font-body font-extralight text-chrono-muted uppercase tracking-[0.15em]">Top Locations</div>
+                <div className="text-xl font-display font-semibold text-chrono-text">{locations.length}</div>
+                <div className="text-[11px] font-body font-medium text-chrono-muted uppercase tracking-[0.12em]">Top Locations</div>
               </div>
               <div className="w-px h-8 bg-[var(--line)]" />
               <div className="text-center">
-                <div className="text-lg font-display font-bold text-chrono-text">{totalMemories}</div>
-                <div className="text-[10px] font-body font-extralight text-chrono-muted uppercase tracking-[0.15em]">Memories</div>
+                <div className="text-xl font-display font-semibold text-chrono-text">{totalMemories}</div>
+                <div className="text-[11px] font-body font-medium text-chrono-muted uppercase tracking-[0.12em]">Memories</div>
               </div>
             </div>
           </div>
@@ -691,7 +687,7 @@ function MapPreview({ events }: { events?: TimelineEvent[] }) {
         <FadeUp className="text-center mt-14">
           <Link
             href="/map"
-            className="px-6 py-3 md:px-10 md:py-4 text-sm font-body font-light text-chrono-text border border-[var(--line-strong)] hover:border-[var(--line-hover)] hover:text-foreground rounded-full transition-all duration-500 inline-block"
+            className="px-6 py-3 md:px-10 md:py-4 text-sm font-body font-medium text-chrono-text border border-[var(--line-strong)] hover:border-[var(--line-hover)] hover:text-foreground rounded-full transition-all duration-500 inline-block"
           >
             Explore Life Map
           </Link>
@@ -707,12 +703,12 @@ function StoriesPreview({ stories }: { stories?: AIStory[] }) {
       <div className="max-w-4xl mx-auto">
         <FadeUp className="text-center mb-24">
           <span className="section-label mb-5 block">Patterns in Your Story</span>
-          <h2 className="text-4xl md:text-5xl font-display font-bold tracking-tight mb-5 text-chrono-text">
+          <h2 className="text-3xl md:text-5xl font-display font-semibold tracking-tight mb-5 text-chrono-text">
             Narratives written about
             <br />
             <em>your life</em>
           </h2>
-          <p className="font-body font-extralight max-w-md mx-auto text-sm leading-relaxed text-chrono-muted">
+          <p className="font-body font-normal max-w-md mx-auto text-sm leading-relaxed text-chrono-muted">
             Emotional, personal narratives crafted about your journey
           </p>
         </FadeUp>
@@ -722,7 +718,7 @@ function StoriesPreview({ stories }: { stories?: AIStory[] }) {
         <FadeUp className="text-center mt-16">
           <Link
             href="/insights"
-            className="px-6 py-3 md:px-10 md:py-4 text-sm font-body font-light text-chrono-text border border-[var(--line-strong)] hover:border-[var(--line-hover)] hover:text-foreground rounded-full transition-all duration-500 inline-block"
+            className="px-6 py-3 md:px-10 md:py-4 text-sm font-body font-medium text-chrono-text border border-[var(--line-strong)] hover:border-[var(--line-hover)] hover:text-foreground rounded-full transition-all duration-500 inline-block"
           >
             View All Stories
           </Link>
@@ -753,25 +749,25 @@ function UseCasesSection() {
       <div className="max-w-5xl mx-auto">
         <FadeUp className="text-center mb-24">
           <span className="section-label mb-5 block">Example Use Cases</span>
-          <h2 className="text-4xl md:text-5xl font-display font-bold tracking-tight text-chrono-text">
+          <h2 className="text-3xl md:text-5xl font-display font-semibold tracking-tight text-chrono-text">
             How people use <em>Crohna</em>
           </h2>
         </FadeUp>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-[1px] bg-[var(--line)]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {useCases.map((uc, i) => (
             <FadeUp key={uc.persona} delay={i * 0.12}>
-              <div className="bg-chrono-bg p-5 sm:p-8 md:p-10 h-full flex flex-col">
-                <p className="text-sm font-body font-extralight leading-relaxed mb-8 flex-1 text-chrono-muted">
+              <div className="bg-[var(--card-bg)] p-6 sm:p-8 md:p-10 rounded-2xl border border-[var(--line)] shadow-[0_4px_20px_rgba(0,0,0,0.04)] h-full flex flex-col">
+                <p className="text-sm font-body font-normal leading-relaxed mb-8 flex-1 text-chrono-muted">
                   {uc.scenario}
                 </p>
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-body font-light border border-[var(--line-strong)] text-chrono-accent">
+                  <div className="w-8 h-8 rounded-xl bg-chrono-accent/10 flex items-center justify-center text-xs font-body font-semibold text-chrono-accent">
                     {uc.persona.split(" ")[1][0]}
                   </div>
                   <div>
-                    <div className="text-sm font-body font-light text-chrono-text">{uc.persona}</div>
-                    <div className="text-[10px] font-body font-extralight text-chrono-muted/60 uppercase tracking-wider">Example scenario</div>
+                    <div className="text-sm font-body font-medium text-chrono-text">{uc.persona}</div>
+                    <div className="text-[10px] font-body font-medium text-chrono-muted/60 uppercase tracking-wider">Example scenario</div>
                   </div>
                 </div>
               </div>
@@ -798,25 +794,25 @@ function CTASection() {
   return (
     <section className="relative py-[80px] md:py-[160px] px-6">
       <FadeUp className="relative max-w-3xl mx-auto text-center">
-        <h2 className="text-4xl md:text-6xl font-display font-bold tracking-tight mb-8 text-chrono-text">
+        <h2 className="text-3xl md:text-6xl font-display font-semibold tracking-tight mb-8 text-chrono-text">
           Ready to map
           <br />
           <em>your story?</em>
         </h2>
-        <p className="text-base font-body font-extralight max-w-md mx-auto mb-14 leading-relaxed text-chrono-muted">
+        <p className="text-base font-body font-normal max-w-md mx-auto mb-14 leading-relaxed text-chrono-muted">
           Transform your memories into a beautiful, interactive timeline.
         </p>
 
         <div className="relative z-50 flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
             onClick={handleGetStarted}
-            className="group relative inline-flex cursor-pointer items-center justify-center overflow-hidden whitespace-nowrap rounded-full px-12 py-4 text-base font-body font-light tracking-wide transition-all duration-300 bg-[var(--foreground)] text-[var(--background)] hover:scale-[1.02] active:scale-[0.98]"
+            className="group relative inline-flex cursor-pointer items-center justify-center overflow-hidden whitespace-nowrap rounded-xl px-10 py-4 text-base font-body font-medium tracking-wide transition-all duration-300 bg-chrono-accent text-white hover:opacity-90 active:scale-[0.98] shadow-[0_2px_12px_rgba(74,107,82,0.25)]"
           >
             Get Started
           </button>
           <a
             href="/insights"
-            className="px-6 py-3 md:px-10 md:py-4 text-chrono-text hover:text-foreground border border-[var(--line-strong)] hover:border-[var(--line-hover)] rounded-full transition-all duration-500 text-sm font-body font-light inline-block cursor-pointer"
+            className="px-6 py-3 md:px-10 md:py-4 text-chrono-text hover:text-foreground border border-[var(--line-strong)] hover:border-[var(--line-hover)] rounded-xl transition-all duration-300 text-sm font-body font-medium inline-block cursor-pointer"
           >
             See a Demo
           </a>
@@ -827,7 +823,7 @@ function CTASection() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3, duration: 1 }}
-          className="flex items-center justify-center gap-8 mt-16 text-xs font-body font-extralight text-chrono-muted"
+          className="flex items-center justify-center gap-8 mt-14 text-xs font-body font-medium text-chrono-muted"
         >
           <span>Free to start</span>
           <span className="w-px h-3 bg-[var(--line)]" />

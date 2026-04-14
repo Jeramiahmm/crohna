@@ -21,19 +21,19 @@ export default function AIStorySummary({ story, index }: AIStorySummaryProps) {
       }}
       className="relative group"
     >
-      <div className="relative bg-[var(--card-bg)] p-4 sm:p-8 md:p-12 border border-[var(--line-strong)] overflow-hidden card-hover">
+      <div className="relative rounded-2xl bg-[var(--card-bg)] p-4 sm:p-8 md:p-12 border border-[var(--line)] shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden">
         <div className="relative flex items-center gap-2 mb-6">
           <span className="section-label">
             Story
           </span>
-          <span className="text-xs font-body font-extralight text-chrono-muted">{story.period}</span>
+          <span className="text-xs font-body font-normal text-chrono-muted">{story.period}</span>
         </div>
 
-        <h3 className="relative text-2xl md:text-3xl font-display font-bold mb-4 text-chrono-text">
+        <h3 className="relative text-2xl md:text-3xl font-display font-semibold mb-4 text-chrono-text">
           {story.title}
         </h3>
 
-        <p className="relative font-body font-extralight leading-relaxed text-base mb-8 text-chrono-muted">
+        <p className="relative font-body font-normal leading-relaxed text-base mb-8 text-chrono-muted">
           {story.summary}
         </p>
 
@@ -47,14 +47,14 @@ export default function AIStorySummary({ story, index }: AIStorySummaryProps) {
               transition={{ delay: 0.3 + i * 0.1 }}
               className="flex items-start gap-3"
             >
-              <div className="w-1 h-1 rounded-full bg-chrono-glow mt-2 flex-shrink-0" />
-              <span className="text-sm font-body font-extralight text-chrono-muted">{highlight}</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-chrono-accent mt-2 flex-shrink-0" />
+              <span className="text-sm font-body font-normal text-chrono-muted">{highlight}</span>
             </motion.div>
           ))}
         </div>
 
         {story.stats && (
-          <div className="relative grid grid-cols-2 md:grid-cols-3 gap-[1px] bg-[var(--line)]">
+          <div className="relative grid grid-cols-2 md:grid-cols-3 gap-4">
             {Object.entries(story.stats).map(([key, value], i) => (
               <motion.div
                 key={key}
@@ -62,12 +62,12 @@ export default function AIStorySummary({ story, index }: AIStorySummaryProps) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.5 + i * 0.1 }}
-                className="bg-chrono-bg p-4"
+                className="rounded-xl bg-chrono-bg border border-[var(--line)] p-4"
               >
-                <div className="text-lg md:text-xl font-display font-bold text-chrono-text">
+                <div className="text-lg md:text-xl font-display font-semibold text-chrono-text">
                   {value}
                 </div>
-                <div className="text-[11px] font-body font-extralight text-chrono-muted uppercase tracking-wider mt-1">
+                <div className="text-[11px] font-body font-normal text-chrono-muted uppercase tracking-wider mt-1">
                   {key}
                 </div>
               </motion.div>

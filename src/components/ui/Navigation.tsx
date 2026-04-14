@@ -30,7 +30,7 @@ function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="w-8 h-8 rounded-full flex items-center justify-center text-chrono-muted hover:text-chrono-text transition-colors"
+      className="w-8 h-8 rounded-xl flex items-center justify-center text-chrono-muted hover:text-chrono-text hover:bg-[var(--line)] transition-all duration-300"
       aria-label="Toggle theme"
     >
       <AnimatePresence mode="wait" initial={false}>
@@ -42,7 +42,7 @@ function ThemeToggle() {
             exit={{ rotate: 90, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Moon size={16} strokeWidth={2} />
+            <Moon size={16} strokeWidth={1.8} />
           </motion.div>
         ) : (
           <motion.div
@@ -52,7 +52,7 @@ function ThemeToggle() {
             exit={{ rotate: -90, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Sun size={16} strokeWidth={2} />
+            <Sun size={16} strokeWidth={1.8} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -126,11 +126,11 @@ function SearchButton() {
     <>
       <button
         onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
-        className="w-8 h-8 rounded-full flex items-center justify-center text-chrono-muted hover:text-chrono-text transition-colors"
+        className="w-8 h-8 rounded-xl flex items-center justify-center text-chrono-muted hover:text-chrono-text hover:bg-[var(--line)] transition-all duration-300"
         aria-label="Search memories"
         data-search-bar
       >
-        <Search size={16} strokeWidth={2} />
+        <Search size={16} strokeWidth={1.8} />
       </button>
 
       <AnimatePresence>
@@ -141,11 +141,11 @@ function SearchButton() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed top-16 sm:top-20 left-0 right-0 z-50 overflow-hidden"
+            className="fixed top-20 left-0 right-0 z-50 overflow-hidden px-6"
           >
-            <div className="glass-strong px-6 py-4">
-              <div className="max-w-xl mx-auto flex items-center gap-3">
-                <Search size={16} className="text-chrono-muted flex-shrink-0" />
+            <div className="max-w-xl mx-auto bg-[var(--card-bg)] rounded-2xl border border-[var(--line)] shadow-[0_8px_32px_rgba(0,0,0,0.06)] px-5 py-4">
+              <div className="flex items-center gap-3">
+                <Search size={16} className="text-chrono-muted flex-shrink-0" strokeWidth={1.8} />
                 <input
                   ref={inputRef}
                   type="text"
@@ -156,7 +156,7 @@ function SearchButton() {
                   }}
                   placeholder="Search memories..."
                   maxLength={200}
-                  className="flex-1 bg-transparent text-sm text-chrono-text placeholder:text-chrono-muted outline-none font-body font-light"
+                  className="flex-1 bg-transparent text-sm text-chrono-text placeholder:text-chrono-muted outline-none font-body font-normal"
                 />
                 <button
                   onClick={() => {
@@ -166,7 +166,7 @@ function SearchButton() {
                   }}
                   className="text-chrono-muted hover:text-chrono-text transition-colors"
                 >
-                  <X size={16} />
+                  <X size={16} strokeWidth={1.8} />
                 </button>
               </div>
             </div>
@@ -197,7 +197,7 @@ function UserMenu() {
     return (
       <button
         onClick={() => signIn("google")}
-        className="px-4 py-1.5 text-xs font-body font-light text-chrono-muted border border-[var(--line-strong)] hover:border-[var(--line-hover)] hover:text-chrono-text rounded-full transition-all"
+        className="px-5 py-2 text-sm font-body font-medium text-white bg-chrono-accent hover:opacity-90 rounded-xl transition-all duration-300"
       >
         Sign In
       </button>
@@ -208,12 +208,12 @@ function UserMenu() {
     <div ref={menuRef} className="relative">
       <button
         onClick={() => setMenuOpen(!menuOpen)}
-        className="w-8 h-8 rounded-full overflow-hidden border border-[var(--line-strong)] hover:border-[var(--line-hover)] transition-colors"
+        className="w-8 h-8 rounded-xl overflow-hidden border border-[var(--line)] hover:border-[var(--line-hover)] transition-colors"
       >
         {session.user.image ? (
           <Image src={session.user.image} alt={session.user.name || "Profile"} width={32} height={32} className="w-full h-full object-cover" />
         ) : (
-          <span className="w-full h-full flex items-center justify-center text-xs font-body text-chrono-muted">
+          <span className="w-full h-full flex items-center justify-center text-xs font-body text-chrono-muted bg-chrono-surface">
             {session.user.name?.[0] || session.user.email?.[0]?.toUpperCase() || "U"}
           </span>
         )}
@@ -222,22 +222,22 @@ function UserMenu() {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            transition={{ duration: 0.2 }}
-            className="absolute right-0 top-full mt-2 w-48 bg-[var(--card-bg)] border border-[var(--line-strong)] shadow-lg z-50"
+            initial={{ opacity: 0, y: -5, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -5, scale: 0.97 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute right-0 top-full mt-2 w-52 bg-[var(--card-bg)] border border-[var(--line)] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] overflow-hidden z-50"
           >
             <div className="px-4 py-3 border-b border-[var(--line)]">
-              <div className="text-sm font-body font-light text-chrono-text truncate">{session.user.name}</div>
-              <div className="text-xs font-body font-light text-chrono-muted truncate">{session.user.email}</div>
+              <div className="text-sm font-body font-medium text-chrono-text truncate">{session.user.name}</div>
+              <div className="text-xs font-body text-chrono-muted truncate">{session.user.email}</div>
             </div>
-            <Link href="/settings" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 text-sm font-body font-light text-chrono-muted hover:text-chrono-text hover:bg-[var(--muted)] transition-colors">
+            <Link href="/settings" onClick={() => setMenuOpen(false)} className="block px-4 py-2.5 text-sm font-body text-chrono-muted hover:text-chrono-text hover:bg-[var(--line)] transition-all duration-200">
               Settings
             </Link>
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
-              className="w-full text-left px-4 py-2.5 text-sm font-body font-light text-red-400/70 hover:text-red-400 hover:bg-[var(--muted)] transition-colors"
+              className="w-full text-left px-4 py-2.5 text-sm font-body text-red-500/70 hover:text-red-500 hover:bg-[var(--line)] transition-all duration-200"
             >
               Sign Out
             </button>
@@ -276,21 +276,21 @@ export default function Navigation() {
         <NavBar items={tubelightItems} extraActions={extraActions} />
       </div>
 
-      {/* Mobile: hamburger nav with fullscreen overlay */}
+      {/* Mobile: hamburger nav */}
       <motion.nav
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className={`fixed top-0 left-0 right-0 z-50 md:hidden transition-all duration-500 ${
           scrolled
-            ? "backdrop-blur-xl bg-chrono-bg/90 border-b border-[var(--line-strong)] py-3"
-            : "bg-transparent py-5"
+            ? "backdrop-blur-xl bg-[var(--card-bg)]/90 border-b border-[var(--line)] py-3"
+            : "bg-transparent py-4"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-chrono-muted text-base leading-none select-none" aria-hidden="true">&#x2022;</span>
-            <span className="text-[13px] font-display font-bold tracking-[0.25em] uppercase text-chrono-text">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-2 h-2 rounded-full bg-chrono-accent" />
+            <span className="text-[15px] font-display font-semibold tracking-wide text-chrono-text">
               Crohna
             </span>
           </Link>
@@ -304,15 +304,15 @@ export default function Navigation() {
             >
               <motion.span
                 animate={{ rotate: mobileOpen ? 45 : 0, y: mobileOpen ? 6 : 0 }}
-                className="w-5 h-[1px] bg-chrono-text block"
+                className="w-5 h-[1.5px] bg-chrono-text block rounded-full"
               />
               <motion.span
                 animate={{ opacity: mobileOpen ? 0 : 1 }}
-                className="w-5 h-[1px] bg-chrono-text block"
+                className="w-5 h-[1.5px] bg-chrono-text block rounded-full"
               />
               <motion.span
                 animate={{ rotate: mobileOpen ? -45 : 0, y: mobileOpen ? -6 : 0 }}
-                className="w-5 h-[1px] bg-chrono-text block"
+                className="w-5 h-[1.5px] bg-chrono-text block rounded-full"
               />
             </button>
           </div>
@@ -326,23 +326,22 @@ export default function Navigation() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 backdrop-blur-2xl pt-24 px-8 md:hidden"
-            style={{ background: "color-mix(in srgb, var(--chrono-bg) 98%, transparent)" }}
+            className="fixed inset-0 z-40 bg-chrono-bg/98 backdrop-blur-2xl pt-24 px-8 md:hidden"
           >
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
               {NAV_ITEMS.map((item, i) => (
                 <motion.div
                   key={item.href}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 }}
+                  transition={{ delay: i * 0.08 }}
                 >
                   <Link
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
-                    className={`block text-xl sm:text-2xl font-display font-bold py-3 ${
+                    className={`block text-2xl font-display py-3 ${
                       pathname === item.href
-                        ? "text-chrono-text"
+                        ? "text-chrono-accent"
                         : "text-chrono-muted"
                     }`}
                   >
@@ -356,20 +355,20 @@ export default function Navigation() {
                 <>
                   <div className="flex items-center gap-3 mb-2">
                     {session.user.image ? (
-                      <Image src={session.user.image} alt={session.user.name || "Profile"} width={40} height={40} className="w-10 h-10 rounded-full" />
+                      <Image src={session.user.image} alt={session.user.name || "Profile"} width={40} height={40} className="w-10 h-10 rounded-xl" />
                     ) : (
-                      <div className="w-10 h-10 rounded-full border border-[var(--line-strong)] flex items-center justify-center text-chrono-muted">
+                      <div className="w-10 h-10 rounded-xl border border-[var(--line)] flex items-center justify-center text-chrono-muted bg-chrono-surface">
                         {session.user.name?.[0] || "U"}
                       </div>
                     )}
                     <div>
-                      <div className="text-sm font-body font-light text-chrono-text">{session.user.name}</div>
-                      <div className="text-xs font-body font-light text-chrono-muted">{session.user.email}</div>
+                      <div className="text-sm font-body font-medium text-chrono-text">{session.user.name}</div>
+                      <div className="text-xs font-body text-chrono-muted">{session.user.email}</div>
                     </div>
                   </div>
                   <button
                     onClick={() => { setMobileOpen(false); signOut({ callbackUrl: "/" }); }}
-                    className="w-full py-3 text-sm font-body font-light text-red-400/70 border border-[var(--line-strong)] rounded-full"
+                    className="w-full py-3 text-sm font-body text-red-500/70 border border-[var(--line)] rounded-xl"
                   >
                     Sign Out
                   </button>
@@ -377,7 +376,7 @@ export default function Navigation() {
               ) : (
                 <button
                   onClick={() => { setMobileOpen(false); signIn("google", { callbackUrl: "/timeline" }); }}
-                  className="w-full py-3 text-sm font-body font-light bg-foreground text-background rounded-full"
+                  className="w-full py-3 text-sm font-body font-medium bg-chrono-accent text-white rounded-xl"
                 >
                   Get Started
                 </button>

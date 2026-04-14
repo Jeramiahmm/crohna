@@ -3,19 +3,18 @@
 import { useEffect, useRef } from "react";
 
 const TICKER_TEXT =
-  "MEMORIES \u00B7 MILESTONES \u00B7 PLACES \u00B7 2022 \u00B7 2023 \u00B7 2024 \u00B7 YOUR STORY \u00B7 ";
+  "memories \u00B7 milestones \u00B7 places \u00B7 stories \u00B7 chapters \u00B7 your journey \u00B7 ";
 
 export default function MarqueeTicker() {
   const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Respect prefers-reduced-motion: skip animation entirely
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
 
     let raf: number;
     let x = 0;
-    const speed = 0.3;
+    const speed = 0.25;
 
     const animate = () => {
       if (!trackRef.current) return;
@@ -31,12 +30,12 @@ export default function MarqueeTicker() {
   }, []);
 
   return (
-    <div className="w-full overflow-hidden py-8 select-none">
+    <div className="w-full overflow-hidden py-10 select-none">
       <div ref={trackRef} className="flex whitespace-nowrap will-change-transform">
         {Array.from({ length: 8 }).map((_, i) => (
           <span
             key={i}
-            className="font-display font-thin text-[11px] tracking-[0.4em] uppercase text-[var(--line)]"
+            className="font-display italic text-[13px] tracking-[0.2em] text-[var(--line-hover)]"
           >
             {TICKER_TEXT}
           </span>

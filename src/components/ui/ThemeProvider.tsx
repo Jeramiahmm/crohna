@@ -5,7 +5,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 type Theme = "dark" | "light";
 
 const ThemeContext = createContext<{ theme: Theme; toggle: () => void }>({
-  theme: "dark",
+  theme: "light",
   toggle: () => {},
 });
 
@@ -14,7 +14,7 @@ export function useTheme() {
 }
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("light");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -28,10 +28,9 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     if (!mounted) return;
     const root = document.documentElement;
-    if (theme === "light") {
-      root.classList.add("light");
-    } else {
-      root.classList.remove("light");
+    root.classList.remove("light", "dark");
+    if (theme === "dark") {
+      root.classList.add("dark");
     }
     localStorage.setItem("chrono-theme", theme);
   }, [theme, mounted]);

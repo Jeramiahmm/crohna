@@ -3,8 +3,11 @@
 (function () {
   try {
     var t = localStorage.getItem("chrono-theme");
-    if (t === "light") document.documentElement.classList.add("light");
+    if (t === "dark") {
+      document.documentElement.classList.add("dark");
+    }
+    // Default is light — no class needed (CSS :root handles it)
   } catch (e) {
-    // localStorage unavailable (private browsing, etc.) — default dark theme
+    // localStorage unavailable (private browsing, etc.) — default light theme
   }
 })();

@@ -2,13 +2,15 @@
 
 import { useEffect, useRef } from "react";
 
-interface Star {
+interface Orb {
   x: number;
   y: number;
   radius: number;
   baseOpacity: number;
   breathSpeed: number;
   breathOffset: number;
+  hue: number;
+  drift: number;
 }
 
 export default function ParticleField() {
@@ -16,8 +18,8 @@ export default function ParticleField() {
   const animationRef = useRef<number>(0);
 
   useEffect(() => {
-    // Respect prefers-reduced-motion: render a static frame instead of animating
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isDark = document.documentElement.classList.contains("dark");
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -34,17 +36,19 @@ export default function ParticleField() {
     resize();
     window.addEventListener("resize", resize);
 
-    const starCount = 60;
+    const orbCount = 5;
     const w = () => canvas.offsetWidth;
     const h = () => canvas.offsetHeight;
 
-    const stars: Star[] = Array.from({ length: starCount }, () => ({
-      x: Math.random() * w(),
-      y: Math.random() * h(),
-      radius: Math.random() * 1.2 + 0.3,
-      baseOpacity: Math.random() * 0.4 + 0.1,
-      breathSpeed: Math.random() * 0.0015 + 0.0005,
+    const orbs: Orb[] = Array.from({ length: orbCount }, (_, i) => ({
+      x: (w() * (i + 1)) / (orbCount + 1) + (Math.random() - 0.5) * w() * 0.2,
+      y: h() * 0.3 + Math.random() * h() * 0.4,
+      radius: Math.random() * 120 + 80,
+      baseOpacity: Math.random() * 0.03 + 0.02,
+      breathSpeed: Math.random() * 0.0003 + 0.0002,
       breathOffset: Math.random() * Math.PI * 2,
+      hue: 140 + Math.random() * 30,
+      drift: Math.random() * 0.08 + 0.02,
     }));
 
     const draw = (time: number) => {
@@ -52,21 +56,30 @@ export default function ParticleField() {
       const height = h();
       ctx.clearRect(0, 0, width, height);
 
-      for (const star of stars) {
-        const breath = Math.sin(time * star.breathSpeed + star.breathOffset) * 0.5 + 0.5;
-        const opacity = star.baseOpacity * (0.3 + breath * 0.7);
-        const radius = star.radius * (0.85 + breath * 0.3);
+      for (const orb of orbs) {
+        const breath = Math.sin(time * orb.breathSpeed + orb.breathOffset) * 0.5 + 0.5;
+        const opacity = orb.baseOpacity * (0.4 + breath * 0.6);
+        const radius = orb.radius * (0.9 + breath * 0.2);
+        const offsetY = Math.sin(time * orb.drift * 0.01 + orb.breathOffset) * 15;
 
-        // Soft glow
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, radius * 3, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.04})`;
-        ctx.fill();
+        const gradient = ctx.createRadialGradient(
+          orb.x, orb.y + offsetY, 0,
+          orb.x, orb.y + offsetY, radius
+        );
 
-        // Core dot — white
+        if (isDark) {
+          gradient.addColorStop(0, `hsla(${orb.hue}, 25%, 65%, ${opacity * 1.5})`);
+          gradient.addColorStop(0.5, `hsla(${orb.hue}, 20%, 50%, ${opacity * 0.5})`);
+          gradient.addColorStop(1, `hsla(${orb.hue}, 15%, 40%, 0)`);
+        } else {
+          gradient.addColorStop(0, `hsla(${orb.hue}, 30%, 75%, ${opacity})`);
+          gradient.addColorStop(0.5, `hsla(${orb.hue}, 25%, 80%, ${opacity * 0.4})`);
+          gradient.addColorStop(1, `hsla(${orb.hue}, 20%, 85%, 0)`);
+        }
+
         ctx.beginPath();
-        ctx.arc(star.x, star.y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+        ctx.arc(orb.x, orb.y + offsetY, radius, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
         ctx.fill();
       }
 
@@ -74,7 +87,6 @@ export default function ParticleField() {
     };
 
     if (prefersReducedMotion) {
-      // Draw a single static frame
       draw(0);
     } else {
       animationRef.current = requestAnimationFrame(draw);
@@ -90,7 +102,7 @@ export default function ParticleField() {
     <canvas
       ref={canvasRef}
       className="absolute inset-0 z-0 w-full h-full pointer-events-none"
-      style={{ opacity: 0.8 }}
+      style={{ opacity: 0.7 }}
     />
   );
 }
