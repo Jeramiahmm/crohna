@@ -36,8 +36,11 @@ vi.mock("@/lib/auth", () => ({
   authOptions: {},
 }));
 
-// Mock env (no-op)
-vi.mock("@/lib/env", () => ({}));
+// Mock env (no-op in tests)
+vi.mock("@/lib/env", () => ({
+  validateEnv: vi.fn(),
+  env: {},
+}));
 
 // Mock logger (silent in tests)
 vi.mock("@/lib/logger", () => ({

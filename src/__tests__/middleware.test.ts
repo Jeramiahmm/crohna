@@ -18,6 +18,7 @@ function makeRequest(
 
 beforeEach(() => {
   vi.clearAllMocks();
+  process.env.NEXTAUTH_SECRET = "test-secret-for-middleware";
 });
 
 describe("Middleware — Public Routes", () => {
