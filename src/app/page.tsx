@@ -78,13 +78,13 @@ function HeroButtons() {
     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12">
       <button
         onClick={handleGetStarted}
-        className="inline-flex cursor-pointer items-center justify-center rounded-xl px-8 py-3.5 text-sm font-body font-medium tracking-wide transition-all duration-300 bg-chrono-accent text-white hover:opacity-90 active:scale-[0.98] shadow-[0_2px_12px_rgba(74,107,82,0.25)]"
+        className="inline-flex cursor-pointer items-center justify-center rounded-xl px-8 py-3.5 text-sm font-body font-medium tracking-wide transition-all duration-300 bg-chrono-accent text-white hover:opacity-90 active:scale-[0.98] shadow-[0_2px_16px_rgba(61,90,68,0.3)]"
       >
         Get Started
       </button>
       <Link
         href="/insights"
-        className="px-8 py-3.5 text-chrono-muted hover:text-chrono-text border border-[var(--line-strong)] hover:border-[var(--line-hover)] rounded-xl transition-all duration-300 text-sm font-body font-medium inline-block cursor-pointer"
+        className="px-8 py-3.5 text-chrono-text/70 hover:text-chrono-text border border-chrono-text/15 hover:border-chrono-text/30 rounded-xl transition-all duration-300 text-sm font-body font-medium inline-block cursor-pointer"
       >
         View Insights
       </Link>
@@ -121,7 +121,7 @@ function HeroSection() {
           <span className="block">Your life,</span>
           <span className="block">
             <AnimatedWord />{" "}
-            <span className="font-semibold">mapped</span>
+            <span className="font-bold">mapped</span>
           </span>
         </motion.h1>
 
@@ -129,7 +129,7 @@ function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 1.2 }}
-          className="text-lg md:text-xl font-body font-normal max-w-lg mx-auto leading-relaxed text-chrono-muted mt-8"
+          className="text-lg md:text-xl font-body font-normal max-w-lg mx-auto leading-relaxed text-chrono-text/60 mt-8"
         >
           The visual timeline that turns memories
           <br className="hidden sm:block" />
@@ -142,7 +142,7 @@ function HeroSection() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.4, duration: 1 }}
-          className="mt-6 text-sm font-body text-chrono-muted/60"
+          className="mt-6 text-sm font-body text-chrono-text/40"
         >
           Free to start. No credit card required.
         </motion.p>
@@ -154,28 +154,28 @@ function HeroSection() {
         animate={{ opacity: 1 }}
         transition={{ delay: 1.6, duration: 1.5 }}
         className="absolute bottom-0 left-0 right-0 z-10 overflow-hidden pointer-events-none"
-        style={{ height: "30vh" }}
+        style={{ height: "35vh" }}
       >
         <div className="w-[200%] h-full flow-text-track">
-          <svg viewBox="0 0 2400 300" className="w-full h-full" preserveAspectRatio="none">
+          <svg viewBox="0 0 2400 350" className="w-full h-full" preserveAspectRatio="none">
             <defs>
-              <path id="curve1" d="M 0,250 Q 300,50 600,150 Q 900,250 1200,80" fill="none" />
-              <path id="curve2" d="M 1200,250 Q 1500,50 1800,150 Q 2100,250 2400,80" fill="none" />
+              <path id="curve1" d="M 0,280 Q 300,80 600,180 Q 900,280 1200,100" fill="none" />
+              <path id="curve2" d="M 1200,280 Q 1500,80 1800,180 Q 2100,280 2400,100" fill="none" />
             </defs>
             <text
-              className="fill-current text-chrono-text"
-              style={{ fontSize: "28px", fontFamily: "'EB Garamond', Georgia, serif", opacity: 0.12 }}
+              className="fill-current text-chrono-accent"
+              style={{ fontSize: "42px", fontFamily: "'EB Garamond', Georgia, serif", opacity: 0.18, fontStyle: "italic" }}
             >
               <textPath href="#curve1" startOffset="0%">
-                memories · milestones · places · stories · chapters · your journey · beautifully mapped · memories · milestones
+                memories · milestones · places · stories · chapters · your journey · beautifully mapped
               </textPath>
             </text>
             <text
-              className="fill-current text-chrono-text"
-              style={{ fontSize: "28px", fontFamily: "'EB Garamond', Georgia, serif", opacity: 0.12 }}
+              className="fill-current text-chrono-accent"
+              style={{ fontSize: "42px", fontFamily: "'EB Garamond', Georgia, serif", opacity: 0.18, fontStyle: "italic" }}
             >
               <textPath href="#curve2" startOffset="0%">
-                memories · milestones · places · stories · chapters · your journey · beautifully mapped · memories · milestones
+                memories · milestones · places · stories · chapters · your journey · beautifully mapped
               </textPath>
             </text>
           </svg>
@@ -445,7 +445,7 @@ function PlayYourStorySection({ events }: { events?: TimelineEvent[] }) {
             <br />
             <em>story</em>
           </h2>
-          <p className="font-body font-normal max-w-md mx-auto text-sm leading-relaxed text-chrono-muted">
+          <p className="font-body font-normal max-w-md mx-auto text-sm leading-relaxed text-chrono-text/50">
             Watch your life unfold year by year in a cinematic sequence
           </p>
         </FadeUp>
@@ -597,7 +597,7 @@ function FeaturesSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {features.map((feature, i) => (
             <FadeUp key={feature.title} delay={i * 0.1}>
-              <div className="group bg-[var(--card-bg)] p-8 md:p-10 rounded-2xl border border-[var(--line)] hover:border-chrono-accent/30 hover:shadow-[0_8px_32px_rgba(74,107,82,0.06)] transition-all duration-500 h-full">
+              <div className="group bg-[var(--card-bg)] p-8 md:p-10 rounded-2xl border border-[var(--line)] hover:border-chrono-accent/30 hover:shadow-[0_8px_32px_rgba(61,90,68,0.08)] transition-all duration-500 h-full">
                 <span className="text-xs font-body font-medium text-chrono-accent tracking-widest">{feature.number}</span>
                 <h3 className="text-2xl md:text-3xl font-display mt-3 mb-4 text-chrono-text tracking-tight" style={{ fontWeight: 400 }}>
                   {feature.title}
@@ -628,7 +628,7 @@ function TimelinePreview({ events }: { events?: TimelineEvent[] }) {
           <h2 className="text-4xl md:text-6xl font-display tracking-tight mb-5 text-chrono-text">
             Your life <em>in motion</em>
           </h2>
-          <p className="font-body font-normal max-w-md mx-auto text-sm leading-relaxed text-chrono-muted">
+          <p className="font-body font-normal max-w-md mx-auto text-sm leading-relaxed text-chrono-text/50">
             Every event becomes a card on your personal timeline
           </p>
         </FadeUp>
@@ -711,7 +711,7 @@ function MapPreview({ events }: { events?: TimelineEvent[] }) {
             <br />
             <em>story happened</em>
           </h2>
-          <p className="font-body font-normal max-w-md mx-auto text-sm leading-relaxed text-chrono-muted">
+          <p className="font-body font-normal max-w-md mx-auto text-sm leading-relaxed text-chrono-text/50">
             Every memory pinned to the places that matter most
           </p>
         </FadeUp>
@@ -805,7 +805,7 @@ function StoriesPreview({ stories }: { stories?: AIStory[] }) {
             <br />
             <em>your life</em>
           </h2>
-          <p className="font-body font-normal max-w-md mx-auto text-sm leading-relaxed text-chrono-muted">
+          <p className="font-body font-normal max-w-md mx-auto text-sm leading-relaxed text-chrono-text/50">
             Emotional, personal narratives crafted about your journey
           </p>
         </FadeUp>
@@ -855,7 +855,7 @@ function UseCasesSection() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {useCases.map((uc, i) => (
             <FadeUp key={uc.persona} delay={i * 0.12}>
-              <div className="bg-[var(--card-bg)] p-6 sm:p-8 md:p-10 rounded-2xl border border-[var(--line)] hover:border-chrono-accent/30 hover:shadow-[0_8px_32px_rgba(74,107,82,0.06)] transition-all duration-500 h-full flex flex-col">
+              <div className="bg-[var(--card-bg)] p-6 sm:p-8 md:p-10 rounded-2xl border border-[var(--line)] hover:border-chrono-accent/30 hover:shadow-[0_8px_32px_rgba(61,90,68,0.08)] transition-all duration-500 h-full flex flex-col">
                 <p className="text-sm font-body font-normal leading-relaxed mb-8 flex-1 text-chrono-muted">
                   {uc.scenario}
                 </p>

@@ -14,9 +14,8 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 py-32">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
           <div className="md:col-span-2">
-            <Link href="/" className="flex items-center gap-3 mb-5">
-              <div className="w-3 h-3 rounded-full bg-chrono-accent" />
-              <span className="text-[14px] font-body font-semibold tracking-[0.04em] text-chrono-text">
+            <Link href="/" className="flex items-center mb-5">
+              <span className="text-[16px] font-body font-bold tracking-[-0.01em] text-chrono-text">
                 Crohna
               </span>
             </Link>

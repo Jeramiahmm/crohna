@@ -22,22 +22,14 @@ export default function LoadingScreen() {
           transition={{ duration: reducedMotion ? 0 : 0.4, ease: "easeInOut" }}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-chrono-bg"
         >
-          <div className="flex flex-col items-center gap-4">
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="w-4 h-4 rounded-full bg-chrono-accent"
-            />
-            <motion.span
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
-              className="text-[18px] font-body font-semibold tracking-[0.04em] text-chrono-text"
-            >
-              Crohna
-            </motion.span>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="text-[22px] font-body font-bold tracking-[-0.01em] text-chrono-text"
+          >
+            Crohna
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

@@ -5,34 +5,34 @@
 :root {
   /* Wispr Flow inspired — light, editorial, quiet luxury */
   --chrono-bg: #FAF8F5;
-  --chrono-surface: #F3F0EB;
+  --chrono-surface: #F0EDE8;
   --chrono-card: #FFFFFF;
-  --chrono-accent: #4A6B52;
-  --chrono-glow: rgba(74, 107, 82, 0.08);
-  --chrono-text: #1A1A1A;
-  --chrono-muted: rgba(26, 26, 26, 0.5);
+  --chrono-accent: #3D5A44;
+  --chrono-glow: rgba(61, 90, 68, 0.10);
+  --chrono-text: #111111;
+  --chrono-muted: rgba(17, 17, 17, 0.55);
 
-  --line: rgba(26, 26, 26, 0.08);
-  --line-strong: rgba(26, 26, 26, 0.10);
-  --line-hover: rgba(26, 26, 26, 0.22);
+  --line: rgba(17, 17, 17, 0.10);
+  --line-strong: rgba(17, 17, 17, 0.15);
+  --line-hover: rgba(17, 17, 17, 0.28);
   --card-bg: #FFFFFF;
-  --input-bg: #F3F0EB;
+  --input-bg: #F0EDE8;
 }
 
 html.light {
   --chrono-bg: #FAF8F5;
-  --chrono-surface: #F3F0EB;
+  --chrono-surface: #F0EDE8;
   --chrono-card: #FFFFFF;
-  --chrono-accent: #4A6B52;
-  --chrono-glow: rgba(74, 107, 82, 0.08);
-  --chrono-text: #1A1A1A;
-  --chrono-muted: rgba(26, 26, 26, 0.5);
+  --chrono-accent: #3D5A44;
+  --chrono-glow: rgba(61, 90, 68, 0.10);
+  --chrono-text: #111111;
+  --chrono-muted: rgba(17, 17, 17, 0.55);
 
-  --line: rgba(26, 26, 26, 0.08);
-  --line-strong: rgba(26, 26, 26, 0.10);
-  --line-hover: rgba(26, 26, 26, 0.22);
+  --line: rgba(17, 17, 17, 0.10);
+  --line-strong: rgba(17, 17, 17, 0.15);
+  --line-hover: rgba(17, 17, 17, 0.28);
   --card-bg: #FFFFFF;
-  --input-bg: #F3F0EB;
+  --input-bg: #F0EDE8;
 }
 
 html.dark {
@@ -190,7 +190,7 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 
 /* Selection color */
 ::selection {
-  background: rgba(74, 107, 82, 0.15);
+  background: rgba(61, 90, 68, 0.18);
   color: var(--chrono-text);
 }
 

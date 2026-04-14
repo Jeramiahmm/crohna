@@ -74,8 +74,8 @@ const config: Config = {
           "50%": { opacity: "0.5", transform: "scale(1.1)" },
         },
         whitePulse: {
-          "0%, 100%": { boxShadow: "0 0 8px rgba(74,107,82,0.1)" },
-          "50%": { boxShadow: "0 0 20px rgba(74,107,82,0.2)" },
+          "0%, 100%": { boxShadow: "0 0 8px rgba(61,90,68,0.12)" },
+          "50%": { boxShadow: "0 0 20px rgba(61,90,68,0.25)" },
         },
         markerRing: {
           "0%": { transform: "scale(1)", opacity: "0.6" },
