@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TimelineEvent } from "@/data/demo";
 import { formatDate, resolveImageUrl, getCategoryColor } from "@/lib/utils";
 import { useTheme } from "@/components/ui/ThemeProvider";
+import { logger } from "@/lib/logger";
 import Image from "next/image";
 import Link from "next/link";
 import L from "leaflet";
@@ -77,7 +78,7 @@ export default function EventMap({ events }: EventMapProps) {
       leafletMap.current = map;
       setMapLoaded(true);
     } catch (error) {
-      console.error("Failed to initialize map:", error);
+      logger.error("Failed to initialize map", { error: String(error) });
     }
 
     return () => {

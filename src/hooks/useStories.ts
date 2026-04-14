@@ -9,7 +9,9 @@ export function useStories() {
 
   const { data, error, isLoading, mutate } = useSWR<{
     stories: AIStory[];
-  }>(isReady && isAuthenticated ? "/api/stories" : null);
+  }>(isReady && isAuthenticated ? "/api/stories" : null, {
+    dedupingInterval: 10000,
+  });
 
   const stories = data?.stories || [];
   const isShowingDemo = isReady && !isAuthenticated;

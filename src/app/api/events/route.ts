@@ -58,8 +58,13 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const year = searchParams.get("year");
-    const cursor = searchParams.get("cursor");
+    const cursor = searchParams.get("cursor") || undefined;
     const limitParam = searchParams.get("limit");
+
+    // Validate cursor format (CUIDs are alphanumeric)
+    if (cursor && !/^[a-z0-9]+$/i.test(cursor)) {
+      return apiError("Invalid cursor", 400);
+    }
     const limit = Math.min(Math.max(parseInt(limitParam || "50", 10) || 50, 1), 100);
 
     const where: Record<string, unknown> = { userId: user.id, deletedAt: null };

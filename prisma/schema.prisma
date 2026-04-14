@@ -76,6 +76,7 @@ model Event {
 
   @@unique([userId, sourceId])
   @@index([userId, date])
+  @@index([userId, createdAt])
   @@index([userId, category])
   @@index([userId, source])
   @@index([userId, deletedAt])

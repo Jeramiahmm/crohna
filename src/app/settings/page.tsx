@@ -77,7 +77,8 @@ export default function SettingsPage() {
   // Load connection status from DB
   useEffect(() => {
     if (!session) return;
-    fetch("/api/google/status")
+    const controller = new AbortController();
+    fetch("/api/google/status", { signal: controller.signal })
       .then((res) => res.ok ? res.json() : { calendar: false, photos: false })
       .then((data) => {
         setConnectedAccounts({
@@ -86,6 +87,7 @@ export default function SettingsPage() {
         });
       })
       .catch(() => {});
+    return () => controller.abort();
   }, [session]);
 
   const refreshConnectionStatus = () => {

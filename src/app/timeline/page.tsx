@@ -187,9 +187,9 @@ function TimelinePage() {
   const categoryFiltered = selectedCategories.size === 0 ? events : events.filter((e) => e.category && selectedCategories.has(e.category));
   const dateFiltered = hasDateFilter
     ? categoryFiltered.filter((e) => {
-        const eventDate = e.date.slice(0, 10);
-        if (dateFrom && eventDate < dateFrom) return false;
-        if (dateTo && eventDate > dateTo) return false;
+        const eventTime = new Date(e.date).getTime();
+        if (dateFrom && eventTime < new Date(dateFrom).getTime()) return false;
+        if (dateTo && eventTime > new Date(dateTo + "T23:59:59").getTime()) return false;
         return true;
       })
     : categoryFiltered;

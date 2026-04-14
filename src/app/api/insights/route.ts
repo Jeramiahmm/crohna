@@ -55,7 +55,7 @@ export async function GET() {
         where: { userId: user.id, deletedAt: null },
         select: { date: true },
         orderBy: { date: "desc" },
-        take: 10_000,
+        take: 2_000,
       }),
     ]);
 

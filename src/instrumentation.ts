@@ -1,7 +1,8 @@
 export async function register() {
   if (process.env.NODE_ENV === "production") {
     // Validate environment on startup
-    await import("@/lib/env");
+    const { validateEnv } = await import("@/lib/env");
+    validateEnv();
 
     const { logger } = await import("@/lib/logger");
     logger.info("Crohna server starting", {

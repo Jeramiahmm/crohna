@@ -66,7 +66,11 @@ export async function middleware(req: NextRequest) {
   // Enforced on ALL methods (GET included) as defense-in-depth
   const method = req.method.toUpperCase();
   if (method !== "OPTIONS") {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const secret = process.env.NEXTAUTH_SECRET;
+    if (!secret) {
+      return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
+    }
+    const token = await getToken({ req, secret });
     if (!token?.sub) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

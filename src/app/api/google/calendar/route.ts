@@ -68,11 +68,12 @@ export async function POST(req: NextRequest) {
       });
 
       if (!calRes.ok) {
-        const errData = await calRes.json().catch(() => ({}));
+        // Consume body to avoid connection leak
+        await calRes.json().catch(() => ({}));
         if (calRes.status === 401 || calRes.status === 403) {
           return apiError("Google access expired. Please sign out and sign in again.", 401);
         }
-        logger.error("Google Calendar API error", { response: errData });
+        logger.error("Google Calendar API error", { status: calRes.status });
         return apiError("Failed to fetch calendar events", 500);
       }
 
@@ -125,6 +126,10 @@ export async function POST(req: NextRequest) {
         const isDateOnly = !item.start?.dateTime;
         const parsedDate = isDateOnly ? new Date(startDate + "T00:00:00") : new Date(startDate);
         if (isNaN(parsedDate.getTime())) continue;
+
+        // Skip events with unreasonable dates
+        const yearNum = parsedDate.getFullYear();
+        if (yearNum < 1900 || yearNum > 2100) continue;
 
         const eventId = item.id as string | undefined;
         if (eventId && existingSet.has(eventId)) continue;

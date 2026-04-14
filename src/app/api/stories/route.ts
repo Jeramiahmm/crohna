@@ -32,6 +32,11 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(Math.max(Number(searchParams.get("limit")) || 50, 1), 100);
     const cursor = searchParams.get("cursor") || undefined;
 
+    // Validate cursor format (CUIDs are alphanumeric)
+    if (cursor && !/^[a-z0-9]+$/i.test(cursor)) {
+      return apiError("Invalid cursor", 400);
+    }
+
     const dbStories = await prisma.aIStory.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
@@ -91,6 +96,17 @@ export async function POST(req: NextRequest) {
 
     const { year, period } = body;
 
+    // Prevent duplicate stories for the same year
+    if (year) {
+      const existing = await prisma.aIStory.findFirst({
+        where: { userId: user.id, year: Number(year) },
+        select: { id: true },
+      });
+      if (existing) {
+        return apiError("A story for this year already exists. Delete it first or choose a different year.", 409);
+      }
+    }
+
     // Fetch user's events for the period to generate content
     const storyPeriod = period || (year ? `January – December ${year}` : "All Time");
     const eventWhere: Record<string, unknown> = { userId: user.id, deletedAt: null };
@@ -105,7 +121,7 @@ export async function POST(req: NextRequest) {
     const events = await prisma.event.findMany({
       where: eventWhere,
       orderBy: { date: "asc" },
-      take: 10_000,
+      take: 500,
     });
 
     const eventSummaries = events.map((e) => ({

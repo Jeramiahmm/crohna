@@ -11,7 +11,9 @@ export function useEvents(limit = 50) {
   const { data, error, isLoading, mutate } = useSWR<{
     events: TimelineEvent[];
     nextCursor?: string;
-  }>(isReady && isAuthenticated ? `/api/events?limit=${limit}` : null);
+  }>(isReady && isAuthenticated ? `/api/events?limit=${limit}` : null, {
+    dedupingInterval: 10000,
+  });
 
   const [extraEvents, setExtraEvents] = useState<TimelineEvent[]>([]);
   const [extraCursor, setExtraCursor] = useState<string | undefined>();

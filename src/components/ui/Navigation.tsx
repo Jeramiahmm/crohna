@@ -78,11 +78,13 @@ function SearchButton() {
   }, [searchParams]);
 
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const searchParamsRef = useRef(searchParams);
+  searchParamsRef.current = searchParams;
 
   const updateSearchParam = useCallback((q: string) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParamsRef.current.toString());
       if (q) {
         params.set("q", q);
       } else {
@@ -91,7 +93,7 @@ function SearchButton() {
       const paramStr = params.toString();
       router.replace(`${pathname}${paramStr ? `?${paramStr}` : ""}`, { scroll: false });
     }, 300);
-  }, [router, pathname, searchParams]);
+  }, [router, pathname]);
 
   useEffect(() => {
     if (open && inputRef.current) inputRef.current.focus();

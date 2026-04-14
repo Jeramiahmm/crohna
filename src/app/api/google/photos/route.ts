@@ -86,11 +86,12 @@ export async function POST(req: NextRequest) {
       );
 
       if (!photosRes.ok) {
-        const errData = await photosRes.json().catch(() => ({}));
+        // Consume body to avoid connection leak
+        await photosRes.json().catch(() => ({}));
         if (photosRes.status === 401 || photosRes.status === 403) {
           return apiError("Google access expired. Please sign out and sign in again.", 401);
         }
-        logger.error("Google Photos API error", { response: errData });
+        logger.error("Google Photos API error", { status: photosRes.status });
         return apiError("Failed to fetch photos", 500);
       }
 
