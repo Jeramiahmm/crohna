@@ -14,6 +14,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "*.supabase.co",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
     ],
   },
   async headers() {
@@ -39,7 +43,7 @@ const nextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "img-src 'self' blob: data: *.supabase.co lh3.googleusercontent.com *.basemaps.cartocdn.com",
+              "img-src 'self' blob: data: *.supabase.co lh3.googleusercontent.com *.basemaps.cartocdn.com images.unsplash.com",
               "font-src 'self' https://fonts.gstatic.com",
               "connect-src 'self' https://va.vercel-scripts.com https://vitals.vercel-insights.com https://fonts.googleapis.com https://fonts.gstatic.com",
               "frame-ancestors 'none'",

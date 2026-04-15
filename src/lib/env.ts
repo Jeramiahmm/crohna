@@ -2,14 +2,17 @@ import { logger } from "@/lib/logger";
 
 /**
  * Validates required environment variables at runtime (not import time).
- * Call this from API route handlers, not at module scope, so `next build`
- * can complete without secrets present.
+ * Skips during `next build` (NEXT_PHASE=phase-production-build) since
+ * Vercel's build environment doesn't have all runtime secrets.
  */
 let validated = false;
 
 export function validateEnv() {
   if (validated) return;
   validated = true;
+
+  // Skip during next build — env vars aren't available in build phase
+  if (process.env.NEXT_PHASE === "phase-production-build") return;
 
   const requiredVars = [
     "DATABASE_URL",

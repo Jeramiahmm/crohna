@@ -72,12 +72,6 @@ export default function RootLayout({
           <ThemeProvider>
             <ErrorBoundary>
               <ScrollProgressBar />
-              {/* Announcement bar - like Wispr Flow */}
-              <div className="w-full bg-[#2D4A35] text-white text-center py-2.5 px-4 text-sm font-body">
-                <span className="font-medium">Now with AI-powered stories</span>
-                <span className="text-white/70"> — your memories, beautifully narrated. </span>
-                <a href="/timeline" className="underline underline-offset-2 hover:text-white/90 transition-colors">Try it free &rsaquo;</a>
-              </div>
               <Suspense>
                 <Navigation />
               </Suspense>
