@@ -137,7 +137,7 @@ function HeroSection() {
           >
             {/* Left Column */}
             <div
-              className="flex flex-col will-change-transform"
+              className="flex flex-col"
               style={{
                 width: `${sideWidth}%`,
                 gap: `${gap}px`,
@@ -148,17 +148,17 @@ function HeroSection() {
               {HERO_SIDE_IMAGES.filter(img => img.position === "left").map((img, idx) => (
                 <div
                   key={idx}
-                  className="relative overflow-hidden will-change-transform"
+                  className="relative overflow-hidden"
                   style={{ flex: 1, borderRadius: `${borderRadius}px` }}
                 >
-                  <Image src={img.src} alt={img.alt} fill className="object-cover" sizes="(max-width: 768px) 40vw, 22vw" unoptimized />
+                  <Image src={img.src} alt={img.alt} fill className="object-cover" sizes="(max-width: 768px) 40vw, 22vw" />
                 </div>
               ))}
             </div>
 
             {/* Main Hero Image - Center */}
             <div
-              className="relative overflow-hidden will-change-transform"
+              className="relative overflow-hidden"
               style={{
                 width: `${centerWidth}%`,
                 height: `${centerHeight}%`,
@@ -172,8 +172,7 @@ function HeroSection() {
                 fill
                 className="object-cover"
                 priority
-                unoptimized
-              />
+                             />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
 
               {/* Overlay Text - Fades out first */}
@@ -188,8 +187,6 @@ function HeroSection() {
                       className="inline-block animate-[slideUp_0.8s_ease-out_forwards] opacity-0"
                       style={{
                         animationDelay: `${index * 0.04}s`,
-                        transition: "all 1.5s",
-                        transitionTimingFunction: "cubic-bezier(0.86, 0, 0.07, 1)",
                       }}
                     >
                       {letter === " " ? "\u00A0" : letter}
@@ -201,7 +198,7 @@ function HeroSection() {
 
             {/* Right Column */}
             <div
-              className="flex flex-col will-change-transform"
+              className="flex flex-col"
               style={{
                 width: `${sideWidth}%`,
                 gap: `${gap}px`,
@@ -212,10 +209,10 @@ function HeroSection() {
               {HERO_SIDE_IMAGES.filter(img => img.position === "right").map((img, idx) => (
                 <div
                   key={idx}
-                  className="relative overflow-hidden will-change-transform"
+                  className="relative overflow-hidden"
                   style={{ flex: 1, borderRadius: `${borderRadius}px` }}
                 >
-                  <Image src={img.src} alt={img.alt} fill className="object-cover" sizes="(max-width: 768px) 40vw, 22vw" unoptimized />
+                  <Image src={img.src} alt={img.alt} fill className="object-cover" sizes="(max-width: 768px) 40vw, 22vw" />
                 </div>
               ))}
             </div>
@@ -330,8 +327,7 @@ function MomentsSection() {
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  unoptimized
-                />
+                                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                 <div className="absolute bottom-6 left-6">
                   <span className="backdrop-blur-md px-4 py-2 text-sm font-body font-medium rounded-full bg-[rgba(255,255,255,0.2)] text-white">
@@ -358,8 +354,7 @@ function MomentsSection() {
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  unoptimized
-                />
+                                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                 <div className="absolute bottom-6 left-6">
                   <span className="backdrop-blur-md px-4 py-2 text-sm font-body font-medium rounded-full bg-[rgba(255,255,255,0.2)] text-white">
@@ -421,7 +416,7 @@ function FeaturesSection() {
                   >
                     {/* Photo side */}
                     <div className="relative w-full md:w-2/5 h-48 md:h-auto min-h-[240px] overflow-hidden">
-                      <Image src={f.photo} alt={f.title} fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="40vw" unoptimized />
+                      <Image src={f.photo} alt={f.title} fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="40vw" />
                       <div className={`absolute inset-0 bg-gradient-to-br ${f.gradient} opacity-30 mix-blend-multiply`} />
                     </div>
                     {/* Content side */}
@@ -482,11 +477,11 @@ function HowItWorksSection() {
         <motion.div style={{ y: imgY }} className="relative hidden md:block">
           <div className="grid grid-cols-2 gap-4">
             <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl">
-              <Image src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&q=80" alt="College memory" fill className="object-cover" unoptimized />
+              <Image src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&q=80" alt="College memory" fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
             </div>
             <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl mt-12">
-              <Image src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&q=80" alt="Team celebration" fill className="object-cover" unoptimized />
+              <Image src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&q=80" alt="Team celebration" fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
             </div>
           </div>
@@ -550,11 +545,24 @@ function GalleryScrollSection() {
     };
   }, [updateTransform, prefersReducedMotion]);
 
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (!containerRef.current || prefersReducedMotion) return;
+    const step = window.innerWidth * 0.5;
+    if (e.key === "ArrowRight") {
+      setTranslateX(prev => Math.max(prev - step, -(containerRef.current!.scrollWidth - window.innerWidth)));
+    } else if (e.key === "ArrowLeft") {
+      setTranslateX(prev => Math.min(prev + step, 0));
+    }
+  }, [prefersReducedMotion]);
+
   return (
     <section
       ref={galleryRef}
       className="relative bg-chrono-bg"
       style={{ height: prefersReducedMotion ? "auto" : sectionHeight }}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      aria-label="Photo gallery — use arrow keys to navigate"
     >
       <div className={prefersReducedMotion ? "overflow-x-auto py-12" : "sticky top-0 h-screen overflow-hidden"}>
         <div className={prefersReducedMotion ? "flex items-center" : "flex h-full items-center"}>
@@ -569,7 +577,7 @@ function GalleryScrollSection() {
           >
             {GALLERY_IMAGES.map((src, index) => (
               <div
-                key={index}
+                key={src}
                 className="relative h-[70vh] w-[85vw] flex-shrink-0 overflow-hidden rounded-2xl md:w-[60vw] lg:w-[45vw]"
                 style={{ transform: "translateZ(0)" }}
               >
@@ -580,7 +588,6 @@ function GalleryScrollSection() {
                   className="object-cover"
                   sizes="(max-width: 768px) 85vw, (max-width: 1024px) 60vw, 45vw"
                   priority={index < 3}
-                  unoptimized
                 />
               </div>
             ))}

@@ -302,6 +302,8 @@ export default function Navigation() {
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               className="flex flex-col gap-1.5 p-2"
+              aria-label="Toggle navigation menu"
+              aria-expanded={mobileOpen}
             >
               <motion.span
                 animate={{ rotate: mobileOpen ? 45 : 0, y: mobileOpen ? 6 : 0 }}

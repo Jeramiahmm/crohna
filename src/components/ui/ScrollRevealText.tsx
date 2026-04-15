@@ -12,6 +12,12 @@ export function ScrollRevealText({ text, className }: ScrollRevealTextProps) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) {
+      setProgress(1);
+      return;
+    }
+
     const handleScroll = () => {
       if (!containerRef.current) return;
 
