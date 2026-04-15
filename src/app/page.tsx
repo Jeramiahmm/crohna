@@ -64,17 +64,34 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
     });
   }, [scrollYProgress, value]);
 
-  return <span ref={ref}>{count}{suffix}</span>;
+  return <span ref={ref} aria-live="polite" aria-atomic="true">{count}{suffix}</span>;
 }
 
 const HERO_TEXT = "Your life, beautifully mapped";
+
+function useReducedMotion() {
+  const [prefersReduced, setPrefersReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReduced(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReduced(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefersReduced;
+}
 
 function HeroSection() {
   const { data: session, status } = useSession();
   const sectionRef = useRef<HTMLElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
+    if (prefersReducedMotion) {
+      setScrollProgress(1);
+      return;
+    }
     const handleScroll = () => {
       if (!sectionRef.current) return;
       const rect = sectionRef.current.getBoundingClientRect();
@@ -86,7 +103,7 @@ function HeroSection() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [prefersReducedMotion]);
 
   const handleCTA = () => {
     if (status !== "loading" && session) window.location.href = "/timeline";
@@ -134,7 +151,7 @@ function HeroSection() {
                   className="relative overflow-hidden will-change-transform"
                   style={{ flex: 1, borderRadius: `${borderRadius}px` }}
                 >
-                  <Image src={img.src} alt={img.alt} fill className="object-cover" sizes="22vw" unoptimized />
+                  <Image src={img.src} alt={img.alt} fill className="object-cover" sizes="(max-width: 768px) 40vw, 22vw" unoptimized />
                 </div>
               ))}
             </div>
@@ -198,7 +215,7 @@ function HeroSection() {
                   className="relative overflow-hidden will-change-transform"
                   style={{ flex: 1, borderRadius: `${borderRadius}px` }}
                 >
-                  <Image src={img.src} alt={img.alt} fill className="object-cover" sizes="22vw" unoptimized />
+                  <Image src={img.src} alt={img.alt} fill className="object-cover" sizes="(max-width: 768px) 40vw, 22vw" unoptimized />
                 </div>
               ))}
             </div>
@@ -243,6 +260,7 @@ function MomentsSection() {
   const [rightTranslateX, setRightTranslateX] = useState(100);
   const [titleOpacity, setTitleOpacity] = useState(1);
   const rafRef = useRef<number | null>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   const updateTransforms = useCallback(() => {
     if (!sectionRef.current) return;
@@ -258,6 +276,12 @@ function MomentsSection() {
   }, []);
 
   useEffect(() => {
+    if (prefersReducedMotion) {
+      setLeftTranslateX(0);
+      setRightTranslateX(0);
+      setTitleOpacity(0);
+      return;
+    }
     const handleScroll = () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(updateTransforms);
@@ -268,7 +292,7 @@ function MomentsSection() {
       window.removeEventListener("scroll", handleScroll);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [updateTransforms]);
+  }, [updateTransforms, prefersReducedMotion]);
 
   return (
     <section className="bg-chrono-bg">
@@ -293,7 +317,11 @@ function MomentsSection() {
                 className="relative aspect-[4/3] overflow-hidden rounded-2xl"
                 style={{
                   transform: `translate3d(${leftTranslateX}%, 0, 0)`,
+                  WebkitTransform: `translate3d(${leftTranslateX}%, 0, 0)`,
                   backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
+                  perspective: 1000,
+                  touchAction: "pan-y",
                 }}
               >
                 <Image
@@ -301,11 +329,12 @@ function MomentsSection() {
                   alt="A cozy home moment"
                   fill
                   className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   unoptimized
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                 <div className="absolute bottom-6 left-6">
-                  <span className="backdrop-blur-md px-4 py-2 text-sm font-body font-medium rounded-full bg-white/20 text-white">
+                  <span className="backdrop-blur-md px-4 py-2 text-sm font-body font-medium rounded-full bg-[rgba(255,255,255,0.2)] text-white">
                     First Apartment — 2019
                   </span>
                 </div>
@@ -316,7 +345,11 @@ function MomentsSection() {
                 className="relative aspect-[4/3] overflow-hidden rounded-2xl"
                 style={{
                   transform: `translate3d(${rightTranslateX}%, 0, 0)`,
+                  WebkitTransform: `translate3d(${rightTranslateX}%, 0, 0)`,
                   backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
+                  perspective: 1000,
+                  touchAction: "pan-y",
                 }}
               >
                 <Image
@@ -324,11 +357,12 @@ function MomentsSection() {
                   alt="Adventure travel"
                   fill
                   className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   unoptimized
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                 <div className="absolute bottom-6 left-6">
-                  <span className="backdrop-blur-md px-4 py-2 text-sm font-body font-medium rounded-full bg-white/20 text-white">
+                  <span className="backdrop-blur-md px-4 py-2 text-sm font-body font-medium rounded-full bg-[rgba(255,255,255,0.2)] text-white">
                     Summer Road Trip — 2023
                   </span>
                 </div>
@@ -468,8 +502,13 @@ function GalleryScrollSection() {
   const [sectionHeight, setSectionHeight] = useState("100vh");
   const [translateX, setTranslateX] = useState(0);
   const rafRef = useRef<number | null>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
+    if (prefersReducedMotion) {
+      setSectionHeight("auto");
+      return;
+    }
     const calculateHeight = () => {
       if (!containerRef.current) return;
       const containerWidth = containerRef.current.scrollWidth;
@@ -484,7 +523,7 @@ function GalleryScrollSection() {
       clearTimeout(timer);
       window.removeEventListener("resize", calculateHeight);
     };
-  }, []);
+  }, [prefersReducedMotion]);
 
   const updateTransform = useCallback(() => {
     if (!galleryRef.current || !containerRef.current) return;
@@ -498,6 +537,7 @@ function GalleryScrollSection() {
   }, []);
 
   useEffect(() => {
+    if (prefersReducedMotion) return;
     const handleScroll = () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(updateTransform);
@@ -508,16 +548,16 @@ function GalleryScrollSection() {
       window.removeEventListener("scroll", handleScroll);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [updateTransform]);
+  }, [updateTransform, prefersReducedMotion]);
 
   return (
     <section
       ref={galleryRef}
       className="relative bg-chrono-bg"
-      style={{ height: sectionHeight }}
+      style={{ height: prefersReducedMotion ? "auto" : sectionHeight }}
     >
-      <div className="sticky top-0 h-screen overflow-hidden">
-        <div className="flex h-full items-center">
+      <div className={prefersReducedMotion ? "overflow-x-auto py-12" : "sticky top-0 h-screen overflow-hidden"}>
+        <div className={prefersReducedMotion ? "flex items-center" : "flex h-full items-center"}>
           <div
             ref={containerRef}
             className="flex gap-6 px-6"
