@@ -9,42 +9,42 @@ import { formatDate, getSeason, resolveImageUrl } from "@/lib/utils";
 interface TimelineCardProps {
   event: TimelineEvent;
   index: number;
-  isLeft?: boolean;
+  variant?: "hero" | "compact";
   onEdit?: () => void;
 }
 
-export default memo(function TimelineCard({ event, index, isLeft = false, onEdit }: TimelineCardProps) {
+export default memo(function TimelineCard({ event, index, variant = "compact", onEdit }: TimelineCardProps) {
+  const isHero = variant === "hero";
+
   return (
     <motion.article
       aria-label={`${event.title} — ${event.date}`}
-      initial={{ opacity: 0, x: isLeft ? -40 : 40, y: 20 }}
-      whileInView={{ opacity: 1, x: 0, y: 0 }}
+      initial={{ opacity: 0, y: isHero ? 60 : 30, scale: isHero ? 1 : 0.97 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{
-        duration: 1,
+        duration: 0.8,
         delay: index * 0.05,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className={`relative group ${isLeft ? "md:pr-12" : "md:pl-12"}`}
+      className="relative group"
     >
-      <div className="relative rounded-2xl bg-[var(--card-bg)] overflow-hidden border border-[var(--line)] shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-all duration-300">
+      <div className="relative rounded-2xl bg-[var(--card-bg)] overflow-hidden border border-[var(--line)] transition-all duration-300">
         {event.imageUrl && (
-          <div className="relative h-40 sm:h-52 md:h-60 overflow-hidden rounded-t-2xl">
+          <div className={`relative overflow-hidden ${isHero ? "h-[50vh] md:h-[60vh]" : "h-40 sm:h-52 md:h-60"}`}>
             <Image
               src={resolveImageUrl(event.imageUrl) || event.imageUrl}
               alt={event.title}
               fill
               quality={75}
               className="object-cover transition-transform duration-700 group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, 50vw"
+              sizes={isHero ? "100vw" : "(max-width: 768px) 100vw, 50vw"}
               {...(index === 0 ? { priority: true } : { loading: "lazy" })}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+            <div className={`absolute inset-0 ${isHero ? "bg-gradient-to-t from-black/60 via-black/20 to-transparent" : "bg-gradient-to-t from-black/45 via-transparent to-transparent"}`} />
 
             <div className="absolute top-4 left-4">
-              <span
-                className="px-3 py-1 text-xs font-body font-medium bg-chrono-accent/90 rounded-lg text-white"
-              >
+              <span className="px-3 py-1 text-xs font-body font-medium bg-chrono-accent/90 rounded-lg text-white">
                 {event.category}
               </span>
             </div>
@@ -69,6 +69,31 @@ export default memo(function TimelineCard({ event, index, isLeft = false, onEdit
                 </span>
               </div>
             )}
+
+            {/* Hero variant: overlay title on image */}
+            {isHero && (
+              <div className="absolute bottom-6 left-6 right-6 md:bottom-8 md:left-8 md:right-8">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px] font-body font-medium text-white/70 uppercase tracking-[0.2em]">
+                    {getSeason(event.date)}
+                  </span>
+                  {event.location && (
+                    <>
+                      <span className="text-white/40 text-[10px]">/</span>
+                      <span className="text-[10px] font-body font-normal text-white/60">
+                        {event.location}
+                      </span>
+                    </>
+                  )}
+                </div>
+                <h3 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-white leading-tight">
+                  {event.title}
+                </h3>
+                <p className="text-xs font-body font-normal text-white/50 mt-2">
+                  {formatDate(event.date)}
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -85,31 +110,34 @@ export default memo(function TimelineCard({ event, index, isLeft = false, onEdit
           </button>
         )}
 
-        <div className="p-4 sm:p-6 md:p-7">
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-[10px] font-body font-medium text-chrono-accent uppercase tracking-[0.2em]">
-              {getSeason(event.date)}
-            </span>
-            {event.location && (
-              <>
-                <span className="text-chrono-muted text-[10px]">/</span>
-                <span className="text-[10px] font-body font-normal text-chrono-muted">
-                  {event.location}
+        {/* Content area — hero shows description only (title is on image), compact shows everything */}
+        <div className={`${isHero ? "p-6 md:p-8" : "p-4 sm:p-6 md:p-7"}`}>
+          {!isHero && (
+            <>
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="text-[10px] font-body font-medium text-chrono-accent uppercase tracking-[0.2em]">
+                  {getSeason(event.date)}
                 </span>
-              </>
-            )}
-          </div>
-
-          <div className="text-xs font-body font-normal text-chrono-muted mb-3">
-            {formatDate(event.date)}
-          </div>
-
-          <h3 className="text-lg md:text-xl font-display font-semibold mb-3 text-chrono-text leading-tight">
-            {event.title}
-          </h3>
+                {event.location && (
+                  <>
+                    <span className="text-chrono-muted text-[10px]">/</span>
+                    <span className="text-[10px] font-body font-normal text-chrono-muted">
+                      {event.location}
+                    </span>
+                  </>
+                )}
+              </div>
+              <div className="text-xs font-body font-normal text-chrono-muted mb-3">
+                {formatDate(event.date)}
+              </div>
+              <h3 className="text-lg md:text-xl font-display font-semibold mb-3 text-chrono-text leading-tight">
+                {event.title}
+              </h3>
+            </>
+          )}
 
           {event.description && (
-            <p className="text-sm font-body font-normal leading-relaxed line-clamp-3 text-chrono-muted">
+            <p className={`text-sm font-body font-normal leading-relaxed text-chrono-muted ${isHero ? "" : "line-clamp-3"}`}>
               {event.description}
             </p>
           )}

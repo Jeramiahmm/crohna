@@ -7,6 +7,7 @@ import { useSession, signIn } from "next-auth/react";
 import { ArrowRight } from "lucide-react";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import { FadeImage } from "@/components/ui/FadeImage";
+import { ScrollRevealText } from "@/components/ui/ScrollRevealText";
 
 /* ─── HERO ─────────────────────────────────────────────────────────── */
 
@@ -191,18 +192,12 @@ function PhilosophySection() {
                 style={{ transform: `translate3d(${leftX}%, 0, 0)`, WebkitTransform: `translate3d(${leftX}%, 0, 0)`, backfaceVisibility: "hidden" }}
               >
                 <Image src="https://images.unsplash.com/photo-1476610182048-b716b8518aae?q=80&w=1000" alt="Your Timeline" fill className="object-cover" unoptimized />
-                <div className="absolute bottom-6 left-6">
-                  <span className="backdrop-blur-md px-4 py-2 text-sm font-medium rounded-full bg-[rgba(255,255,255,0.2)] text-white">Timeline</span>
-                </div>
               </div>
               <div
                 className="relative aspect-[4/3] overflow-hidden rounded-2xl"
                 style={{ transform: `translate3d(${rightX}%, 0, 0)`, WebkitTransform: `translate3d(${rightX}%, 0, 0)`, backfaceVisibility: "hidden" }}
               >
                 <Image src="https://images.unsplash.com/photo-1511593358241-7eea1f3c84e5?q=80&w=1000" alt="Life Stories" fill className="object-cover" unoptimized />
-                <div className="absolute bottom-6 left-6">
-                  <span className="backdrop-blur-md px-4 py-2 text-sm font-medium rounded-full bg-[rgba(255,255,255,0.2)] text-white">Stories</span>
-                </div>
               </div>
             </div>
           </div>
@@ -263,33 +258,6 @@ function FeaturesGrid() {
 }
 
 /* ─── TECHNOLOGY (second bento + scroll reveal text) ───────────────── */
-
-function ScrollRevealText({ text }: { text: string }) {
-  const ref = useRef<HTMLParagraphElement>(null);
-  const [progress, setProgress] = useState(0);
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!ref.current) return;
-      const rect = ref.current.getBoundingClientRect();
-      const h = window.innerHeight;
-      const p = Math.max(0, Math.min(1, (h * 0.9 - rect.top) / (h * 0.8)));
-      setProgress(p);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-  const words = text.split(" ");
-  return (
-    <p ref={ref} className="text-3xl font-semibold leading-snug md:text-4xl lg:text-5xl">
-      {words.map((w, i) => (
-        <span key={i} className="transition-colors duration-150" style={{ color: progress > i / words.length ? "var(--chrono-text)" : "var(--line-strong)" }}>
-          {w}{i < words.length - 1 ? " " : ""}
-        </span>
-      ))}
-    </p>
-  );
-}
 
 const techSideImages = [
   { src: "https://images.unsplash.com/photo-1476610182048-b716b8518aae?q=80&w=1000", alt: "Forest trail", position: "left" },

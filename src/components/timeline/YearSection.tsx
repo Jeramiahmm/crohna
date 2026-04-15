@@ -4,30 +4,33 @@ import { memo } from "react";
 import { motion } from "framer-motion";
 import { TimelineEvent } from "@/data/demo";
 import TimelineCard from "./TimelineCard";
+import { ScrollRevealText } from "@/components/ui/ScrollRevealText";
 
 interface YearSectionProps {
   year: string;
   events: TimelineEvent[];
+  yearSummary?: string;
   onEditEvent?: (event: TimelineEvent) => void;
   onGenerateStory?: (year: number) => void;
 }
 
-export default memo(function YearSection({ year, events, onEditEvent, onGenerateStory }: YearSectionProps) {
+export default memo(function YearSection({ year, events, yearSummary, onEditEvent, onGenerateStory }: YearSectionProps) {
   return (
     <div className="relative">
-      {/* Ghost watermark year */}
-      <div className="absolute -top-10 left-1/2 -translate-x-1/2 pointer-events-none select-none z-0">
+      {/* Dramatic watermark */}
+      <div className="absolute -top-20 left-1/2 -translate-x-1/2 pointer-events-none select-none z-0 w-full text-center overflow-hidden">
         <span className="watermark">
           {year}
         </span>
       </div>
 
+      {/* Year heading */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-        className="sticky top-24 z-10 flex justify-center mb-16"
+        className="sticky top-24 z-10 flex justify-center mb-8"
       >
         <div className="relative text-center flex items-center gap-3">
           <span className="text-2xl md:text-3xl font-display font-bold text-chrono-text">
@@ -48,6 +51,7 @@ export default memo(function YearSection({ year, events, onEditEvent, onGenerate
         </div>
       </motion.div>
 
+      {/* Moment count */}
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -59,61 +63,29 @@ export default memo(function YearSection({ year, events, onEditEvent, onGenerate
         </span>
       </motion.div>
 
-      <div className="relative max-w-5xl mx-auto">
-        <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px">
-          <motion.div
-            initial={{ scaleY: 0 }}
-            whileInView={{ scaleY: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full h-full origin-top timeline-line"
+      {/* Year summary scroll reveal text */}
+      {yearSummary && (
+        <div className="max-w-3xl mx-auto px-6 mb-16">
+          <ScrollRevealText
+            text={yearSummary}
+            className="text-xl md:text-2xl lg:text-3xl font-display font-light leading-relaxed text-center"
           />
         </div>
+      )}
 
-        <div className="space-y-6 md:space-y-16">
+      {/* Bento grid layout */}
+      <div className="max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {events.map((event, index) => {
-            const isLeft = index % 2 === 0;
+            const isHero = index % 3 === 0;
             return (
-              <div
-                key={event.id}
-                className={`relative md:grid md:grid-cols-2 md:gap-8 ${
-                  isLeft ? "" : "md:direction-rtl"
-                }`}
-              >
-                <div className="hidden md:flex absolute left-1/2 top-8 -translate-x-1/2 z-10">
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    whileInView={{ scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                    className="w-2.5 h-2.5 rounded-full bg-chrono-glow ring-4 ring-chrono-bg"
-                  />
-                </div>
-
-                {isLeft ? (
-                  <>
-                    <div className="md:text-right">
-                      <TimelineCard
-                        event={event}
-                        index={index}
-                        isLeft
-                        onEdit={onEditEvent ? () => onEditEvent(event) : undefined}
-                      />
-                    </div>
-                    <div className="hidden md:block" />
-                  </>
-                ) : (
-                  <>
-                    <div className="hidden md:block" />
-                    <div style={{ direction: "ltr" }}>
-                      <TimelineCard
-                        event={event}
-                        index={index}
-                        onEdit={onEditEvent ? () => onEditEvent(event) : undefined}
-                      />
-                    </div>
-                  </>
-                )}
+              <div key={event.id} className={isHero ? "md:col-span-2" : ""}>
+                <TimelineCard
+                  event={event}
+                  index={index}
+                  variant={isHero ? "hero" : "compact"}
+                  onEdit={onEditEvent ? () => onEditEvent(event) : undefined}
+                />
               </div>
             );
           })}

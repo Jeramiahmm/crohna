@@ -159,13 +159,15 @@ body {
   .watermark {
     position: absolute;
     font-family: var(--font-display), Georgia, serif;
-    font-weight: 300;
+    font-weight: 200;
     font-style: italic;
-    font-size: clamp(100px, 12vw, 200px);
+    font-size: clamp(150px, 20vw, 400px);
     color: var(--line);
+    opacity: 0.6;
     pointer-events: none;
     user-select: none;
-    line-height: 1;
+    line-height: 0.85;
+    letter-spacing: -0.04em;
   }
 }
 

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { TimelineEvent, getEventsByYear } from "@/data/demo";
+import { TimelineEvent, getEventsByYear, demoYearSummaries } from "@/data/demo";
 import YearSection from "@/components/timeline/YearSection";
 import EventModal from "@/components/events/EventModal";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -351,7 +351,7 @@ function TimelinePage() {
       <section className="relative py-16 md:py-28 px-6 overflow-hidden">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} className="relative max-w-4xl mx-auto text-center">
           <span className="section-label mb-5 block">Your Journey</span>
-          <h1 className="text-3xl sm:text-5xl md:text-7xl font-display font-bold mb-6 tracking-tight text-chrono-text"><em>Timeline</em></h1>
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-display font-medium mb-6 tracking-tight text-chrono-text">Timeline</h1>
           <p className="text-base font-body font-light text-chrono-muted max-w-md mx-auto mb-12 leading-relaxed">Every moment that shaped your story, beautifully organized and brought to life.</p>
 
           {!isShowingDemo && (
@@ -437,11 +437,11 @@ function TimelinePage() {
         <EmptyState icon="timeline" title="Your story starts here" description="Add your first life event to begin building your personal timeline. Every moment matters." actionLabel="Create First Event" onAction={() => setEventModalOpen(true)} />
       ) : (
         <section className="px-6">
-          <div className="space-y-28">
+          <div className="space-y-36">
             <AnimatePresence mode="sync">
               {years.map((year) => (
                   <motion.div key={year} data-year={year} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.4 }}>
-                    <YearSection year={year} events={eventsByYear[year]} onEditEvent={isShowingDemo ? undefined : (event) => { setEditingEvent(event); setEventModalOpen(true); }} onGenerateStory={isShowingDemo ? undefined : handleGenerateStory} />
+                    <YearSection year={year} events={eventsByYear[year]} yearSummary={isShowingDemo ? demoYearSummaries[year] : undefined} onEditEvent={isShowingDemo ? undefined : (event) => { setEditingEvent(event); setEventModalOpen(true); }} onGenerateStory={isShowingDemo ? undefined : handleGenerateStory} />
                   </motion.div>
               ))}
             </AnimatePresence>
