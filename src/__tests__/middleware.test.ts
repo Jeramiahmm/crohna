@@ -1,9 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { middleware, config } from "@/middleware";
 import { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
-
-vi.unmock("@/middleware");
 
 // Compiles a Next.js path-to-regexp matcher into a RegExp we can test against.
 function matchesMiddleware(pathname: string): boolean {
@@ -24,17 +21,11 @@ function makeRequest(
   });
 }
 
-beforeEach(() => {
-  vi.clearAllMocks();
-  process.env.NEXTAUTH_SECRET = "test-secret-for-middleware";
-});
-
 describe("Middleware — Matcher excludes public routes", () => {
   // The matcher excludes /api/auth/* and /api/health from middleware execution
   // entirely, so the Edge function is never invoked for the OAuth flow or the
-  // health endpoint. This is what keeps Google login working — the middleware
-  // bundle (which pulls in next-auth/jwt → jose → hkdf) is never loaded for
-  // /api/auth/callback/google, /api/auth/csrf, /api/auth/error, etc.
+  // health endpoint. This keeps Google login working even if the middleware
+  // bundle has issues in the Edge runtime.
   it("does not match /api/health", () => {
     expect(matchesMiddleware("/api/health")).toBe(false);
   });
@@ -59,53 +50,17 @@ describe("Middleware — Matcher excludes public routes", () => {
     expect(matchesMiddleware("/api/events")).toBe(true);
   });
 
-  it("matches /api/google/photos (an /api/auth-prefixed lookalike)", () => {
-    // Make sure we didn't accidentally exclude paths like /api/authors/* or /api/healthcheck
+  it("does not exclude /api/auth lookalikes (e.g. /api/authentication, /api/healthy)", () => {
     expect(matchesMiddleware("/api/authentication")).toBe(true);
     expect(matchesMiddleware("/api/healthy")).toBe(true);
   });
 });
 
-describe("Middleware — Auth Enforcement", () => {
-  it("rejects GET /api/events without auth token", async () => {
-    vi.mocked(getToken).mockResolvedValue(null);
-
-    const req = makeRequest("/api/events", "GET", {
-      origin: "http://localhost:3000",
-    });
-    const res = await middleware(req);
-
-    expect(res.status).toBe(401);
-  });
-
-  it("allows GET /api/events with valid auth token", async () => {
-    vi.mocked(getToken).mockResolvedValue({ sub: "user-1" } as never);
-
-    const req = makeRequest("/api/events", "GET", {
-      origin: "http://localhost:3000",
-    });
-    const res = await middleware(req);
-
-    expect(res.status).not.toBe(401);
-  });
-
-  it("rejects POST /api/events without auth token", async () => {
-    vi.mocked(getToken).mockResolvedValue(null);
-
-    const req = makeRequest("/api/events", "POST", {
-      origin: "http://localhost:3000",
-    });
-    const res = await middleware(req);
-
-    // Could be 401 (no auth) — CSRF passes since origin is valid
-    expect(res.status).toBe(401);
-  });
-});
-
 describe("Middleware — CSRF Enforcement", () => {
+  // The middleware no longer enforces auth (each route handler calls
+  // getServerSession itself). It only does CSRF defense-in-depth on mutating
+  // requests, so the Edge bundle stays small and free of next-auth/jwt.
   it("rejects POST without origin or referer", async () => {
-    vi.mocked(getToken).mockResolvedValue({ sub: "user-1" } as never);
-
     const req = makeRequest("/api/events", "POST");
     const res = await middleware(req);
 
@@ -115,8 +70,6 @@ describe("Middleware — CSRF Enforcement", () => {
   });
 
   it("rejects POST with cross-origin header", async () => {
-    vi.mocked(getToken).mockResolvedValue({ sub: "user-1" } as never);
-
     const req = makeRequest("/api/events", "POST", {
       origin: "http://evil.com",
     });
@@ -127,19 +80,23 @@ describe("Middleware — CSRF Enforcement", () => {
     expect(data.error).toContain("cross-origin");
   });
 
-  it("allows GET without origin (CSRF only applies to mutating methods)", async () => {
-    vi.mocked(getToken).mockResolvedValue({ sub: "user-1" } as never);
+  it("allows POST with same-origin header", async () => {
+    const req = makeRequest("/api/events", "POST", {
+      origin: "http://localhost:3000",
+    });
+    const res = await middleware(req);
 
+    expect(res.status).not.toBe(403);
+  });
+
+  it("allows GET without origin (CSRF only applies to mutating methods)", async () => {
     const req = makeRequest("/api/events", "GET");
     const res = await middleware(req);
 
-    // GET should not be blocked by CSRF
     expect(res.status).not.toBe(403);
   });
 
   it("rejects DELETE without origin", async () => {
-    vi.mocked(getToken).mockResolvedValue({ sub: "user-1" } as never);
-
     const req = makeRequest("/api/events/123", "DELETE");
     const res = await middleware(req);
 
@@ -147,8 +104,6 @@ describe("Middleware — CSRF Enforcement", () => {
   });
 
   it("rejects PUT with cross-origin referer", async () => {
-    vi.mocked(getToken).mockResolvedValue({ sub: "user-1" } as never);
-
     const req = makeRequest("/api/events/123", "PUT", {
       referer: "http://evil.com/page",
     });
@@ -161,8 +116,6 @@ describe("Middleware — CSRF Enforcement", () => {
     const req = makeRequest("/api/events", "OPTIONS");
     const res = await middleware(req);
 
-    // OPTIONS should be allowed (CORS preflight)
     expect(res.status).not.toBe(403);
-    expect(res.status).not.toBe(401);
   });
 });

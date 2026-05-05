@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
 
 function validateCsrfInMiddleware(req: NextRequest): NextResponse | null {
   const method = req.method.toUpperCase();
@@ -39,29 +38,21 @@ function validateCsrfInMiddleware(req: NextRequest): NextResponse | null {
 }
 
 export async function middleware(req: NextRequest) {
-  const csrfError = validateCsrfInMiddleware(req);
-  if (csrfError) return csrfError;
-
-  const method = req.method.toUpperCase();
-  if (method !== "OPTIONS") {
-    const secret = process.env.NEXTAUTH_SECRET;
-    if (!secret) {
-      return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
-    }
-    const token = await getToken({ req, secret });
-    if (!token?.sub) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  try {
+    const csrfError = validateCsrfInMiddleware(req);
+    if (csrfError) return csrfError;
+    return NextResponse.next();
+  } catch {
+    // Never let the Edge function throw — that produces
+    // MIDDLEWARE_INVOCATION_FAILED, which broke the OAuth flow. Fail open
+    // and let the route handler enforce auth via getServerSession().
+    return NextResponse.next();
   }
-
-  return NextResponse.next();
 }
 
 // Exclude /api/auth/* (NextAuth handles its own flow, including CSRF) and
-// /api/health (must be reachable without auth) from middleware execution.
-// Doing this in the matcher — not at runtime — guarantees the Edge function
-// is never invoked for these paths, so NextAuth's OAuth callback can complete
-// even if the middleware bundle has issues in the Edge runtime.
+// /api/health from middleware execution. Each protected route enforces auth
+// via getServerSession(authOptions) on its own, so there is no lost coverage.
 export const config = {
   matcher: ["/api/((?!auth/|auth$|health/|health$).*)"],
 };

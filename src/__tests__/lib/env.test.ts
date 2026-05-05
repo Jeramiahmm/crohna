@@ -29,7 +29,10 @@ describe("env validation", () => {
     expect(() => validateEnv()).toThrow("Missing required environment variables");
   });
 
-  it("throws in production when Upstash Redis is missing", async () => {
+  it("does not throw in production when Upstash Redis is missing (warns instead)", async () => {
+    // Throwing here previously crashed /api/auth/* on every request and broke
+    // Google login. The rate limiter has an in-memory fallback, so missing
+    // Upstash should warn but not block the app from booting.
     (process.env as Record<string, string | undefined>).NODE_ENV = "production";
     process.env.DATABASE_URL = "postgres://test";
     process.env.NEXTAUTH_SECRET = "test-secret";
@@ -39,7 +42,7 @@ describe("env validation", () => {
     delete process.env.UPSTASH_REDIS_REST_TOKEN;
 
     const { validateEnv } = await import("@/lib/env");
-    expect(() => validateEnv()).toThrow("Upstash Redis is required");
+    expect(() => validateEnv()).not.toThrow();
   });
 
   it("does not throw in development when vars are missing", async () => {

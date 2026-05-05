@@ -33,14 +33,15 @@ export function validateEnv() {
     logger.warn("Missing environment variables", { vars: missingVars });
   }
 
-  // Warn if Upstash is missing in production (rate limiting won't work across serverless instances)
+  // Warn (don't throw) if Upstash is missing in production. The rate limiter
+  // falls back to in-memory; throwing here would crash the auth route on every
+  // request and break Google login when Upstash is unconfigured.
   if (
     process.env.NODE_ENV === "production" &&
     (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN)
   ) {
-    throw new Error(
-      "Upstash Redis is required in production for distributed rate limiting. " +
-      "Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN."
+    logger.warn(
+      "Upstash Redis is not configured in production — rate limiting will fall back to in-memory and won't work across serverless instances."
     );
   }
 }
